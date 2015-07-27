@@ -7,7 +7,7 @@ class BaseTest {
 	protected $defaultClient;
 	protected $checkResultFuncName;
 	
-	public function __construct($service, $action, $actionParameters, $defaultClient, $checkResultFuncName = 'assertTrue')
+	public function __construct($service, $action, $actionParameters, $defaultClient, $checkResultFuncName)
 	{
 		$this->service = $service;
 		$this->action = $action;

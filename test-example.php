@@ -11,7 +11,7 @@ class BaseEntry extends KalturaPHPUnit_Framework_TestCase {
 	 */
 	public function testListAction1()
 	{
-		$test1 = $this->createTest('baseEntry','listAction',array(),$this->client,array($this,'validateTestListAction1'));
+		$test1 = $this->createTest('baseEntry', 'listAction', array(), 'validateTestListAction1');
 		$test1->runTest();
 	}
 
@@ -31,7 +31,7 @@ class BaseEntry extends KalturaPHPUnit_Framework_TestCase {
 	 */
 	public function testGetAction1()
 	{
-		$test1 = $this->createTest('baseEntry','get',array(),$this->client,array($this,'validateTestGetAction1'));
+		$test1 = $this->createTest('baseEntry', 'get', array(), 'validateTestGetAction1');
 		$test1->runTest();
 	}
 

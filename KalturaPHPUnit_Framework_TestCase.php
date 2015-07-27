@@ -126,7 +126,7 @@ class KalturaPHPUnit_Framework_TestCase extends PHPUnit_Framework_TestCase
 		return array();
 	}
 	
-	protected function createTest($service, $action, $actionParameters, $defaultClient, $checkResultFuncName = 'assertTrue')
+	protected function createTest($service, $action, $actionParameters, $checkResultFuncName = 'assertTrue')
 	{
 		$trace=debug_backtrace();
 		$caller=$trace[1];
@@ -141,7 +141,7 @@ class KalturaPHPUnit_Framework_TestCase extends PHPUnit_Framework_TestCase
 				array_merge($additionalParams, $this->getAdditionalParam($preReq));
 			}
 		}
-		return new BaseTest($service,$action,array_merge($actionParameters,$additionalParams),$defaultClient,$checkResultFuncName);
+		return new BaseTest($service,$action,array_merge($actionParameters,$additionalParams),$this->client,array($this,$checkResultFuncName));
 	}
 
 	/**
