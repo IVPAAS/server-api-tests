@@ -21,5 +21,13 @@ Create new test
     - By default the client used is with the configured partner and admin secret if you want to run a test with a different client that has different privileges you can create it and send it as a parameter in the "runTest" call.
     - Some API calls require some prerequisites (e.g.: entry-id of a valid entry), in order to support this you can just add the annotation "@pre <prerequisite-name" to the test method function and it will be created and sent as a parameter to the call. (e.g.: "@pre entry" will cause a new entry to be created and a field with the entry_id will be sent along).
     
+# Unit tests
+
+Prerequisites
+================
+* make sure phpunit is installed on the env you're testing.
     
-     
+How to run tests
+================
+* cd to the top dir of repo - /kaltura/server/
+* run the following commnad - phpunit ../server-api-tests/unitTests/infra/*     
