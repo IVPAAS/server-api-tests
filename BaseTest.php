@@ -30,8 +30,6 @@ class BaseTest {
 		$serviceName = $this->service;
 		$actionName = $this->action;
 		$currentService = $client->$serviceName;
-//		$serviceResult = $currentService->$actionName();
-//		echo "this is it [".print_r($currentService->$actionName(),true)."]";
 		try
 		{
 			$serviceResult = call_user_func_array(array($currentService, $actionName), $this->actionParameters);
@@ -41,7 +39,6 @@ class BaseTest {
 			$serviceResult = $e;
 		}
 		call_user_func($this->checkResultFuncName,$serviceResult);
-//		$this->checkResultFuncName($serviceResult);
 	}
 	
 }

@@ -13,6 +13,9 @@ require_once('BaseTest.php');
 class KalturaPHPUnit_Framework_TestCase extends PHPUnit_Framework_TestCase
 {
 
+	const DOCCOMMENT_PREREQUISITE = "/\\@pre ([\\w\\,\\s]*)/i";
+	
+	const CONFIG_FILE = "config.ini";
 	/**
 	 * @var KalturaClient
 	 */
@@ -20,14 +23,22 @@ class KalturaPHPUnit_Framework_TestCase extends PHPUnit_Framework_TestCase
 	
 	public $preReqs = array();
 	
-	const DOCCOMMENT_PREREQUISITE = "/\\@pre ([\\w\\,\\s]*)/i";
+	
 
 	/**
 	 * @before
 	 */
 	public function getClient()
 	{
-		$cm = new clientManager;
+		$config = parse_ini_file(dirname(__FILE__).'/'.self::CONFIG_FILE);
+		if ($config === false)
+		{
+			$cm = new clientManager;
+		}
+		else
+		{
+			$cm = new clientManager($config['serviceUrl'],$config['partnerId'], $config['secret'], $config['ksType']);
+		}
 		$this->client = $cm->getClient();
 		$this->doAllPrerequisites();
 	}

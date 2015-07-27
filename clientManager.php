@@ -45,20 +45,34 @@ class clientManager
 	
 	public $PARAM_FILE="TBD";
 	
-	public function __construct()
+	public function __construct($serviceUrl = null, $partnerId = null, $secret = null, $ksType = "ADMIN")
 	{
-		$this->readClientParamsFromFile();
+		if ($serviceUrl === null)
+		{
+			$this->readClientParamsFromFile();
+		}
+		else
+		{
+			$this->destUrl = $serviceUrl;
+			$this->partnerId=$partnerId;
+			$this->secret=$secret;
+			$finalKSType = KalturaSessionType::ADMIN;
+			if ($ksType != "ADMIN")
+			{
+				$finalKSType = KalturaSessionType::USER;
+			}
+			$this->ksType=$finalKSType;
+		}
 	}
+	
 	private function readClientParamsFromFile()
 	{
-		//todo try read client info from default config file
-		
-		//TODO 
-		$this->destUrl = "http://centos.kaltura/";
-		$this->partnerId=101;
-		$this->secret='537389d22dadfec14d9377a8773f37c2';
+		$this->destUrl = null;
+		$this->partnerId=null;
+		$this->secret=null;
 		$this->ksType=KalturaSessionType::ADMIN;
 	}
+	
 	public function setDestUrl($destUrl)
 	{
 		$this->destUrl=$destUrl;
@@ -87,9 +101,6 @@ class clientManager
 	
 	public function getClient()
 	{
-		//todo read client info from default config file
-		
-		//read all client parameters from config file
 		return $this->prvGetClient($this->partnerId,$this->secret,$this->destUrl,$this->ksType);
 	}
 
