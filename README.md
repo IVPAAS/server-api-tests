@@ -20,6 +20,6 @@ Create new test
     - The validation method should be defined in the same class and doesn't need to return anything, you can use all the asserts and functionality that exists in phpunit
     - By default the client used is with the configured partner and admin secret if you want to run a test with a different client that has different privileges you can create it and send it as a parameter in the "runTest" call.
     - Some API calls require some prerequisites (e.g.: entry-id of a valid entry), in order to support this you can just add the annotation "@pre <prerequisite-name" to the test method function and it will be created and sent as a parameter to the call. (e.g.: "@pre entry" will cause a new entry to be created and a field with the entry_id will be sent along).
-    
+    - [Manual about which assertions you should and can call](https://phpunit.de/manual/current/en/appendixes.assertions.html) 
     
      
