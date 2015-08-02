@@ -22,4 +22,8 @@ Create new test
     - Some API calls require some prerequisites (e.g.: entry-id of a valid entry), in order to support this you can just add the annotation "@pre <prerequisite-name" to the test method function and it will be created and sent as a parameter to the call. (e.g.: "@pre entry" will cause a new entry to be created and a field with the entry_id will be sent along).
     - [Manual about which assertions you should and can call](https://phpunit.de/manual/current/en/appendixes.assertions.html) 
     
-     
+The road ahead
+===============
+* Right now there is support for one prerequisite (entry) in the future there needs to be support for more.
+* The client location is hard coded and should be more configurable or more automatic to fit more systems.
+* Right way more tests.
