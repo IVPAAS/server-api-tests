@@ -1,0 +1,11 @@
+About the files in this directory 
+-----------------------------------
+1. The files under this directory contain scripts that requires the following arguments - 
+           <DC URL>
+           <parnter id> 
+           <admin secret>
+  
+2. Each file is a standalone test that does not relay on any pre-condition
+3. You can use specific partner for each tests if the test require specific configuration.
+
+
