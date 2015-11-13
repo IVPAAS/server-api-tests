@@ -64,7 +64,6 @@ function createNewQuiz($client,
   $quiz->allowDownload                = $allowDownload;
   $quiz->showGradeAfterSubmission     = $showGradeAfterSubmission;
   $quizPlugin                         = KalturaQuizClientPlugin::get($client);
-  $quiz->showGradeAfterSubmission     = KalturaNullableBoolean::TRUE_VALUE;
   $result                             = $quizPlugin->quiz->add($entryId, $quiz);
   return $result;
 }
