@@ -47,6 +47,28 @@ function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionTyp
 	}
 }	
 
+function startWidgetSession($destUrl,$partnerId)
+{
+    try
+    {
+        $config = new KalturaConfiguration($partnerId);
+        $config->serviceUrl = $destUrl;
+        $client = new KalturaClient($config);
+        $widgetId = "_".$partnerId;
+        $expiry = null;
+        $result = $client->session->startwidgetsession($widgetId, $expiry);  
+        print_r ($result);
+        $client->setKs($result);
+        return $client;
+    }
+	catch (KalturaException $e)
+	{
+		$msg = $e->getMessage();
+		shout("Problem starting widget sesseion with message: [$msg]\n");
+		die("ERROR - cannot generate widget session with widgetId [$widgetId]");
+	}
+}
+
 function createNewQuiz($client,
                        $entryId,
                        $showResultOnAnswer,
@@ -155,7 +177,7 @@ function addEntry($client,$name)
   $type                                   = KalturaEntryType::MEDIA_CLIP;
   $entry->name                            = $name;
   $result                                 = $client->baseEntry->add($entry, $type);
-  //print ("\nAdd entry ID:".$result->id);
+  print ("\nAdd entry ID:".$result->id);
   return $result;
 }
 
@@ -336,6 +358,45 @@ function Test5_CheckAllowDownload($client)
     return success(__FUNCTION__);
   }
 }
+function Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId)
+{
+  $entry=addEntry($client,__FUNCTION__);
+  $quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
+  $questions = array();
+  for ( $questionIndex=0 ; $questionIndex < 4 ; $questionIndex ++)
+  {
+      $questionCue = addQuestionsOnQuiz($client,$entry->id,"Q");
+      $questions[$questionIndex]=$questionCue->id;
+  }     
+
+  $wgClient = startWidgetSession($dc,$partnerId);  
+  $quizOutputType = KalturaQuizOutputType::PDF;
+  $quizPlugin = KalturaQuizClientPlugin::get($wgClient);
+  #$result = $quizPlugin->quiz->getUrl($entry->id, $quizOutputType);
+  $result = $quizPlugin->quiz->get($entry->id);
+  if(is_null($result))
+  {
+      fail(__FUNCTION__." Should get download URL ".$res->score);
+  }
+  
+  $quiz = new KalturaQuiz();
+  $quiz->allowDownload = KalturaNullableBoolean::FALSE_VALUE;
+  $quizPlugin = KalturaQuizClientPlugin::get($client);
+  $result = $quizPlugin->quiz->update($entry->id, $quiz);
+  $quizOutputType = KalturaQuizOutputType::PDF;
+  $quizPlugin = KalturaQuizClientPlugin::get($wgClient);
+  try
+  {
+      
+    $result = $quizPlugin->quiz->geturl($entry->id, $quizOutputType);
+    return fail(__FUNCTION__." Should not get download URL ".$result);
+  }
+  catch  (Exception $e)
+  {
+    return success(__FUNCTION__);
+  }
+}
+
 function Test6_ValidateshowCorrectAfterSubmission($client)
 {
   $entry=addEntry($client,__FUNCTION__);
@@ -367,6 +428,60 @@ function Test6_ValidateshowCorrectAfterSubmission($client)
   
   return success(__FUNCTION__);
 }
+
+function test7_GetUserPercentageReport($client)
+{
+    $entry=addEntry($client,__FUNCTION__);
+    $quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,null);
+    $questions = array();
+    for ( $questionIndex=0 ; $questionIndex < 4 ; $questionIndex ++)
+    {
+      $questionCue = addQuestionsOnQuiz($client,$entry->id,"Q");
+      $questions[$questionIndex]=$questionCue->id;
+    }     
+    $user = addKalturaUser($client,"UU".rand(1,1000));
+    $quizUserEntry = addQuizUserEntry($client,$user->id,$entry->id);
+    for ( $answerIndex=0 ; $answerIndex < 2 ; $answerIndex ++)
+    {
+      $answerCue = addAnswer($client,$entry->id,$questions[$answerIndex],$quizUserEntry->id,"Q");
+    }
+    
+    $reportType = KalturaReportType::QUIZ_USER_PERCENTAGE;
+    $reportInputFilter = new KalturaEndUserReportInputFilter();
+    $pager = new KalturaFilterPager();
+    $order = null;
+    $result = $client->report->gettable($reportType, $reportInputFilter, $pager, $order, $entry->id);
+    if($result->data !=null)
+    {
+        fail(__FUNCTION__." report should be empty since quiz was not submitted");
+    }
+    $res = submitQuiz($client,$quizUserEntry->id);
+    $result = $client->report->gettable($reportType, $reportInputFilter, $pager, $order, $entry->id);
+    $scores = explode(",", $result->data );
+    if($scores[1] !=50)
+    {
+        fail(__FUNCTION__." score is no calculated correct, should be 50 got - ".$scores[1]);
+    }
+
+
+    $user = addKalturaUser($client,"UU".rand(1,1000));
+    $quizUserEntry = addQuizUserEntry($client,$user->id,$entry->id);
+    for ( $answerIndex=0 ; $answerIndex < 4 ; $answerIndex ++)
+    {
+      $answerCue = addAnswer($client,$entry->id,$questions[$answerIndex],$quizUserEntry->id,"Q");
+    }
+    $res = submitQuiz($client,$quizUserEntry->id);
+    $result = $client->report->gettable($reportType, $reportInputFilter, $pager, $order, $entry->id);
+    $scores = explode(",", $result->data );
+    if($scores[1] !=100)
+    {
+        fail(__FUNCTION__." score is no calculated correct, should be 100 got - ".$scores[1]);
+    }
+
+    return success(__FUNCTION__);
+}
+
+
 function mainStory($dc,$partnerId,$adminSecret,$userSecret)
 {
   $client = startKalturaSession($partnerId,$adminSecret,$dc); 
@@ -375,7 +490,9 @@ function mainStory($dc,$partnerId,$adminSecret,$userSecret)
   Test3_ValidateScoreUponSubmitWithAdminKS($client);
   Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
   Test5_CheckAllowDownload($client);
+  //Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
   Test6_ValidateshowCorrectAfterSubmission($client);
+  test7_GetUserPercentageReport($client);
   // report1($client,$quizUserEntry->id);
   print ("\n");
   
