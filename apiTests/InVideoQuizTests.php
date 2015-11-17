@@ -33,7 +33,7 @@ function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionTyp
 	{
 		$config = new KalturaConfiguration($partnerId);
 		$config->serviceUrl = $destUrl;
-        $client = new KalturaClient($config);
+        	$client = new KalturaClient($config);
 		$result = $client->session->start($secret, $userId, $type, $partnerId, null, null);
 		$client->setKs($result);
 		//print("Started session successfully with KS [$result]\n");
@@ -57,8 +57,7 @@ function startWidgetSession($destUrl,$partnerId)
         $widgetId = "_".$partnerId;
         $expiry = null;
         $result = $client->session->startwidgetsession($widgetId, $expiry);  
-        print_r ($result);
-        $client->setKs($result);
+        $client->setKs($result->ks);
         return $client;
     }
 	catch (KalturaException $e)
@@ -368,12 +367,10 @@ function Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId)
       $questionCue = addQuestionsOnQuiz($client,$entry->id,"Q");
       $questions[$questionIndex]=$questionCue->id;
   }     
-
   $wgClient = startWidgetSession($dc,$partnerId);  
   $quizOutputType = KalturaQuizOutputType::PDF;
   $quizPlugin = KalturaQuizClientPlugin::get($wgClient);
-  #$result = $quizPlugin->quiz->getUrl($entry->id, $quizOutputType);
-  $result = $quizPlugin->quiz->get($entry->id);
+  $result = $quizPlugin->quiz->getUrl($entry->id, $quizOutputType);
   if(is_null($result))
   {
       fail(__FUNCTION__." Should get download URL ".$res->score);
@@ -472,7 +469,8 @@ function test7_GetUserPercentageReport($client)
     }
     $res = submitQuiz($client,$quizUserEntry->id);
     $result = $client->report->gettable($reportType, $reportInputFilter, $pager, $order, $entry->id);
-    $scores = explode(",", $result->data );
+    $result = explode(";", $result->data );
+    $scores = explode(",", $result[1] );
     if($scores[1] !=100)
     {
         fail(__FUNCTION__." score is no calculated correct, should be 100 got - ".$scores[1]);
@@ -490,7 +488,7 @@ function mainStory($dc,$partnerId,$adminSecret,$userSecret)
   Test3_ValidateScoreUponSubmitWithAdminKS($client);
   Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
   Test5_CheckAllowDownload($client);
-  //Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
+  Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
   Test6_ValidateshowCorrectAfterSubmission($client);
   test7_GetUserPercentageReport($client);
   // report1($client,$quizUserEntry->id);
