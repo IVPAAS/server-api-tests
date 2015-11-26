@@ -24,8 +24,11 @@ function rawurlencode() {
 }
 
 
+$ECHO "THESE TESTS AREN'T READY YET. THERE IS DATA NEEDED TO SEND FOR THE LICENSE REQUESTS."
+exit 1
+
 if [[ $# -lt 1 ]]; then
-    $ECHO "${PURPLE}Usage: test_default_provider_sign_key.sh <udrm_server_address> \n"
+    $ECHO "${PURPLE}Usage: test_encryption_and_license_flows.sh <udrm_server_address> \n"
     $ECHO "${NC}"
     exit 0
 fi
