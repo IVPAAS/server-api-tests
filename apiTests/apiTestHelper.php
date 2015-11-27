@@ -27,6 +27,14 @@ function fail($msg)
     logOutput($out);
     return -1;
 }
+function info($msg)
+{
+    $out = "\n".bcolors::WARNING.$msg.bcolors::ENDC;
+    print($out);
+    logOutput($out);
+    return 0;
+}
+
 
 function logOutput($msg)
 {
@@ -126,9 +134,10 @@ function addKalturaUser($client,$userId)
 }
 function addEntry($client,$name)
 {
-  $entry                                  = new KalturaBaseEntry();
+  $entry                                  = new KalturaMediaEntry();
   $type                                   = KalturaEntryType::MEDIA_CLIP;
   $entry->name                            = $name;
+  $entry->mediaType                       = KalturaMediaType::VIDEO;
   $result                                 = $client->baseEntry->add($entry, $type);
   //print ("\nAdd entry ID:".$result->id);
   return $result;
