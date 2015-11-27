@@ -132,13 +132,14 @@ function addKalturaUser($client,$userId)
   //print ("\nAdd User ID:".$result->id);
   return $result;
 }
-function addEntry($client,$name)
+function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO)
 {
   $entry                                  = new KalturaMediaEntry();
   $type                                   = KalturaEntryType::MEDIA_CLIP;
   $entry->name                            = $name;
-  $entry->mediaType                       = KalturaMediaType::VIDEO;
+  $entry->mediaType                       = $mediaType;
   $result                                 = $client->baseEntry->add($entry, $type);
   //print ("\nAdd entry ID:".$result->id);
   return $result;
 }
+
