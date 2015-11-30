@@ -26,7 +26,7 @@ function helper_createLiveEntry($client, $recordedEntryId = null)
 
 function helper_createRecordedEntry($client)
 {
-	return addEntry($client,__FUNCTION__, 27);
+	return addEntry($client,__FUNCTION__, KalturaMediaType::VIDEO, 27);
 }
 
 function helper_createVideoToken($client)
