@@ -4,9 +4,9 @@ require_once('apiTestHelper.php');
 
 
 /**
- * @KalturaClient $client
- * @param $recordedEntryId
- * @return mixed
+ * @KalturaClient $client (admin KS)
+ * $recordedEntryId 
+ * @return live entry 
  */
 function helper_createLiveEntry($client, $recordedEntryId = null)
 {
@@ -16,26 +16,24 @@ function helper_createLiveEntry($client, $recordedEntryId = null)
 	$entry->mediaType                       = KalturaMediaType::LIVE_STREAM_FLASH;
 	if ($recordedEntryId != null)
 		$entry->recordedEntryId					= $recordedEntryId;
-	$entry->conversionProfileId				= 17;
+	$conversionProfile = $client->conversionProfile->getdefault(KalturaConversionProfileType::LIVE_STREAM);
+	$entry->conversionProfileId	= $conversionProfile->id;
 	$entry->dvrStatus						= 0;
 	$entry->recordStatus					= 1;
 	$result                                 = $client->liveStream->add($entry, KalturaSourceType::FILE);
-	//print ("\nAdd entry ID:".$result->id);
 	return $result;
 }
 
-function helper_createRecordedEntry($client)
+function helper_createVideoToken($client,$index=0)
 {
-	return addEntry($client,__FUNCTION__, KalturaMediaType::VIDEO, 27);
-}
-
-function helper_createVideoToken($client)
-{
+	$videoAsset = array('../resources/Countdown2.mp4',
+						'../resources/Kaltura Test Upload.mp4');
+	$index = $index % count($videoAsset);
 	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = '..\resources\Kaltura Test Upload.mp4';
+	$uploadTokenObj->fileName = $videoAsset[$index];
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = '../resources/Kaltura Test Upload.mp4';
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+	$fileData = $videoAsset[$index];
+	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,false,true);
 	$resource = new KalturaUploadedFileTokenResource();
 	$resource->token = $uploadToken->id;
 	return $resource;
@@ -43,15 +41,19 @@ function helper_createVideoToken($client)
 
 function isEntryReady($client,$id)
 {
-	$result = $client->baseEntry->get($id, null);
-	if ($result->status == 2)
-		return true;
+	if($id!=null)
+	{
+		try{
+			$result = $client->baseEntry->get($id, null);
+			if ($result->status == 2)
+			return true;
+		}
+		catch(Exception $e)
+		{
+			return true;
+		}
+	}
 	return false;
-}
-
-function helper_addContentToEntry($client, $entry, $resource)
-{
-	return $client->baseEntry->addcontent($entry->id, $resource);
 }
 
 function helper_appendRecording($client, $entry, $flavorAssetId, $resource)
@@ -65,81 +67,86 @@ function helper_getEntryFlavorAssets($client, $entryId)
 	$filter->entryIdEqual = $entryId;
 	return $client->flavorAsset->listAction($filter);
 }
-
-
-function Test1_CreateLiveStreamEntry($client)
+function helper_CreateAndAppend($clientMS, $clientServer, $liveEntry,  $flavorAssetIds, $duration, $i, $isLastChunk = false)
 {
-	info("Created recorded entry to use");
-	$recordedEntry = helper_createRecordedEntry($client);
+	info("Appending chunk [$i] for live entry [$liveEntry->id]");
+	foreach ($flavorAssetIds as $flavorAsset )
+	{
+		$resource = helper_createVideoToken($clientMS,$i);
+		$liveEntry = helper_appendRecording($clientMS, $liveEntry,  $flavorAsset->id, $resource, $duration , $isLastChunk);
+		info ("Flavor asset".$flavorAsset->id);
+	}
+ return $liveEntry;
+}
 
-	info("Create live entry and upload content");
-	$liveEntry = helper_createLiveEntry($client, $recordedEntry->id);
-
+function helper_ValidateAppend($clientServer, $liveEntry)
+{
+	if($liveEntry->recordedEntryId!=null)
+	{
+		info("Waiting for replacing entry to be created live entry [$liveEntry->id] recorded entry [$liveEntry->recordedEntryId]");
+		do 
+		{
+			$recordedEntry = $clientServer->baseEntry->get($liveEntry->recordedEntryId, null);
+			info("Waiting! live entry [$liveEntry->id] recorded entry [$liveEntry->recordedEntryId]" .
+			" replacing entry [$recordedEntry->replacingEntryId] and replcaed entry [$recordedEntry->replacedEntryId]");
+			sleep(1);
+			print (".");
+		}
+		while(!$recordedEntry->replacingEntryId);
+	info("Found replacing entry Id [$recordedEntry->replacedEntryId] waiting for it to be ready");
+		while($recordedEntry->replacingEntryId && isEntryReady($clientServer,$recordedEntry->replacingEntryId)!=true)
+		{
+			sleep(1);
+			print (".");
+		}
+	}
 	return $liveEntry;
 }
 
-function helper_appendRecordingAndValidate($clientMS, $clientServer, $liveEntry,  $flavorAssetId, $duration, $i, $isLastChunk = false)
+function Test1_AppenRecording($clientMS, $clientServer)
 {
-	info("Create a resource to use");
-	$resource = helper_createVideoToken($clientMS);
-
-	info("Appending chunk [$i]");
-	helper_appendRecording($clientMS, $liveEntry,  $flavorAssetId, $resource, $duration , $isLastChunk);
-
-	info("Waiting for live entry [$liveEntry->id] and recorded entry [$liveEntry->recordedEntryId]");
-	//sleep(15);
-/*	while(isEntryReady($clientServer,$liveEntry->recordedEntryId)!=true)
-	{
-		sleep(1);
-		print (".");
-	}*/
-/*
-	do {
-		$recordedEntry = $clientServer->baseEntry->get($liveEntry->recordedEntryId, null);
-		info("Waiting for live entry [$liveEntry->id] and recorded entry [$liveEntry->recordedEntryId]" .
-			"and replacing entry [$recordedEntry->replacingEntryId] and replcaed entry [$recordedEntry->replacedEntryId]");
-		sleep(1);print (".");
-	}while($i!= 0 && !$recordedEntry->replacingEntryId);
-	while($recordedEntry->replacingEntryId && isEntryReady($clientServer,$recordedEntry->replacingEntryId)!=true)
-	{
-		sleep(1);
-		print (".");
-	}*/
-}
-
-function Test2_AppenRecording($clientMS, $liveEntry, $clientServer)
-{
-	info("Get the flavor assets for the uploaded entry");
+	info("Create live entry");
+	$liveEntry = helper_createLiveEntry($clientServer);
+	info("Get the flavor assets for the uploaded entry [$liveEntry->id]");
 	$response = helper_getEntryFlavorAssets($clientMS, $liveEntry->id);
-
-//	print_r($response);
-
-	$flavorAssetId = $response->objects[0]->id;
-	info("Now try to append the resource to the first asset ID ");
-
-	for ($i=0 ; $i<10 ; $i++)
+	$flavorAssetIds = $response->objects;
+	for ($i=0; $i<7 ; $i++)
 	{
-		helper_appendRecordingAndValidate($clientMS, $clientServer, $liveEntry, $flavorAssetId, 4, $i);
+		helper_CreateAndAppend($clientMS, $clientServer, $liveEntry, $flavorAssetIds, 4, $i);
 	}
-
-	helper_appendRecordingAndValidate($clientMS, $clientServer, $liveEntry, $flavorAssetId, 4, $i, true);
-
-
+	$liveEntry = helper_CreateAndAppend($clientMS, $clientServer, $liveEntry, $flavorAssetIds, 4, $i, true);
+	return $liveEntry;
 }
 
+function Test2_AppenRecordingandValidate($clientMS, $clientServer)
+{
+	info("Create live entry");
+	$liveEntry = helper_createLiveEntry($clientServer);
+	info("Get the flavor assets for the uploaded entry [$liveEntry->id]");
+	$flavorAssetIds = helper_getEntryFlavorAssets($clientMS, $liveEntry->id);
+	$liveEntry = helper_CreateAndAppend($clientMS, $clientServer, $liveEntry, $flavorAssetIds->objects, 4, 0);
+	for ($i=1; $i<7 ; $i++)
+	{
+		$liveEntry =  helper_CreateAndAppend($clientMS, $clientServer, $liveEntry, $flavorAssetIds->objects, 4, $i);
+        helper_ValidateAppend($clientServer,$liveEntry);
+	}
+	
+	$liveEntry =  helper_CreateAndAppend($clientMS, $clientServer, $liveEntry, $flavorAssetIds->objects, 4, $i ,true);
+	return $liveEntry;
+}
 
 
 
 function main($dc,$partnerId,$adminSecret,$mediaServerSecret)
 {
-	$clientServer = startKalturaSession($partnerId,$adminSecret,$dc);
+	warning("This test require admin secret and media server secret (partner -5)");
+	$clientAdmin = startKalturaSession($partnerId,$adminSecret,$dc);
 	$clientMediaServer = startKalturaSession(-5,$mediaServerSecret,$dc);
-
-	$entry  = Test1_CreateLiveStreamEntry($clientServer);
-	$ret  = Test2_AppenRecording($clientMediaServer, $entry, $clientServer);
+	Test1_AppenRecording($clientMediaServer, $clientAdmin);
+	$entry = Test2_AppenRecordingandValidate($clientMediaServer, $clientAdmin);
 	$result = $clientServer->baseEntry->get($entry->recordedEntryId, null);
 	info("Final duration is [$result->duration]");
-	return ($ret);
+	return 0;
 }
 
 goMain();
