@@ -7,7 +7,8 @@ class bcolors
 {
     const OKBLUE = "\033[94m";
     const OKGREEN = "\033[92m";
-    const WARNING = "\033[93m";
+    const WARNING = "\033[94m";
+    const INFO = "\033[93m";
     const FAIL = "\033[91m";
     const ENDC = "\033[0m";
     const BOLD = "\033[1m";
@@ -28,6 +29,13 @@ function fail($msg)
     return -1;
 }
 function info($msg)
+{
+    $out = "\n".bcolors::INFO.$msg.bcolors::ENDC;
+    print($out);
+    logOutput($out);
+    return 0;
+}
+function warning($msg)
 {
     $out = "\n".bcolors::WARNING.$msg.bcolors::ENDC;
     print($out);
@@ -77,7 +85,7 @@ function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionTyp
 	catch (KalturaException $e)
 	{
 		$msg = $e->getMessage();
-		shout("Problem starting session with message: [$msg]\n");
+		fail("Problem starting session with message: [$msg]\n");
 		die("ERROR - cannot generate session with partner id [$partnerId] and secret [$secret]");
 	}
 }	
@@ -132,16 +140,16 @@ function addKalturaUser($client,$userId)
   //print ("\nAdd User ID:".$result->id);
   return $result;
 }
-function addEntry($client,$name, $mediaType=KalturaMediaType::VIDEO, $profileId = null)
+function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='')
 {
-	$entry                                  = new KalturaMediaEntry();
-	$type                                   = KalturaEntryType::MEDIA_CLIP;
-	$entry->name                            = $name;
-	$entry->mediaType                       = $mediaType;
-	if ($profileId != null)
-		$entry->conversionProfileId			= $profileId;
-	$result                                 = $client->baseEntry->add($entry, $type);
-	//print ("\nAdd entry ID:".$result->id);
-	return $result;
+    $entry                                  = new KalturaMediaEntry();
+    $type                                   = KalturaEntryType::MEDIA_CLIP;
+    $entry->name                            = $name;
+    $entry->mediaType                       = $mediaType;
+    if ($profileId != null)
+        $entry->conversionProfileId			= $profileId;
+    $entry->userId                          = $userId;
+    $result                                 = $client->baseEntry->add($entry, $type);
+    //print ("\nAdd entry ID:".$result->id);
+    return $result;
 }
-

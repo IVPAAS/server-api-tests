@@ -144,6 +144,116 @@ function Test4_CloneImageEntry($client)
     return success(__FUNCTION__);
 }
 
+function Test5_CloneEntryWithUsersAndCategories($client)
+{
+    info("Clone entry including its users and categories");
+
+    //create a new user
+    $user = new KalturaUser();
+    $user->id = uniqid('clonedUser_');
+    $newUser = $client->user->add($user);
+    $profileId = null;
+
+    //create a new entry
+    $entry = addEntry($client,"UsersAndCategoriesOriginEntryOriginEntry", $mediaType=KalturaMediaType::VIDEO,
+                        $profileId, $newUser->id);
+
+    //add a category
+    $category = new KalturaCategory();
+    $categoryName = uniqid('cloneCategory_');
+    $category->name = $categoryName;
+    $category->tags = 'CLONE';
+    $newCategory = $client->category->add($category);
+
+    //create a category entry
+    $categoryEntry = new KalturaCategoryEntry();
+    $categoryEntry->categoryId = $newCategory->id;
+    $categoryEntry->entryId = $entry->id;
+    $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
+
+    $cloneOptions = array();
+    $cloneOptions[0] = new KalturaBaseEntryCloneOptionComponent();
+    $cloneOptions[0]->itemType = KalturaBaseEntryCloneOptions::USERS;
+    $cloneOptions[0]->rule = KalturaResponseProfileType::INCLUDE_FIELDS;
+    $cloneOptions[1] = new KalturaBaseEntryCloneOptionComponent();
+    $cloneOptions[1]->itemType = KalturaBaseEntryCloneOptions::CATEGORIES;
+    $cloneOptions[1]->rule = KalturaResponseProfileType::INCLUDE_FIELDS;
+    $newEntry = $client->baseEntry->cloneAction($entry->id, $cloneOptions);
+
+//T.B.D test USERS option
+//    if ($newEntry->userId != $entry->userId || $newEntry->creatorId != $entry->creatorId)
+//    {
+//        return fail(__FUNCTION__);
+//    }
+
+    $filter = new KalturaCategoryEntryFilter();
+    $filter->categoryIdEqual = $newCategory->id;
+    $filter->entryIdEqual = $newEntry->id;
+    $pager = null;
+    $result = $client->categoryEntry->listAction($filter, $pager);
+    if ($result->totalCount == 1)
+    {
+        return success(__FUNCTION__);
+    }
+    return fail(__FUNCTION__);
+}
+
+function Test6_CloneEntryNoUsersAndNoCategories($client)
+{
+    info("Clone entry excluding its users and categories");
+    //create a new user
+    $user = new KalturaUser();
+    $user->id = uniqid('clonedUser_');
+    $newUser = $client->user->add($user);
+    $profileId = null;
+
+    //create a new entry
+    $entry = addEntry($client,"UsersAndCategoriesOriginEntryOriginEntry", $mediaType=KalturaMediaType::VIDEO,
+                        $profileId, $newUser->id);
+
+    //add a category
+    $category = new KalturaCategory();
+    $categoryName = uniqid('cloneCategory_');
+    $category->name = $categoryName;
+    $category->tags = 'CLONE';
+    $newCategory = $client->category->add($category);
+
+    //create a category entry
+    $categoryEntry = new KalturaCategoryEntry();
+    $categoryEntry->categoryId = $newCategory->id;
+    $categoryEntry->entryId = $entry->id;
+    $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
+
+    $cloneOptions = array();
+    $cloneOptions[0] = new KalturaBaseEntryCloneOptionComponent();
+    $cloneOptions[0]->itemType = KalturaBaseEntryCloneOptions::USERS;
+    $cloneOptions[0]->rule = KalturaResponseProfileType::EXCLUDE_FIELDS;
+    $cloneOptions[1] = new KalturaBaseEntryCloneOptionComponent();
+    $cloneOptions[1]->itemType = KalturaBaseEntryCloneOptions::CATEGORIES;
+    $cloneOptions[1]->rule = KalturaResponseProfileType::EXCLUDE_FIELDS;
+    $newEntry = $client->baseEntry->cloneAction($entry->id, $cloneOptions);
+
+       //T.B.D
+    //    if ($newEntry->userId == $entry->userId && $newEntry->creatorId == $entry->creatorId)
+    //    {
+    //        echo("user is cloned");
+    //        $bCloned = true;
+    //    }
+
+    $filter = new KalturaCategoryEntryFilter();
+    $filter->categoryIdEqual = $newCategory->id;
+    $filter->entryIdEqual = $newEntry->id;
+    $pager = null;
+
+    $result = $client->categoryEntry->listAction($filter, $pager);
+    if ($result->totalCount == 1)
+    {
+        return fail(__FUNCTION__);
+    }
+    return success(__FUNCTION__);
+}
+
+
 
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
@@ -152,6 +262,9 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
   $ret += Test2_CloneAPendingEntry($client);
   $ret += Test3_ClonePlaylistEntry( $client );
   $ret += Test4_CloneImageEntry($client);
+  $ret += Test5_CloneEntryWithUsersAndCategories($client);
+  $ret += Test6_CloneEntryNoUsersAndNoCategories($client);
+
   return ($ret);
 }
 

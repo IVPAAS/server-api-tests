@@ -213,7 +213,7 @@ function Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId)
   }
 }
 
-function Test6_ValidateshowCorrectAfterSubmission($client)
+function Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc)
 {
   $entry=addEntry($client,__FUNCTION__);
   $quiz = createNewQuiz($client,$entry->id,KalturaNullableBoolean::FALSE_VALUE,KalturaNullableBoolean::FALSE_VALUE,null,KalturaNullableBoolean::FALSE_VALUE,null,KalturaNullableBoolean::TRUE_VALUE);
@@ -236,7 +236,8 @@ function Test6_ValidateshowCorrectAfterSubmission($client)
   $quiz->showCorrectAfterSubmission = KalturaNullableBoolean::FALSE_VALUE;
   $quizPlugin = KalturaQuizClientPlugin::get($client);
   $result = $quizPlugin->quiz->update($entry->id, $quiz);
-  $answerCue = addAnswer($client,$entry->id,$questions[0],$quizUserEntry->id,"Q");
+  $userClient = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER,$userId);
+  $answerCue = addAnswer($userClient,$entry->id,$questions[0],$quizUserEntry->id,"Q");
   if(!is_null($answerCue->isCorrect))
   {
     return fail(__FUNCTION__." Should not get isCorrect value current value is:".$answerCue->isCorrect );
@@ -306,7 +307,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
   $ret+=Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
   $ret+=Test5_CheckAllowDownload($client);
   $ret+=Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
-  $ret+=Test6_ValidateshowCorrectAfterSubmission($client);
+  $ret+=Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc);
   $ret+=test7_GetUserPercentageReport($client);
   return ($ret);
 }
