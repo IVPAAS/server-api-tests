@@ -7,7 +7,7 @@ require_once('apiTestHelper.php');
 
 function helper_createEntryAndUploaDmp4Content($client)
 {
-    $FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/Kaltura Test Upload.mp4';
+    $FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
     $entry = addEntry($client,__FUNCTION__);
     $uploadTokenObj = new KalturaUploadToken();
     $uploadTokenObj->fileName = $FILE_NAME_MP4;
