@@ -32,7 +32,7 @@ function helper_createRecordedEntry($client)
 function helper_createVideoToken($client)
 {
 	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = '..\resources\Kaltura Test Upload.mp4';
+	$uploadTokenObj->fileName = '..\resources\KalturaTestUpload.mp4';
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
 	$fileData = '../resources/Kaltura Test Upload.mp4';
 	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
