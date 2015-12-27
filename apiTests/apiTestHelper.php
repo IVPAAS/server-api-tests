@@ -153,3 +153,24 @@ function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId =
     //print ("\nAdd entry ID:".$result->id);
     return $result;
 }
+
+function addCategory($client, $categoryPrefixName, $categoryTag)
+{
+    $category = new KalturaCategory();
+    $categoryName = uniqid($categoryPrefixName);
+    /** @var string $categoryName */
+    $category->name = $categoryName;
+    $category->tags = $categoryTag;
+    $result = $newCategory = $client->category->add($category);
+    return $result;
+}
+
+function addCategoryEntry($client, $categoryId, $entryId)
+{
+    //create a category entry
+    $categoryEntry = new KalturaCategoryEntry();
+    $categoryEntry->categoryId = $categoryId;
+    $categoryEntry->entryId = $entryId;
+    $result = $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
+    return $result;
+}

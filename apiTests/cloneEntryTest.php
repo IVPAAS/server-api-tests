@@ -158,18 +158,11 @@ function Test5_CloneEntryWithUsersAndCategories($client)
     $entry = addEntry($client,"UsersAndCategoriesOriginEntryOriginEntry", $mediaType=KalturaMediaType::VIDEO,
         $profileId, $newUser->id);
 
-    //add a category
-    $category = new KalturaCategory();
-    $categoryName = uniqid('cloneCategory_');
-    $category->name = $categoryName;
-    $category->tags = 'CLONE';
-    $newCategory = $client->category->add($category);
+    $categoryPrefixName = uniqid('cloneCategory_');
+    $categoryTag = "CLONE";
+    $newCategory = addCategory($client, $categoryPrefixName, $categoryTag);
 
-    //create a category entry
-    $categoryEntry = new KalturaCategoryEntry();
-    $categoryEntry->categoryId = $newCategory->id;
-    $categoryEntry->entryId = $entry->id;
-    $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
+    $newCategoryEntry = addCategoryEntry($client, $newCategory->id, $entry->id);
 
     $cloneOptions = array();
     $cloneOptions[0] = new KalturaBaseEntryCloneOptionComponent();
@@ -211,18 +204,13 @@ function Test6_CloneEntryNoUsersAndNoCategories($client)
     $entry = addEntry($client,"UsersAndCategoriesOriginEntryOriginEntry", $mediaType=KalturaMediaType::VIDEO,
         $profileId, $newUser->id);
 
-    //add a category
-    $category = new KalturaCategory();
-    $categoryName = uniqid('cloneCategory_');
-    $category->name = $categoryName;
-    $category->tags = 'CLONE';
-    $newCategory = $client->category->add($category);
 
-    //create a category entry
-    $categoryEntry = new KalturaCategoryEntry();
-    $categoryEntry->categoryId = $newCategory->id;
-    $categoryEntry->entryId = $entry->id;
-    $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
+
+    $categoryPrefixName = uniqid('cloneCategory_');
+    $categoryTag = "CLONE";
+    $newCategory = addCategory($client, $categoryPrefixName, $categoryTag);
+
+    $newCategoryEntry = addCategoryEntry($client, $newCategory->id, $entry->id);
 
     $cloneOptions = array();
     $cloneOptions[0] = new KalturaBaseEntryCloneOptionComponent();
@@ -253,17 +241,61 @@ function Test6_CloneEntryNoUsersAndNoCategories($client)
     return success(__FUNCTION__);
 }
 
+function Test7_CloneEntryWithNullCloneOptions($client)
+{
+    info("Clone entry including its users and categories NullCloneOptions");
+
+    //create a new user
+    $user = new KalturaUser();
+    $user->id = uniqid('clonedUser_');
+    $newUser = $client->user->add($user);
+    $profileId = null;
+
+    //create a new entry
+    $entry = addEntry($client,"UsersAndCategoriesOriginEntryOriginEntry", $mediaType=KalturaMediaType::VIDEO,
+        $profileId, $newUser->id);
+
+    $categoryPrefixName = uniqid('cloneCategory_');
+    $categoryTag = "CLONE";
+    $newCategory = addCategory($client, $categoryPrefixName, $categoryTag);
+
+    $newCategoryEntry = addCategoryEntry($client, $newCategory->id, $entry->id);
+
+    $newEntry = $client->baseEntry->cloneAction($entry->id, $cloneOptions=null);
+
+//T.B.D test USERS option
+//    if ($newEntry->userId != $entry->userId || $newEntry->creatorId != $entry->creatorId)
+//    {
+//        return fail(__FUNCTION__);
+//    }
+
+    $filter = new KalturaCategoryEntryFilter();
+    $filter->categoryIdEqual = $newCategory->id;
+    $filter->entryIdEqual = $newEntry->id;
+    $pager = null;
+    $result = $client->categoryEntry->listAction($filter, $pager);
+    if ($result->totalCount == 1)
+    {
+        return success(__FUNCTION__);
+    }
+    return fail(__FUNCTION__);
+
+}
+
+
+
 
 
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
   $client = startKalturaSession($partnerId,$adminSecret,$dc);
-//  $ret  = Test1_CloneAReadyEntry($client);
-//  $ret += Test2_CloneAPendingEntry($client);
-//  $ret += Test3_ClonePlaylistEntry( $client );
-//  $ret += Test4_CloneImageEntry($client);
-  $ret = Test5_CloneEntryWithUsersAndCategories($client);
+  $ret  = Test1_CloneAReadyEntry($client);
+  $ret += Test2_CloneAPendingEntry($client);
+  $ret += Test3_ClonePlaylistEntry( $client );
+  $ret += Test4_CloneImageEntry($client);
+  $ret += Test5_CloneEntryWithUsersAndCategories($client);
   $ret += Test6_CloneEntryNoUsersAndNoCategories($client);
+    $ret += Test7_CloneEntryWithNullCloneOptions($client);
 
   return ($ret);
 }
