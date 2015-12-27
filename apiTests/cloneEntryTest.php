@@ -156,7 +156,7 @@ function Test5_CloneEntryWithUsersAndCategories($client)
 
     //create a new entry
     $entry = addEntry($client,"UsersAndCategoriesOriginEntryOriginEntry", $mediaType=KalturaMediaType::VIDEO,
-                        $profileId, $newUser->id);
+        $profileId, $newUser->id);
 
     //add a category
     $category = new KalturaCategory();
@@ -174,10 +174,10 @@ function Test5_CloneEntryWithUsersAndCategories($client)
     $cloneOptions = array();
     $cloneOptions[0] = new KalturaBaseEntryCloneOptionComponent();
     $cloneOptions[0]->itemType = KalturaBaseEntryCloneOptions::USERS;
-    $cloneOptions[0]->rule = KalturaResponseProfileType::INCLUDE_FIELDS;
+    $cloneOptions[0]->rule = KalturaCloneComponentSelectorType::INCLUDE_COMPONENT;
     $cloneOptions[1] = new KalturaBaseEntryCloneOptionComponent();
     $cloneOptions[1]->itemType = KalturaBaseEntryCloneOptions::CATEGORIES;
-    $cloneOptions[1]->rule = KalturaResponseProfileType::INCLUDE_FIELDS;
+    $cloneOptions[1]->rule = KalturaCloneComponentSelectorType::INCLUDE_COMPONENT;
     $newEntry = $client->baseEntry->cloneAction($entry->id, $cloneOptions);
 
 //T.B.D test USERS option
@@ -209,7 +209,7 @@ function Test6_CloneEntryNoUsersAndNoCategories($client)
 
     //create a new entry
     $entry = addEntry($client,"UsersAndCategoriesOriginEntryOriginEntry", $mediaType=KalturaMediaType::VIDEO,
-                        $profileId, $newUser->id);
+        $profileId, $newUser->id);
 
     //add a category
     $category = new KalturaCategory();
@@ -227,13 +227,13 @@ function Test6_CloneEntryNoUsersAndNoCategories($client)
     $cloneOptions = array();
     $cloneOptions[0] = new KalturaBaseEntryCloneOptionComponent();
     $cloneOptions[0]->itemType = KalturaBaseEntryCloneOptions::USERS;
-    $cloneOptions[0]->rule = KalturaResponseProfileType::EXCLUDE_FIELDS;
+    $cloneOptions[0]->rule = KalturaCloneComponentSelectorType::EXCLUDE_COMPONENT;
     $cloneOptions[1] = new KalturaBaseEntryCloneOptionComponent();
     $cloneOptions[1]->itemType = KalturaBaseEntryCloneOptions::CATEGORIES;
-    $cloneOptions[1]->rule = KalturaResponseProfileType::EXCLUDE_FIELDS;
+    $cloneOptions[1]->rule = KalturaCloneComponentSelectorType::EXCLUDE_COMPONENT;
     $newEntry = $client->baseEntry->cloneAction($entry->id, $cloneOptions);
 
-       //T.B.D
+    //T.B.D
     //    if ($newEntry->userId == $entry->userId && $newEntry->creatorId == $entry->creatorId)
     //    {
     //        echo("user is cloned");
@@ -258,11 +258,11 @@ function Test6_CloneEntryNoUsersAndNoCategories($client)
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
   $client = startKalturaSession($partnerId,$adminSecret,$dc);
-  $ret  = Test1_CloneAReadyEntry($client);
-  $ret += Test2_CloneAPendingEntry($client);
-  $ret += Test3_ClonePlaylistEntry( $client );
-  $ret += Test4_CloneImageEntry($client);
-  $ret += Test5_CloneEntryWithUsersAndCategories($client);
+//  $ret  = Test1_CloneAReadyEntry($client);
+//  $ret += Test2_CloneAPendingEntry($client);
+//  $ret += Test3_ClonePlaylistEntry( $client );
+//  $ret += Test4_CloneImageEntry($client);
+  $ret = Test5_CloneEntryWithUsersAndCategories($client);
   $ret += Test6_CloneEntryNoUsersAndNoCategories($client);
 
   return ($ret);
