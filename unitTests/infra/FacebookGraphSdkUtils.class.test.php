@@ -8,7 +8,6 @@ require __DIR__.'/../mock/KalturaLog.mock.php';
 require_once('infra/general/FacebookGraphSdkUtils.php');
 require_once('infra/storage/kFile.class.php');
 require_once('alpha/config/kConf.php');
-require_once('plugins/content_distribution/providers/facebook/lib/model/FacebookRequestParameters.php');
 require_once('vendor/facebook-sdk-php-v5-customized/FileUpload/FacebookFile.php');
 
 
