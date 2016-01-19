@@ -27,7 +27,7 @@ function helper_createLiveEntry($client, $recordedEntryId = null)
 function helper_createVideoToken($client,$index=0)
 {
 	$videoAsset = array('../resources/Countdown2.mp4',
-						'../resources/Kaltura Test Upload.mp4');
+						'../resources/KalturaTestUpload.mp4');
 	$index = $index % count($videoAsset);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $videoAsset[$index];
