@@ -51,6 +51,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
         createUser($client,$userId);
         bindUserToCategory($client,$userId,$category->id);
     }
+    success("Users were bounded to category successfully");
 
 }
 
