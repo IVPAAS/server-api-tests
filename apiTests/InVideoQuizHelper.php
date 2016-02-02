@@ -36,27 +36,30 @@ function addQuizUserEntry($client,$userId,$quizEntryId)
 function addQuestionsOnQuiz($client,$QuizEntryId,$str)
 {
   $cuePoint                               = new KalturaQuestionCuePoint();
-  $cuepointPlugin                         = KalturaCuepointClientPlugin::get($client);
-  $cuePoint->hint                         = 'h'+$str;
-  $cuePoint->question                     = 'q'+$str;
-  $cuePoint->explanation                  = 'r'+$str;
-  $cuePoint->entryId                      = $QuizEntryId;  
+  $cuePoint->hint                         = 'hint '.$str;
+  $cuePoint->question                     = 'question '.$str;
+  $cuePoint->explanation                  = 'explanation '.$str;
+  $cuePoint->entryId                      = $QuizEntryId;
+  $cuePoint->startTime                    = time().microtime ();
   $cuePoint->optionalAnswers              = array();
-  $cuePoint->optionalAnswers[0]           = new KalturaOptionalAnswer();
-  $cuePoint->optionalAnswers[0]->key      = $str;
-  $cuePoint->optionalAnswers[0]->isCorrect= 1;
-  $cuePoint->optionalAnswers[1]           = new KalturaOptionalAnswer();
-  $cuePoint->optionalAnswers[1]->key      = $str;
-  $cuePoint->optionalAnswers[1]->isCorrect= 1;
-  $cuePoint->hint                         = 'Hint';
-  $cuePoint->question                     = 'What is my name?';
-  $cuePoint->explanation                  = 'My Name';
+  for($i=0;$i<4;$i++)
+  {
+      $optionalAnswer                        = new KalturaOptionalAnswer();
+      $optionalAnswer->text                 = "Answer $i ".$str;
+      $optionalAnswer->isCorrect            = 0;
+      $optionalAnswer->key                  = $str;
+      $cuePoint->optionalAnswers[]          = $optionalAnswer;
+  }
+	$cuePoint->optionalAnswers[3]->isCorrect= 1;	
+//  $cuePoint->hint                         = 'Hint';
+//  $cuePoint->question                     = 'What is my name?';
+//  $cuePoint->explanation                  = 'My Name';
   $cuepointPlugin                         = KalturaCuepointClientPlugin::get($client);
-  try 
+  //try
   {
     $result                               = $cuepointPlugin->cuePoint->add($cuePoint);
   }
-  catch (Exception $e)
+  //catch (Exception $e)
   {
     //pddEntry($client,__FUNCTION__);rint_r($e);
   }
