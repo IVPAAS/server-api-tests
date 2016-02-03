@@ -144,7 +144,7 @@ function main($dc,$partnerId,$adminSecret,$mediaServerSecret)
 	$clientMediaServer = startKalturaSession(-5,$mediaServerSecret,$dc);
 	Test1_AppenRecording($clientMediaServer, $clientAdmin);
 	$entry = Test2_AppenRecordingandValidate($clientMediaServer, $clientAdmin);
-	$result = $clientServer->baseEntry->get($entry->recordedEntryId, null);
+	$result = $clientAdmin->baseEntry->get($entry->recordedEntryId, null);
 	info("Final duration is [$result->duration]");
 	return 0;
 }
