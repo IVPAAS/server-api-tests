@@ -174,3 +174,85 @@ function addCategoryEntry($client, $categoryId, $entryId)
     $result = $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
     return $result;
 }
+
+function helper_createEmptyEntry($client, $testName)
+{
+	$entry = addEntry($client, $testName);
+	return $entry;
+}
+
+
+function helper_createEntryAndUploaDmp4Content($client, $testName)
+{
+	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/Kaltura Test Upload.mp4';
+	$entry = addEntry($client, $testName);
+	$uploadTokenObj = new KalturaUploadToken();
+	$uploadTokenObj->fileName = $FILE_NAME_MP4;
+	$uploadToken = $client->uploadToken->add($uploadTokenObj);
+	$fileData = $FILE_NAME_MP4;
+	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+	$resource = new KalturaUploadedFileTokenResource();
+	$resource->token = $uploadToken->id;
+	$result = $client->baseEntry->addcontent($entry->id, $resource);
+	return $result;
+}
+
+function helper_uploadThumbAsset($client, $entryId)
+{
+	$thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
+
+	$THUMB_NAME = dirname ( __FILE__ ).'/../resources/thumb_300_150.jpg';
+	$uploadTokenObj = new KalturaUploadToken();
+	$uploadTokenObj->fileName = $THUMB_NAME;
+	$uploadToken = $client->uploadToken->add($uploadTokenObj);
+	$fileData = $THUMB_NAME;
+	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+	$resource = new KalturaUploadedFileTokenResource();
+	$resource->token = $uploadToken->id;
+
+	$client->thumbAsset->setContent($thumbAsset->id, $resource);
+}
+
+function isEntryReady($client,$id)
+{
+	$result = $client->baseEntry->get($id, null);
+	if ($result->status == 2)
+		return true;
+	return false;
+}
+
+function isSubmitting($client, $id)
+{
+	$result = $client->entryDistribution->get($id);
+	if ($result->status == 4) // status submitting
+		return true;
+	return false;
+}
+
+function helper_createEntryAndUploadJpgContent($client)
+{
+	$FILE_NAME_JPG = dirname ( __FILE__ ).'/../resources/kalturaIcon.jpg';
+	$entry = addEntry($client,__FUNCTION__,KalturaMediaType::IMAGE);
+	$uploadTokenObj = new KalturaUploadToken();
+	$uploadTokenObj->fileName = $FILE_NAME_JPG;
+	$uploadToken = $client->uploadToken->add($uploadTokenObj);
+	$fileData = $FILE_NAME_JPG;
+	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+	$resource = new KalturaUploadedFileTokenResource();
+	$resource->token = $uploadToken->id;
+	$result = $client->baseEntry->addcontent($entry->id, $resource);
+	return $result;
+}
+
+
+function helper_createPlaylist($client)
+{
+	$entry = new KalturaPlaylist();
+	$entry->type = KalturaEntryType::PLAYLIST;
+	$entry->operationAttributes = array();
+	$entry->totalResults = 1;
+	$entry->playlistType = KalturaPlaylistType::DYNAMIC;
+	$type = KalturaEntryType::PLAYLIST;
+	$result = $client->baseEntry->add($entry, $type);
+	return $result;
+}

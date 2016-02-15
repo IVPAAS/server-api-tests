@@ -3,61 +3,10 @@ require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('apiTestHelper.php');
 
 
-
-
-function helper_createEntryAndUploaDmp4Content($client)
-{
-    $FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
-    $entry = addEntry($client,__FUNCTION__);
-    $uploadTokenObj = new KalturaUploadToken();
-    $uploadTokenObj->fileName = $FILE_NAME_MP4;
-    $uploadToken = $client->uploadToken->add($uploadTokenObj);
-    $fileData = $FILE_NAME_MP4;
-    $result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-    $resource = new KalturaUploadedFileTokenResource();
-    $resource->token = $uploadToken->id;
-    $result = $client->baseEntry->addcontent($entry->id, $resource);
-    return $result;
-}
-
-function helper_createEntryAndUploadJpgContent($client)
-{
-    $FILE_NAME_JPG = dirname ( __FILE__ ).'/../resources/kalturaIcon.jpg';
-    $entry = addEntry($client,__FUNCTION__,KalturaMediaType::IMAGE);
-    $uploadTokenObj = new KalturaUploadToken();
-    $uploadTokenObj->fileName = $FILE_NAME_JPG;
-    $uploadToken = $client->uploadToken->add($uploadTokenObj);
-    $fileData = $FILE_NAME_JPG;
-    $result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-    $resource = new KalturaUploadedFileTokenResource();
-    $resource->token = $uploadToken->id;
-    $result = $client->baseEntry->addcontent($entry->id, $resource);
-    return $result;
-}
-
-
-function helper_createPlaylist($client)
-{
-  $entry = new KalturaPlaylist();
-  $entry->type = KalturaEntryType::PLAYLIST;
-  $entry->operationAttributes = array();
-  $entry->totalResults = 1;
-  $entry->playlistType = KalturaPlaylistType::DYNAMIC;
-  $type = KalturaEntryType::PLAYLIST;
-  $result = $client->baseEntry->add($entry, $type);
-  return $result;
-}
-function isEntryReady($client,$id)
-{
-    $result = $client->baseEntry->get($id, null);
-    if ($result->status == 2)
-        return true;
-    return false;
-}
 function Test1_CloneAReadyEntry($client)
 {
     info("Create entry and upload content");
-    $MediaEntry = helper_createEntryAndUploaDmp4Content($client);
+    $MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
     info("Wait for entry to be ready id =".$MediaEntry->id);
     while(isEntryReady($client,$MediaEntry->id)!=true)
     {
@@ -78,7 +27,7 @@ function Test1_CloneAReadyEntry($client)
 function Test2_CloneAPendingEntry($client)
 {
     info("Create entry and upload content");
-    $MediaEntry = helper_createEntryAndUploaDmp4Content($client);
+    $MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
     info("Make sure entry is not ready id =".$MediaEntry->id);
     if (isEntryReady($client,$MediaEntry->id)!=true)
     {
