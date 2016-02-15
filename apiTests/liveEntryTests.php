@@ -38,7 +38,7 @@ function helper_createVideoToken($client,$index=0)
 	$resource->token = $uploadToken->id;
 	return $resource;
 }
-
+/*
 function isEntryReady($client,$id)
 {
 	if($id!=null)
@@ -54,7 +54,7 @@ function isEntryReady($client,$id)
 		}
 	}
 	return false;
-}
+}*/
 
 function helper_appendRecording($client, $entry, $flavorAssetId, $resource)
 {
