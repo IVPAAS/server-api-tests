@@ -11,22 +11,22 @@ function runAllTests($dc,$userName,$userPassword)
     print("\n*********************************************");
     info("\n******** Running All Tests *******************");
     print("\n*********************************************\n");
-//    info("\n********** runVideoQuizTest *****************");
-//    runInVideoQuizTest($dc, $userName, $userPassword);
-//    info("\n********** runListEntriesTest ***************");
-//    runListEntriesTest($dc, $userName, $userPassword);
-//    info("\n********** runCloneEntryTest ****************");
-//    runCloneEntryTest($dc, $userName, $userPassword);
-//    info("\n********** runLiveEntryTest *****************");
-//    runLiveEntryTest($dc, $userName, $userPassword);
-//    info("\n********** runUserCategoryTest **************");
-//    runUserCategoryTest($dc, $userName, $userPassword);
-//    info("\n********** cloneEntryWithCuePointsTest ******");
-//    runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
-//    info("\n********** runCrossKalturaDistributionTest **");
-//    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
-    info("\n********** runRemoteStorageDistributionTest **");
-    runRemoteStorageTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#');
+    info("\n********** runVideoQuizTest *****************");
+    runInVideoQuizTest($dc, $userName, $userPassword);
+    info("\n********** runListEntriesTest ***************");
+    runListEntriesTest($dc, $userName, $userPassword);
+    info("\n********** runCloneEntryTest ****************");
+    runCloneEntryTest($dc, $userName, $userPassword);
+    info("\n********** runLiveEntryTest *****************");
+    runLiveEntryTest($dc, $userName, $userPassword);
+    info("\n********** runUserCategoryTest **************");
+    runUserCategoryTest($dc, $userName, $userPassword);
+    info("\n********** cloneEntryWithCuePointsTest ******");
+    runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
+    info("\n********** runCrossKalturaDistributionTest **");
+    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
+//    info("\n********** runRemoteStorageDistributionTest **");
+//    runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
 
     print("\n*********************************************");
     info("\n******** Running All Tests Finished **********");
@@ -276,23 +276,24 @@ function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
 }
 
 
-function runRemoteStorageTest($dc,$userName,$userPassword, $remoteHost, $storageUsername, $storageUserPassword)
+function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remoteHost, $storageUsername, $storageUserPassword, $storageBaseDir)
 {
 //  try {
 
     print("\n\r remoteStorageTest init.");
     $client = login($dc, $userName, $userPassword);
     $testPartner = createTestPartner($client);
+    $storageUrl = 'http://'.$remoteHost.':90/testingStorage/';
     updatePartnerWithRemoteStoragePriority ($client, $testPartner->id, KalturaStorageServePriority::EXTERNAL_ONLY , 1 );
-    $deliveryProfile = createDeliveryProfile($client, $testPartner->id, "testDeliveryProfile", KalturaDeliveryProfileType::HTTP, KalturaPlaybackProtocol::HTTP, 'http://'.$remoteHost.':90/testingStorage/', KalturaDeliveryStatus::ACTIVE);
+    $deliveryProfile = createDeliveryProfile($client, $testPartner->id, "testDeliveryProfile", KalturaDeliveryProfileType::HTTP, KalturaPlaybackProtocol::HTTP, $storageUrl , KalturaDeliveryStatus::ACTIVE);
     print ("\n\r delivery profile id: $deliveryProfile->id");
     $remoteStorageProfile = createRemoteStorageProfile($client, $testPartner->id, "testStorage", KalturaStorageProfileStatus::AUTOMATIC, KalturaStorageProfileProtocol::SCP, $remoteHost,
-        '../var/www/html/testingStorage/', $storageUsername, $storageUserPassword, KalturaStorageProfileDeliveryStatus::ACTIVE, 'kExternalPathManager', $deliveryProfile);
+        $storageBaseDir, $storageUsername, $storageUserPassword, KalturaStorageProfileDeliveryStatus::ACTIVE, 'kExternalPathManager', $deliveryProfile);
 
     print ("\n\r remote profile id: $remoteStorageProfile->id");
     info(" executing remoteStorageTest...");
     $output = array();
-    exec("php remoteStorageTest.php $dc $testPartner->id $testPartner->adminSecret $testPartner->secret ", $output, $result);
+    exec("php remoteStorageTest.php $dc $testPartner->id $testPartner->adminSecret $remoteHost $storageUsername $storageUserPassword $storageUrl, $storageBaseDir", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
