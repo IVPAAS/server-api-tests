@@ -5,12 +5,12 @@ const LOG_FILE="./executionLog.txt";
 //start session and setting KS function
 class bcolors
 {
-    const OKBLUE = "\033[94m";
-    const OKGREEN = "\033[92m";
-    const WARNING = "\033[94m";
-    const INFO = "\033[93m";
-    const FAIL = "\033[91m";
+    const OKBLUE = "\033[34;1m";
+    const OKGREEN = "\033[32;1m";
+    const FAIL = "\033[31;1m";
     const ENDC = "\033[0m";
+    const WARNING = "\033[34;1m";
+    const INFO = "\033[33:1m";
     const BOLD = "\033[1m";
     const UNDERLINE = "\033[4m";
 }
@@ -76,8 +76,8 @@ function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionTyp
 	{
 		$config = new KalturaConfiguration($partnerId);
 		$config->serviceUrl = $destUrl;
-        	$client = new KalturaClient($config);
-		$result = $client->session->start($secret, $userId, $type, $partnerId, null, null);
+        $client = new KalturaClient($config);
+        $result = $client->session->start($secret, $userId, $type, $partnerId, null, null);
 		$client->setKs($result);
 		//print("Started session successfully with KS [$result]\n");
 		return $client;
