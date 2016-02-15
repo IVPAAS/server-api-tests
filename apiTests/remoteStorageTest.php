@@ -3,33 +3,10 @@ require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('apiTestHelper.php');
 
 
-function helper_createEntryAndUploaDmp4Content($client)
-{
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
-	$entry = addEntry($client,__FUNCTION__);
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $FILE_NAME_MP4;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $FILE_NAME_MP4;
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-	$result = $client->baseEntry->addcontent($entry->id, $resource);
-	return $result;
-}
-
-function isEntryReady($client,$id)
-{
-	$result = $client->baseEntry->get($id, null);
-	if ($result->status == 2)
-		return true;
-	return false;
-}
-
 function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $storageHost, $storageUserName,$storageUserPassword, $storageUrl ,$storageBaseDir)
 {
 	info("Create entry and upload content");
-	$MediaEntry = helper_createEntryAndUploaDmp4Content($client);
+	$MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP' );
 	info("Wait for entry to be ready id =".$MediaEntry->id);
 	while(isEntryReady($client,$MediaEntry->id)!=true)
 	{
@@ -46,20 +23,24 @@ function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $
 	{
 		return fail(__FUNCTION__."Entry $MediaEntry->id was not copied to remote Storage.");
 	}
+	success("Entry  $MediaEntry->id exists in remote storage");
 
 	foreach ($output as $item) {
 		print("\n\r found entry location in remote storage: $item");
 		$arr = explode($storageBaseDir, $item);
 		$important = $arr[1];
-		print("Stroage baseDir is : $storageBaseDir, output of splitting is: $item");
 	}
 
-	$command = "curl --head $storageUrl$important | grep \"200 OK\"";
-	exec($command, $output, $result);
+	$httpRequest = $storageUrl.$important ;
+	$command = "curl --head $httpRequest | grep \"200 OK\"";
+	print("\n\r Validate http request for uploaded media in remote server: \n executing the following request: $command");
+
+	exec($command, $output1, $result);
+
 	if ($result != 0){
 		return fail(__FUNCTION__." Command: $command failed.");
 	}
-	return success(__FUNCTION__ ." Entry $MediaEntry->id remote storage export and import finished successfully");
+	return success(__FUNCTION__ .". \n\r Remote storage export and import for Entry $MediaEntry->id finished successfully");
 }
 
 
@@ -96,11 +77,11 @@ function printUsage2()
 {
 	print ("\n\rUsage: " .$GLOBALS['argv'][0] . " <DC URL> 	<parnter id> <storageHost> <storageUserName> <storageUserPassword> <storageUrl> <storageBaseDir>");
 	print ("\n\r for remotoe Storage Testing.\r\n");
-	print ("\n\r This test should run when the following prerequisits are configured:\n\r
+	print ("\n\r This test should run when the following prerequisites are configured:\n\r
 	1. Partner is configured.
 	2. RemoteStorageProfile is configured and enabled on automatic export mode.\r\n
 	3. DeliveryProfile is created, enabled and assigned to the remoteStorage \n\r
-	4. ");
-
+	4. DeliveryProfile and RemoteStorageProfile should be assigned to the created Partner \n\r
+	5. Storage host is configured and web service is configured to allow permissions in the storageBaseDir configured to http requests \r\n");
 
 }

@@ -25,8 +25,8 @@ function runAllTests($dc,$userName,$userPassword)
     runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
     info("\n********** runCrossKalturaDistributionTest **");
     runCrossKalturaDistributionTest($dc, $userName, $userPassword);
-//    info("\n********** runRemoteStorageDistributionTest **");
-//    runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
+    info("\n********** runRemoteStorageDistributionTest **");
+    runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
 
     print("\n*********************************************");
     info("\n******** Running All Tests Finished **********");
@@ -278,8 +278,7 @@ function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
 
 function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remoteHost, $storageUsername, $storageUserPassword, $storageBaseDir)
 {
-//  try {
-
+  try {
     print("\n\r remoteStorageTest init.");
     $client = login($dc, $userName, $userPassword);
     $testPartner = createTestPartner($client);
@@ -293,26 +292,25 @@ function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remot
     print ("\n\r remote profile id: $remoteStorageProfile->id");
     info(" executing remoteStorageTest...");
     $output = array();
-    exec("php remoteStorageTest.php $dc $testPartner->id $testPartner->adminSecret $remoteHost $storageUsername $storageUserPassword $storageUrl, $storageBaseDir", $output, $result);
+    exec("php remoteStorageTest.php $dc $testPartner->id $testPartner->adminSecret $remoteHost $storageUsername $storageUserPassword $storageUrl $storageBaseDir", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
-//  } catch (Exception $e) {
-//    fail(" remoteStorageTest failed: $e");
-//    $result = 1;
-//  }
+  } catch (Exception $e) {
+    fail(" remoteStorageTest failed: $e");
+    $result = 1;
+  }
    //finally{
-//  if ($testPartner != null) {
-//    info(" remoteStorageTest tear down.");
-//    $client = login($dc, $userName, $userPassword);
-//    removePartner($dc, $client, $testPartner);
-//  }
+  if ($testPartner != null) {
+    info(" remoteStorageTest tear down.");
+    $client = login($dc, $userName, $userPassword);
+    removePartner($dc, $client, $testPartner);
+  }
   //}
-//  if ($result) {
-//    fail("remoteStorageTest");
-//    exit($result);
-//  }
-
+  if ($result) {
+    fail("remoteStorageTest");
+    exit($result);
+  }
 }
 
 
