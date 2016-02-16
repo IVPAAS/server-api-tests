@@ -13,10 +13,12 @@ function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $
 		sleep(1);
 		print (".");
 	}
+
 	info("Check That entry exists in remote storage");
 
+	info("Rqunning command to locate entry on remote storage: sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find .* -name '$MediaEntry->id*'");
 	$output = array();
-    exec("sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find .* -name $MediaEntry->id*", $output, $result);
+	exec("sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find .* -name '$MediaEntry->id*'", $output, $result);
 	$res = count($output);
 
 	if ( $res<1 )
@@ -25,11 +27,9 @@ function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $
 	}
 	success("Entry  $MediaEntry->id exists in remote storage");
 
-	foreach ($output as $item) {
-		print("\n\r found entry location in remote storage: $item");
-		$arr = explode($storageBaseDir, $item);
-		$important = $arr[1];
-	}
+		print("\n\r found entry location in remote storage: $output[0]");
+		list($var, $value) = explode($storageBaseDir, $output[0]);
+		$important = $value;
 
 	$httpRequest = $storageUrl.$important ;
 	$command = "curl --head $httpRequest | grep \"200 OK\"";

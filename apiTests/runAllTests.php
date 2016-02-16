@@ -11,6 +11,8 @@ function runAllTests($dc,$userName,$userPassword)
     print("\n*********************************************");
     info("\n******** Running All Tests *******************");
     print("\n*********************************************\n");
+    info("\n********** runRemoteStorageDistributionTest **");
+    runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
     info("\n********** runVideoQuizTest *****************");
     runInVideoQuizTest($dc, $userName, $userPassword);
     info("\n********** runListEntriesTest ***************");
@@ -25,9 +27,6 @@ function runAllTests($dc,$userName,$userPassword)
     runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
     info("\n********** runCrossKalturaDistributionTest **");
     runCrossKalturaDistributionTest($dc, $userName, $userPassword);
-    info("\n********** runRemoteStorageDistributionTest **");
-    runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
-
     print("\n*********************************************");
     info("\n******** Running All Tests Finished **********");
     print("\n*********************************************\n");
