@@ -10,7 +10,7 @@ class bcolors
     const FAIL = "\033[31;1m";
     const ENDC = "\033[0m";
     const WARNING = "\033[34;1m";
-    const INFO = "\033[33:1m";
+    const INFO = "\033[33;1m";
     const BOLD = "\033[1m";
     const UNDERLINE = "\033[4m";
 }
