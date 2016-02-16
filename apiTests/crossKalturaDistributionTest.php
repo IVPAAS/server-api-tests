@@ -2,21 +2,6 @@
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('apiTestHelper.php');
 
-function helper_createEntryAndUploaDmp4Content($client)
-{
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
-	$entry = addEntry($client,'crossKalturaDistributionTest');
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $FILE_NAME_MP4;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $FILE_NAME_MP4;
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-	$result = $client->baseEntry->addcontent($entry->id, $resource);
-	return $result;
-}
-
 function helper_uploadThumbAsset($client, $entryId)
 {
 	$thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
