@@ -60,15 +60,6 @@ function helper_createEntryAndUploadContent($client, $entryName)
 	return $result->id;
 }
 
-function isEntryReady($client,$id)
-{
-	$result = $client->baseEntry->get($id, null);
-	if ($result->status == 2)
-		return true;
-	return false;
-}
-
-
 function helper_validateEntryList( $client, $filter, $goodEntries, $badEntries )
 {
 	$totalCreated = array_merge($goodEntries, $badEntries);
