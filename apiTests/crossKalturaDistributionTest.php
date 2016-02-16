@@ -2,22 +2,6 @@
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('apiTestHelper.php');
 
-function helper_uploadThumbAsset($client, $entryId)
-{
-	$thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
-
-	$THUMB_NAME = dirname ( __FILE__ ).'/../resources/thumb_300_150.jpg';
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $THUMB_NAME;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $THUMB_NAME;
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-
-	$client->thumbAsset->setContent($thumbAsset->id, $resource);
-}
-
 function Test1_DistributeEntry($client, $targetClient, $profileId)
 {
 	info("Create entry and upload content");
