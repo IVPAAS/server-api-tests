@@ -11,6 +11,8 @@ function runAllTests($dc,$userName,$userPassword)
     print("\n*********************************************");
     info("\n******** Running All Tests *******************");
     print("\n*********************************************\n");
+    info("\n********** runYoutubeDistributionTest **");
+    runYoutubeDistributionTest($dc, $userName, $userPassword);
     info("\n********** runRemoteStorageDistributionTest **");
     runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
     info("\n********** runVideoQuizTest *****************");
@@ -25,8 +27,9 @@ function runAllTests($dc,$userName,$userPassword)
     runUserCategoryTest($dc, $userName, $userPassword);
     info("\n********** cloneEntryWithCuePointsTest ******");
     runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
-    info("\n********** runCrossKalturaDistributionTest **");
-    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
+//    info("\n********** runCrossKalturaDistributionTest **");
+//    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
+    
     print("\n*********************************************");
     info("\n******** Running All Tests Finished **********");
     print("\n*********************************************\n");
@@ -313,7 +316,35 @@ function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remot
 }
 
 
+function runYoutubeDistributionTest($dc,$userName,$userPassword)
+{
+  try {
+    print("\n\r youtubeDistributionTest init.");
+    $client = login($dc, $userName, $userPassword);
 
+    $testPartner = getPartner($client, '99'); //partner 99 should be manually configured to have a enabled youTubeDistributionProfile with a connection a youtube account for video upload.
+    // follow the wiki page for info on how to create the distribution profile
+    // https://kaltura.atlassian.net/wiki/display/QAC/How+to+create+a+YouTubeAPI+distribution+profile
+    $youTubeDistributionProfileId = 39; // the youtube distribution profile configured manually
+
+    addPartnerPermissions($client, $testPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
+
+    info(" executing youtubeDistributionTest ...");
+    $output = array();
+    exec("php youtubeDistributionTest.php $dc $testPartner->id $testPartner->adminSecret $youTubeDistributionProfileId ", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  } catch (Exception $e) {
+    fail(" youtubeDistributionTest failed: $e");
+    $result = 1;
+  }
+  // No need to remove the default template partner (99)
+  if ($result) {
+    fail("youtubeDistributionTest");
+    exit($result);
+  }
+}
 
 
 
