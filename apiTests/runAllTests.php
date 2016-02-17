@@ -11,6 +11,8 @@ function runAllTests($dc,$userName,$userPassword)
     print("\n*********************************************");
     info("\n******** Running All Tests *******************");
     print("\n*********************************************\n");
+    info("\n********** runUserCategoryTest **************");
+    runUserCategoryTest($dc, $userName, $userPassword);
     info("\n********** runYoutubeDistributionTest **");
     runYoutubeDistributionTest($dc, $userName, $userPassword);
     info("\n********** runRemoteStorageDistributionTest **");
@@ -23,13 +25,11 @@ function runAllTests($dc,$userName,$userPassword)
     runCloneEntryTest($dc, $userName, $userPassword);
     info("\n********** runLiveEntryTest *****************");
     runLiveEntryTest($dc, $userName, $userPassword);
-    info("\n********** runUserCategoryTest **************");
-    runUserCategoryTest($dc, $userName, $userPassword);
     info("\n********** cloneEntryWithCuePointsTest ******");
     runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
 //    info("\n********** runCrossKalturaDistributionTest **");
 //    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
-    
+
     print("\n*********************************************");
     info("\n******** Running All Tests Finished **********");
     print("\n*********************************************\n");

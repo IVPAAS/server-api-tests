@@ -7,11 +7,6 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
     info("Create entry and upload content");
     $MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'youTubeDistributionTest');
 
-//    // update mandatory description and tags in media entry meta data required for youtube distribution.
-//    $MediaEntry->description = 'youtube media description';
-//    $MediaEntry->tags = 'youtubeTag';
-//    $client->baseEntry->update($MediaEntry->id, $MediaEntry);
-
     info("Upload 300X150 thumb asset");
     helper_uploadThumbAsset($client, $MediaEntry->id);
 
@@ -22,7 +17,7 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
         print (".");
     }
 
-    //start cross Kaltura distribution
+    //start youtube distribution
 	$entryDistribution = new KalturaEntryDistribution();
 	$entryDistribution->entryId = $MediaEntry->id;
 	$entryDistribution->distributionProfileId = $DistributionProfileId;
@@ -45,38 +40,6 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
     info($MediaEntry->id . " Youtube Distribution Succeeded" );
     return success(__FUNCTION__);
 }
-
-//function createYoutubeEntryAndUploaDmp4Content($client, $testName)
-//{
-//    $FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
-//    $entry = addYoutubeEntry($client, $testName);
-//    $uploadTokenObj = new KalturaUploadToken();
-//    $uploadTokenObj->fileName = $FILE_NAME_MP4;
-//    $uploadToken = $client->uploadToken->add($uploadTokenObj);
-//    $fileData = $FILE_NAME_MP4;
-//    $result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-//    $resource = new KalturaUploadedFileTokenResource();
-//    $resource->token = $uploadToken->id;
-//    $result = $client->baseEntry->addcontent($entry->id, $resource);
-//    return $result;
-//}
-//
-//function addYoutubeEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag')
-//{
-//    $entry                                  = new KalturaMediaEntry();
-//    $type                                   = KalturaEntryType::MEDIA_CLIP;
-//    $entry->name                            = $name;
-//    $entry->mediaType                       = $mediaType;
-//    if ($profileId != null)
-//        $entry->conversionProfileId			= $profileId;
-//    $entry->userId                          = $userId;
-//    $entry->description                     = $description;
-//    $entry->tags                            = $tags;
-//    $result                                 = $client->baseEntry->add($entry, $type);
-//    //print ("\nAdd entry ID:".$result->id);
-//    return $result;
-//}
-
 
 function printTestUsage()
 {
