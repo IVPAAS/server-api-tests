@@ -54,20 +54,27 @@ function startKalturaSession($partnerId, $secret, $destUrl, $type = KalturaSessi
     }
 }
 
-function createTestPartner($client, $email='testUserEmail@gmail.com')
+function createTestPartner($client, $name)
 {
     print("\n\r start createTestPartner");
-    $superUserPartner = $client->partner->get($client->user->get(null)->partnerId);
     $partner = new KalturaPartner();
-    $partner->name = 'myTestUser';
-    $partner->adminName = 'myTestUserAdminName1234';
-    $partner->adminEmail = $email;
+    $partner->name = $name;
+    $partner->adminName = $name;
+    $partner->adminEmail = "$name@email.com";
     $partner->description = 'myTestUser Description';
-    $partner->commercialUse = KalturaCommercialUseType::COMMERCIAL_USE;
+    #$partner->type = KalturaPartnerType::ADMIN_CONSOLE;
     $cmsPassword = '';
-    $templatePartnerId = null;
+    $templatePartnerId = 99;
     $silent = null;
     $testPartner = $client->partner->register($partner, $cmsPassword, $templatePartnerId, $silent);
+
+    $configuration = new KalturaSystemPartnerConfiguration();
+    $configuration->partnerPackage = 1;
+    $configuration->storageDeleteFromKaltura = 1;
+    $configuration->storageServePriority = KalturaStorageServePriority::KALTURA_ONLY;
+    $systempartnerPlugin = KalturaSystempartnerClientPlugin::get($client);
+    $result = $systempartnerPlugin->systemPartner->updateConfiguration($testPartner->id, $configuration);
+
     print("\n\r createTestPartner finished successfully. partner created with id: $testPartner->id ");
     return $testPartner;
 }

@@ -13,6 +13,8 @@ function runAllTests($dc,$userName,$userPassword)
     print("\n*********************************************\n");
     info("\n********** runUserCategoryTest **************");
     runUserCategoryTest($dc, $userName, $userPassword);
+    info("\n********** runCrossKalturaDistributionTest **");
+    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
     info("\n********** runYoutubeDistributionTest **");
     runYoutubeDistributionTest($dc, $userName, $userPassword);
     info("\n********** runRemoteStorageDistributionTest **");
@@ -27,8 +29,6 @@ function runAllTests($dc,$userName,$userPassword)
     runLiveEntryTest($dc, $userName, $userPassword);
     info("\n********** cloneEntryWithCuePointsTest ******");
     runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
-//    info("\n********** runCrossKalturaDistributionTest **");
-//    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
 
     print("\n*********************************************");
     info("\n******** Running All Tests Finished **********");
@@ -47,7 +47,7 @@ function runInVideoQuizTest($dc,$userName,$userPassword)
   try {
     info("InVideoQuizTests init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client);
+    $testPartner = createTestPartner($client, "testPartner");
     addPartnerPermissions($client, $testPartner, "QUIZ_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
 
     info("Executing InVideoQuizTests...");
@@ -78,7 +78,7 @@ function runLiveEntryTest($dc,$userName,$userPassword)
   try {
     print("\n\r liveEntryTests init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client);
+    $testPartner = createTestPartner($client, "testPartner");
     addPartnerPermissions($client, $testPartner, "QUIZ_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
     $conversionProfile = getConversionProfileForSpecficPartner($client, $testPartner->id, 'Passthrough', KalturaConversionProfileType::LIVE_STREAM);
     setDefaultConversionProfile($dc, $testPartner, $conversionProfile->id);
@@ -113,7 +113,7 @@ function runListEntriesTest($dc,$userName,$userPassword)
   try {
     print("\n\r listEntriesTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client);
+    $testPartner = createTestPartner($client, "testPartner");
 
     info(" executing listEntriesTest...");
     $output = array();
@@ -143,7 +143,7 @@ function runCloneEntryTest($dc,$userName,$userPassword)
   try {
     print("\n\r cloneEntryTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client);
+    $testPartner = createTestPartner($client, "testPartner");
 
     info(" executing cloneEntryTest...");
     $output = array();
@@ -173,7 +173,7 @@ function runUserCategoryTest($dc,$userName,$userPassword)
   try {
     print("\n\r userCategoryTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client);
+    $testPartner = createTestPartner($client, "testPartner");
 
     info(" executing userCategoryTest...");
     $output = array();
@@ -203,7 +203,7 @@ function runCloneEntryWithCuePointsTest($dc,$userName,$userPassword)
   try {
     print("\n\r cloneEntryWithCuePointsTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client);
+    $testPartner = createTestPartner($client, "testPartner");
 
     info(" executing cloneEntryWithCuePointsTest ...");
     $output = array();
@@ -233,13 +233,13 @@ function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
   try {
     print("\n\r crossKalturaDistributionTest init.");
     $client = login($dc, $userName, $userPassword);
-    $sourceTestPartner = createTestPartner($client, "testUser1@kaltura.com");
-    $targetTestPartner = createTestPartner($client, "testUser2@kaltura.com");
+    $sourceTestPartner = createTestPartner($client, "testUser1");
+    $targetTestPartner = createTestPartner($client, "testUser2");
 
     addPartnerPermissions($client, $sourceTestPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
     addPartnerPermissions($client, $targetTestPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
 
-    $tempPartnerPassword = '!Duy271985';
+    $tempPartnerPassword = '!Trz271985';
     resetPartnerPassword($client, $targetTestPartner, $tempPartnerPassword);
 
     $sourceConversionProfile = createConversionProfileForSpecficPartner($dc, $sourceTestPartner, 'testConversionProfile1');
@@ -256,7 +256,8 @@ function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
     foreach ($output as $item) {
       print("\n\r $item");
     }
-  } catch (Exception $e) {
+  }
+catch (Exception $e) {
     fail(" crossKalturaDistributionTest failed: $e");
     $result = 1;
   }
@@ -283,7 +284,7 @@ function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remot
   try {
     print("\n\r remoteStorageTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client);
+    $testPartner = createTestPartner($client, "testPartner");
     $storageUrl = 'http://'.$remoteHost.':90/testingStorage/';
     updatePartnerWithRemoteStoragePriority ($client, $testPartner->id, KalturaStorageServePriority::EXTERNAL_ONLY , 1 );
     $deliveryProfile = createDeliveryProfile($client, $testPartner->id, "testDeliveryProfile", KalturaDeliveryProfileType::HTTP, KalturaPlaybackProtocol::HTTP, $storageUrl , KalturaDeliveryStatus::ACTIVE);
