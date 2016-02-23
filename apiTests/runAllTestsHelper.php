@@ -260,7 +260,7 @@ function removeDeletedBaseEntriesForPartnerFromFileSystem( $partner )
     try
     {
         print("\n\r Deleting base entries from file system for partner $partner->id");
-        exec("php /opt/kaltura/app/alpha/scripts/utils/removeFilesForDeletedFileSyncs.php $partner->id");
+        exec("php /executionScripts/removeFilesForDeletedFileSyncs.php $partner->id");
         print("\n\r Finished removing partners base entry from file system.");
     }
     catch(Exception $e)
