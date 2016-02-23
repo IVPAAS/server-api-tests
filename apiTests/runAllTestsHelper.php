@@ -2,28 +2,27 @@
 //require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('/opt/kaltura/web/content/clientlibs/php5API_Testing/KalturaClient.php');
 
-const LOG_FILE="./runAllTests.log";
+const HTML_LOG_FILE="./runAllTestsLog.html";
+
 const FAIL=1;
 
-function clearLog()
-{
-    file_put_contents ( LOG_FILE , "" );
-}
-function logOutput($msg)
-{
-    file_put_contents ( LOG_FILE , $msg,$flags =FILE_APPEND );
-}
 
 function printInfoAndlogOutput($msg)
 {
     info($msg);
-    file_put_contents ( LOG_FILE , "\n".$msg ,$flags =FILE_APPEND );
+    HTMLLogger::logInfoToHTML($msg);
 }
 
 function printFailAndlogOutput($msg)
 {
     fail($msg);
-    file_put_contents ( LOG_FILE , "\n".$msg." FAIL!", $flags =FILE_APPEND );
+    HTMLLogger::logFailToHTML($msg);
+}
+
+function printSuccessAndlogOutput($msg)
+{
+    success($msg);
+    HTMLLogger::logSuccessToHTML($msg);
 }
 
 function printUsage()
@@ -225,7 +224,7 @@ function removePartner($dc, $client, $partner)
         markBaseEntriesForPartnersAsDeleted($dc, $partner);
         removeDeletedBaseEntriesForPartnerFromFileSystem($partner); //can only be used on server side invocation
         markAPartnersAsDeleted($client, $partner);
-        success(" removePartner finished successfully. Partner $partner->id removed. ");
+        print(" removePartner finished successfully. Partner $partner->id removed. ");
     }
     catch(Exception $e)
     {
@@ -312,7 +311,7 @@ function removeAllNonDefaultPartners($dc, $client)
        markBaseEntriesFromNonDefaultPartnersAsDeleted($dc, $client);
        removeDeletedBaseEntriesForNonDefaultPartnersFromFileSystem($client);
        markAllNonDefaultPartnersAsDeleted($client);
-       success("\n\r removeAllNonDefaultPartners finished successfully. partners deleted. ");
+       print("\n\r removeAllNonDefaultPartners finished successfully. partners deleted. ");
    }
    catch(Exception $e)
     {
@@ -517,5 +516,37 @@ function info($msg)
     $out = "\n" . textColors::OKBLUE . $msg . textColors::ENDC . "\n";
     print($out);
     return $out;
+}
+
+Class HTMLLogger
+{
+
+    private static $logger;
+
+    public static function logSuccessToHTML($text)
+    {
+        $out = "<p style=\"color:green\"> $text</p>";
+        fwrite(self::$logger, $out);
+    }
+
+    public static function logFailToHTML($text)
+    {
+        $out = "<p style=\"color:red\"> $text</p>";
+        fwrite(self::$logger, $out);
+    }
+
+    public static function logInfoToHTML($text)
+    {
+        $out = "<p style=\"color:darkblue\"> $text</p>";
+        fwrite(self::$logger, $out);
+    }
+
+    public static function init(){
+        self::$logger = fopen(HTML_LOG_FILE, "w") or die("Unable to create html log file!");
+    }
+
+    public static function close(){
+        fclose(self::$logger);
+    }
 }
 

@@ -8,55 +8,56 @@ main();
 function runAllTests($dc,$userName,$userPassword)
 {
 
+  HTMLLogger::init();
+  $time_start = microtime(true);
+
   $TotalCount = 0;
   $failedCount = 0;
   $res = 0;
 
   try {
-    clearLog();
 
     print("\n*********************************************");
-    printInfoAndlogOutput("Running All Tests - ".date("F j, Y, g:i a"));
+    printInfoAndlogOutput("Running All Tests - " . date("F j, Y, g:i a"));
     print("\n*********************************************\n");
-
-    printInfoAndlogOutput("\n********** runUserCategoryTest **************");
+    info("\n********** runUserCategoryTest **************");
     $TotalCount++;
     $failedCount = $failedCount + runUserCategoryTest($dc, $userName, $userPassword);
 
-    printInfoAndlogOutput("\n********** runCrossKalturaDistributionTest **");
+    info("\n********** runCrossKalturaDistributionTest **");
     $TotalCount++;
     $failedCount = $failedCount + runCrossKalturaDistributionTest($dc, $userName, $userPassword);
 
-    printInfoAndlogOutput("\n********** runYoutubeDistributionTest **");
+    info("\n********** runYoutubeDistributionTest **");
     $TotalCount++;
     $failedCount = $failedCount + runYoutubeDistributionTest($dc, $userName, $userPassword);
 
-    printInfoAndlogOutput("\n********** runRemoteStorageDistributionTest **");
+    info("\n********** runRemoteStorageDistributionTest **");
     $TotalCount++;
     $failedCount = $failedCount + runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
 
-    printInfoAndlogOutput("\n********** runVideoQuizTest *****************");
+    info("\n********** runVideoQuizTest *****************");
     $TotalCount++;
     $failedCount = $failedCount + runInVideoQuizTest($dc, $userName, $userPassword);
 
-    printInfoAndlogOutput("\n********** runListEntriesTest ***************");
+    info("\n********** runListEntriesTest ***************");
     $TotalCount++;
     $failedCount = $failedCount + runListEntriesTest($dc, $userName, $userPassword);
 
-    printInfoAndlogOutput("\n********** runCloneEntryTest ****************");
+    info("\n********** runCloneEntryTest ****************");
     $TotalCount++;
     $failedCount = $failedCount + runCloneEntryTest($dc, $userName, $userPassword);
 
-    printInfoAndlogOutput("\n********** runLiveEntryTest *****************");
+    info("\n********** runLiveEntryTest *****************");
     $TotalCount++;
     $failedCount = $failedCount + runLiveEntryTest($dc, $userName, $userPassword);
 
-    printInfoAndlogOutput("\n********** runCloneEntryWithCuePointsTest ******");
+    info("\n********** runCloneEntryWithCuePointsTest ******");
     $TotalCount++;
     $failedCount = $failedCount + runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
 
     print("\n*********************************************");
-    printInfoAndlogOutput("\nRunning All Tests Finished - ".date("F j, Y, g:i a"));
+    printInfoAndlogOutput("\nRunning All Tests Finished - " . date("F j, Y, g:i a"));
     print("\n*********************************************\n");
 
   }
@@ -66,9 +67,14 @@ function runAllTests($dc,$userName,$userPassword)
     $res = FAIL;
   }
 
-  printInfoAndlogOutput("Total Tests:$TotalCount      Successful:".($TotalCount-$failedCount)."           Failed:$failedCount  \n");
-  if ($res)
+  $time_end = microtime(true);
+  $execution_time = ($time_end - $time_start)/60;
+  printInfoAndlogOutput("Total Tests:$TotalCount      Successful:".($TotalCount-$failedCount)."           Failed:$failedCount   Execution-Time:".$execution_time. " Mins\n");
+
+  HTMLLogger::close();
+  if ($res) {
     exit(FAIL);
+  }
 }
 
 function runInVideoQuizTest($dc,$userName,$userPassword)
@@ -100,6 +106,7 @@ function runInVideoQuizTest($dc,$userName,$userPassword)
     printFailAndlogOutput("InVideoQuizTests");
     return FAIL;
   }
+  printSuccessAndlogOutput("InVideoQuizTests");
 }
 
 function runLiveEntryTest($dc,$userName,$userPassword)
@@ -134,6 +141,7 @@ function runLiveEntryTest($dc,$userName,$userPassword)
     printFailAndlogOutput("liveEntryTests");
     return FAIL;
   }
+  printSuccessAndlogOutput("liveEntryTests");
 }
 
 
@@ -165,6 +173,7 @@ function runListEntriesTest($dc,$userName,$userPassword)
     printFailAndlogOutput("listEntriesTest");
     return FAIL;
   }
+  printSuccessAndlogOutput("listEntriesTest");
 }
 
 function runCloneEntryTest($dc,$userName,$userPassword)
@@ -195,6 +204,7 @@ function runCloneEntryTest($dc,$userName,$userPassword)
     printFailAndlogOutput("cloneEntryTest");
     return FAIL;
   }
+  printSuccessAndlogOutput("cloneEntryTest");
 }
 
 function runUserCategoryTest($dc,$userName,$userPassword)
@@ -225,6 +235,7 @@ function runUserCategoryTest($dc,$userName,$userPassword)
     printFailAndlogOutput("userCategoryTest");
     return FAIL;
   }
+  printSuccessAndlogOutput("userCategoryTest");
 }
 
 function runCloneEntryWithCuePointsTest($dc,$userName,$userPassword)
@@ -255,6 +266,7 @@ function runCloneEntryWithCuePointsTest($dc,$userName,$userPassword)
     printFailAndlogOutput("cloneEntryWithCuePointsTest");
     return FAIL;
   }
+  printSuccessAndlogOutput("cloneEntryWithCuePointsTest");
 }
 
 function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
@@ -305,6 +317,7 @@ catch (Exception $e) {
     printFailAndlogOutput("crossKalturaDistributionTest");
     return FAIL;
   }
+  printSuccessAndlogOutput("crossKalturaDistributionTest");
 }
 
 
@@ -343,6 +356,7 @@ function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remot
     printFailAndlogOutput("remoteStorageTest");
     return FAIL;
   }
+  printSuccessAndlogOutput("remoteStorageTest");
 }
 
 
@@ -374,6 +388,7 @@ function runYoutubeDistributionTest($dc,$userName,$userPassword)
     printFailAndlogOutput("youtubeDistributionTest");
     return FAIL;
   }
+  printSuccessAndlogOutput("youtubeDistributionTest");
 }
 
 
