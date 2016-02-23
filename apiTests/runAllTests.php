@@ -7,39 +7,68 @@ main();
 
 function runAllTests($dc,$userName,$userPassword)
 {
+
+  $TotalCount = 0;
+  $failedCount = 0;
+  $res = 0;
+
   try {
-    print("\n*********************************************");
-    info("\n******** Running All Tests *******************");
-    print("\n*********************************************\n");
-    info("\n********** runUserCategoryTest **************");
-    runUserCategoryTest($dc, $userName, $userPassword);
-    info("\n********** runCrossKalturaDistributionTest **");
-    runCrossKalturaDistributionTest($dc, $userName, $userPassword);
-    info("\n********** runYoutubeDistributionTest **");
-    runYoutubeDistributionTest($dc, $userName, $userPassword);
-    info("\n********** runRemoteStorageDistributionTest **");
-    runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
-    info("\n********** runVideoQuizTest *****************");
-    runInVideoQuizTest($dc, $userName, $userPassword);
-    info("\n********** runListEntriesTest ***************");
-    runListEntriesTest($dc, $userName, $userPassword);
-    info("\n********** runCloneEntryTest ****************");
-    runCloneEntryTest($dc, $userName, $userPassword);
-    info("\n********** runLiveEntryTest *****************");
-    runLiveEntryTest($dc, $userName, $userPassword);
-    info("\n********** cloneEntryWithCuePointsTest ******");
-    runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
+    clearLog();
 
     print("\n*********************************************");
-    info("\n******** Running All Tests Finished **********");
+    printInfoAndlogOutput("Running All Tests - ".date("F j, Y, g:i a"));
     print("\n*********************************************\n");
+
+    printInfoAndlogOutput("\n********** runUserCategoryTest **************");
+    $TotalCount++;
+    $failedCount = $failedCount + runUserCategoryTest($dc, $userName, $userPassword);
+
+    printInfoAndlogOutput("\n********** runCrossKalturaDistributionTest **");
+    $TotalCount++;
+    $failedCount = $failedCount + runCrossKalturaDistributionTest($dc, $userName, $userPassword);
+
+    printInfoAndlogOutput("\n********** runYoutubeDistributionTest **");
+    $TotalCount++;
+    $failedCount = $failedCount + runYoutubeDistributionTest($dc, $userName, $userPassword);
+
+    printInfoAndlogOutput("\n********** runRemoteStorageDistributionTest **");
+    $TotalCount++;
+    $failedCount = $failedCount + runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
+
+    printInfoAndlogOutput("\n********** runVideoQuizTest *****************");
+    $TotalCount++;
+    $failedCount = $failedCount + runInVideoQuizTest($dc, $userName, $userPassword);
+
+    printInfoAndlogOutput("\n********** runListEntriesTest ***************");
+    $TotalCount++;
+    $failedCount = $failedCount + runListEntriesTest($dc, $userName, $userPassword);
+
+    printInfoAndlogOutput("\n********** runCloneEntryTest ****************");
+    $TotalCount++;
+    $failedCount = $failedCount + runCloneEntryTest($dc, $userName, $userPassword);
+
+    printInfoAndlogOutput("\n********** runLiveEntryTest *****************");
+    $TotalCount++;
+    $failedCount = $failedCount + runLiveEntryTest($dc, $userName, $userPassword);
+
+    printInfoAndlogOutput("\n********** runCloneEntryWithCuePointsTest ******");
+    $TotalCount++;
+    $failedCount = $failedCount + runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
+
+    print("\n*********************************************");
+    printInfoAndlogOutput("\nRunning All Tests Finished - ".date("F j, Y, g:i a"));
+    print("\n*********************************************\n");
+
   }
   catch(Exception $e)
   {
-    fail ($e);
-    exit(1);
+    $failedCount++;
+    $res = FAIL;
   }
-  exit(0);
+
+  printInfoAndlogOutput("Total Tests:$TotalCount      Successful:".($TotalCount-$failedCount)."           Failed:$failedCount  \n");
+  if ($res)
+    exit(FAIL);
 }
 
 function runInVideoQuizTest($dc,$userName,$userPassword)
@@ -68,8 +97,8 @@ function runInVideoQuizTest($dc,$userName,$userPassword)
   }
   //}
   if ($result) {
-    fail("InVideoQuizTests");
-    exit($result);
+    printFailAndlogOutput("InVideoQuizTests");
+    return FAIL;
   }
 }
 
@@ -102,8 +131,8 @@ function runLiveEntryTest($dc,$userName,$userPassword)
   }
   //}
   if ($result) {
-    fail("liveEntryTests");
-    exit($result);
+    printFailAndlogOutput("liveEntryTests");
+    return FAIL;
   }
 }
 
@@ -133,8 +162,8 @@ function runListEntriesTest($dc,$userName,$userPassword)
   }
   // }
   if ($result) {
-    fail("listEntriesTest");
-    exit($result);
+    printFailAndlogOutput("listEntriesTest");
+    return FAIL;
   }
 }
 
@@ -163,8 +192,8 @@ function runCloneEntryTest($dc,$userName,$userPassword)
   }
   //}
   if ($result) {
-    fail("cloneEntryTest");
-    exit($result);
+    printFailAndlogOutput("cloneEntryTest");
+    return FAIL;
   }
 }
 
@@ -193,8 +222,8 @@ function runUserCategoryTest($dc,$userName,$userPassword)
   }
   //}
   if ($result) {
-    fail("userCategoryTest");
-    exit($result);
+    printFailAndlogOutput("userCategoryTest");
+    return FAIL;
   }
 }
 
@@ -223,8 +252,8 @@ function runCloneEntryWithCuePointsTest($dc,$userName,$userPassword)
   }
   // }
   if ($result) {
-    fail("cloneEntryWithCuePointsTest");
-    exit($result);
+    printFailAndlogOutput("cloneEntryWithCuePointsTest");
+    return FAIL;
   }
 }
 
@@ -273,8 +302,8 @@ catch (Exception $e) {
   }
   //}
   if ($result) {
-    fail("crossKalturaDistributionTest");
-    exit($result);
+    printFailAndlogOutput("crossKalturaDistributionTest");
+    return FAIL;
   }
 }
 
@@ -311,8 +340,8 @@ function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remot
   }
   //}
   if ($result) {
-    fail("remoteStorageTest");
-    exit($result);
+    printFailAndlogOutput("remoteStorageTest");
+    return FAIL;
   }
 }
 
@@ -342,8 +371,8 @@ function runYoutubeDistributionTest($dc,$userName,$userPassword)
   }
   // No need to remove the default template partner (99)
   if ($result) {
-    fail("youtubeDistributionTest");
-    exit($result);
+    printFailAndlogOutput("youtubeDistributionTest");
+    return FAIL;
   }
 }
 

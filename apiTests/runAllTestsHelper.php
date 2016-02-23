@@ -2,6 +2,30 @@
 //require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('/opt/kaltura/web/content/clientlibs/php5API_Testing/KalturaClient.php');
 
+const LOG_FILE="./runAllTests.log";
+const FAIL=1;
+
+function clearLog()
+{
+    file_put_contents ( LOG_FILE , "" );
+}
+function logOutput($msg)
+{
+    file_put_contents ( LOG_FILE , $msg,$flags =FILE_APPEND );
+}
+
+function printInfoAndlogOutput($msg)
+{
+    info($msg);
+    file_put_contents ( LOG_FILE , "\n".$msg ,$flags =FILE_APPEND );
+}
+
+function printFailAndlogOutput($msg)
+{
+    fail($msg);
+    file_put_contents ( LOG_FILE , "\n".$msg." FAIL!", $flags =FILE_APPEND );
+}
+
 function printUsage()
 {
     print ("\n\rUsage: " . $GLOBALS['argv'][0] . " <HOST> <ADMIN USER CREDENTIALS> <ADMIN USER PASSWORD>");
@@ -365,7 +389,7 @@ function removeDeletedBaseEntriesForNonDefaultPartnersFromFileSystem($client)
             foreach ($result->objects as $partner) {
                 if ($partner->id > 100) {
                     print("\n\r Deleting base entries from file system for partner $partner->id");
-                    exec("php /opt/kaltura/app/alpha/scripts/utils/removeFilesForDeletedFileSyncs.php $partner->id");
+                    exec("php /executionScripts/removeFilesForDeletedFileSyncs.php $partner->id");
                     $counter = $counter + 1;
                 }
             }
@@ -478,16 +502,20 @@ function success($msg)
 {
     $out = "\n" . textColors::OKGREEN . $msg . " OK!" . textColors::ENDC . "\n";
     print($out);
+    return $out;
 }
 
 function fail($msg)
 {
     $out = "\n" . textColors::FAIL . $msg . " FAIL!" . textColors::ENDC . "\n";
     print($out);
+    return $out;
 }
 
 function info($msg)
 {
     $out = "\n" . textColors::OKBLUE . $msg . textColors::ENDC . "\n";
     print($out);
+    return $out;
 }
+

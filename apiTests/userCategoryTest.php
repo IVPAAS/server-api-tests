@@ -82,10 +82,10 @@ function createCategoryTree( $client )
 	$filter = new KalturaCategoryFilter();
 	$filter->memberEqual = $userId;
 
-	$retries = 3;
+	$retries = 10;
 	for ($i=0; $i<$retries; $i++) {
-		info("sleep 100 seconds");
-		for ($j = 0; $j < 100; $j++) {
+		info("sleep 30 seconds");
+		for ($j = 0; $j < 30; $j++) {
 			sleep(1);
 			print(".");
 		}
