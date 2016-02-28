@@ -120,6 +120,7 @@ function runLiveEntryTest($dc,$userName,$userPassword)
     setDefaultConversionProfile($dc, $testPartner, $conversionProfile->id);
 
     info(" executing liveEntryTests...");
+    $client = login($dc, $userName, $userPassword);
     $liveStreamPartner = getPartner($client, '-5'); //get the live streaming partner required for the test
     $output = array();
     exec("php liveEntryTests.php $dc $testPartner->id $testPartner->adminSecret $liveStreamPartner->adminSecret", $output, $result);
@@ -383,7 +384,9 @@ function runYoutubeDistributionTest($dc,$userName,$userPassword)
     fail(" youtubeDistributionTest failed: $e");
     $result = 1;
   }
-  // No need to remove the default template partner (99)
+  // No need to remove the default template partner (99) but we need to remove the entries we upladed
+  markBaseEntriesForPartnersAsDeleted($dc, $testPartner);
+  removeDeletedBaseEntriesForPartnerFromFileSystem($testPartner); //can only be used on server side invocation
   if ($result) {
     printFailAndlogOutput("youtubeDistributionTest");
     return FAIL;

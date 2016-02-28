@@ -133,6 +133,7 @@ function resetPartnerPassword($client, $testPartner, $newPassword)
 function getConversionProfileForSpecficPartner($client, $partnerId, $conversionProfileName, $conversionProfileType = null)
 {
     print("\n\r start getConversionProfile.");
+    $client->setPartnerId($partnerId);
     $filter = new KalturaConversionProfileFilter();
     $filter->nameEqual = $conversionProfileName;
     $filter->typeEqual = $conversionProfileType;
