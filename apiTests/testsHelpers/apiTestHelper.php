@@ -1,7 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 
-const LOG_FILE="../executionLog.txt";
+const LOG_FILE="./executionLog.txt";
 //start session and setting KS function
 class bcolors
 {
