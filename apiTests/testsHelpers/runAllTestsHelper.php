@@ -223,7 +223,7 @@ function removePartner($dc, $client, $partner)
     try {
         print("\n\r Start removePartner. Removing partner  $partner->id.");
         markBaseEntriesForPartnersAsDeleted($dc, $partner);
-        //removeDeletedBaseEntriesForPartnerFromFileSystem($partner); //can only be used on server side invocation
+        removeDeletedBaseEntriesForPartnerFromFileSystem($partner); //can only be used on server side invocation
         markAPartnersAsDeleted($client, $partner);
         print(" removePartner finished successfully. Partner $partner->id removed. ");
     }
@@ -261,7 +261,8 @@ function removeDeletedBaseEntriesForPartnerFromFileSystem( $partner )
     try
     {
         print("\n\r Deleting base entries from file system for partner $partner->id");
-        exec("php /executionScripts/removeFilesForDeletedFileSyncs.php $partner->id");
+//        exec("php /executionScripts/removeFilesForDeletedFileSyncs.php $partner->id");
+        exec("php /opt/kaltura/app/alpha/scripts/utils/removeFilesForDeletedFileSyncs.php $partner->id");
         print("\n\r Finished removing partners base entry from file system.");
     }
     catch(Exception $e)
