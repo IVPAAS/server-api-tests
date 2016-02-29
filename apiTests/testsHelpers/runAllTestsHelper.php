@@ -2,7 +2,7 @@
 //require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('/opt/kaltura/web/content/clientlibs/php5API_Testing/KalturaClient.php');
 
-const HTML_LOG_FILE="./runAllTestsLog.html";
+const HTML_LOG_FILE="../runAllTestsLog.html";
 
 const FAIL=1;
 
@@ -223,7 +223,7 @@ function removePartner($dc, $client, $partner)
     try {
         print("\n\r Start removePartner. Removing partner  $partner->id.");
         markBaseEntriesForPartnersAsDeleted($dc, $partner);
-        removeDeletedBaseEntriesForPartnerFromFileSystem($partner); //can only be used on server side invocation
+        //removeDeletedBaseEntriesForPartnerFromFileSystem($partner); //can only be used on server side invocation
         markAPartnersAsDeleted($client, $partner);
         print(" removePartner finished successfully. Partner $partner->id removed. ");
     }

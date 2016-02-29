@@ -1,6 +1,6 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('apiTestHelper.php');
+require_once('testsHelpers/apiTestHelper.php');
 
 function Test1_DistributeEntry($client, $targetClient, $profileId)
 {

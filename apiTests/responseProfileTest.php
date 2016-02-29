@@ -1,6 +1,6 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('apiTestHelper.php');
+require_once('testsHelpers/apiTestHelper.php');
 
 function helper_createEntryWithCaptions( $client, $captionsPath)
 {
@@ -25,7 +25,7 @@ function helper_createEntryWithCaptions( $client, $captionsPath)
 
 function testEntriesWithCaptionItem( $client )
 {
-	$entryId = helper_createEntryWithCaptions( $client, '/../resources/KalturaTestCaption.srt');
+	$entryId = helper_createEntryWithCaptions( $client, '/../../resources/KalturaTestCaption.srt');
 
 	$captionItemFilter = new KalturaCaptionAssetItemFilter();
 	$captionMapping = new KalturaResponseProfileMapping();

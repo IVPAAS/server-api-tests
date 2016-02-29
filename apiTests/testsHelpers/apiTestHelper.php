@@ -1,7 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 
-const LOG_FILE="./executionLog.txt";
+const LOG_FILE="../executionLog.txt";
 //start session and setting KS function
 class bcolors
 {
@@ -186,7 +186,7 @@ function helper_createEmptyEntry($client, $testName)
 
 function helper_createEntryAndUploaDmp4Content($client, $testName)
 {
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
+	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 	$entry = addEntry($client, $testName);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
@@ -203,7 +203,7 @@ function helper_uploadThumbAsset($client, $entryId)
 {
 	$thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
 
-	$THUMB_NAME = dirname ( __FILE__ ).'/../resources/thumb_300_150.jpg';
+	$THUMB_NAME = dirname ( __FILE__ ).'/../../resources/thumb_300_150.jpg';
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $THUMB_NAME;
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
@@ -243,7 +243,7 @@ function isSubmitting($client, $id)
 
 function helper_createEntryAndUploadJpgContent($client)
 {
-	$FILE_NAME_JPG = dirname ( __FILE__ ).'/../resources/kalturaIcon.jpg';
+	$FILE_NAME_JPG = dirname ( __FILE__ ).'/../../resources/kalturaIcon.jpg';
 	$entry = addEntry($client,__FUNCTION__,KalturaMediaType::IMAGE);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_JPG;
