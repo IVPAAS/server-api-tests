@@ -1,10 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('../testsHelpers/apiTestHelper.php');
-require_once('../testsHelpers/InVideoQuizHelper.php');
-
-
-
+require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__).'/../testsHelpers/InVideoQuizHelper.php');
 
 function report1($client,$userEntryId)
 {
