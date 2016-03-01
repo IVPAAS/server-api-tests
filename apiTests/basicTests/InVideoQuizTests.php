@@ -1,7 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('testsHelpers/apiTestHelper.php');
-require_once('testsHelpers/InVideoQuizHelper.php');
+require_once('../testsHelpers/apiTestHelper.php');
+require_once('../testsHelpers/InVideoQuizHelper.php');
 
 
 
@@ -303,22 +303,6 @@ function test8_filterQuizUserEntry($client)
 	$filter = new KalturaQuizUserEntryFilter();
 	$pager = null;
 
-	//KalturaUserEntryArray $result
-	$result = $client->userEntry->listAction($filter, $pager);
-	if(empty($result))
-	{
-		fail(__FUNCTION__."QuizUserEntry list is empty");
-	}
-	$items = $result->objects;
-	$foundAnonymousUsres=0;
-	foreach($items as $item)
-	{
-		if($item->userId==='0') {
-			$foundAnonymousUsres++;
-		}
-	}
-	info("Found {$foundAnonymousUsres} anonymous users");
-
 	//Get list of all quiz user entry without anonymous user
 	$filter = new KalturaQuizUserEntryFilter();
 	$filter->isAnonymous = KalturaNullableBoolean::FALSE_VALUE;
@@ -326,7 +310,7 @@ function test8_filterQuizUserEntry($client)
 	$items = $result->objects;
 	foreach($items as $item)
 	{
-		if($item->userId==='0') {
+		if($item->userId=='0') {
 			fail(__FUNCTION__.__LINE__." found anonymous user while should not" . print_r($item,true));
 		}
 	}
@@ -336,19 +320,41 @@ function test8_filterQuizUserEntry($client)
 	$filter->isAnonymous = KalturaNullableBoolean::TRUE_VALUE;
 	$result = $client->userEntry->listAction($filter, $pager);
 	$items = $result->objects;
+	$foundAnonymousUsres=0;
 	foreach($items as $item)
 	{
-		if($item->userId==='0') {
+		if($item->userId=='0') {
 			$foundAnonymousUsres--;
 		}
 	}
-	if($foundAnonymousUsres!=0)
+	if($foundAnonymousUsres==0)
 	{
 		fail(__FUNCTION__.__LINE__." Did not found all anonymous users while it should, missing {$foundAnonymousUsres}" . print_r($items,true));
 	}
 
 	success(__FUNCTION__);
 }
+function test9_addAnonimousUserQuiz($client,$dc,$partnerId)
+{
+	$entry=addEntry($client,__FUNCTION__);
+	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
+	$questions = array();
+	for ( $questionIndex=0 ; $questionIndex < 4 ; $questionIndex ++)
+	{
+		$questionCue = addQuestionsOnQuiz($client,$entry->id,"Question".$questionIndex);
+		$questions[$questionIndex]=$questionCue->id;
+	}
+	$wgClient = startWidgetSession($dc,$partnerId);
+	$quizUserEntry = addQuizUserEntry($wgClient,0,$entry->id);
+	for ( $answerIndex=0 ; $answerIndex < 4 ; $answerIndex ++)
+	{
+		addAnswer($wgClient,$entry->id,$questions[$answerIndex],$quizUserEntry->id,"Q");
+	}
+	$res = submitQuiz($wgClient,$quizUserEntry->id);
+
+	success(__FUNCTION__);
+}
+
 
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
@@ -362,6 +368,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret+=Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc);
 	$ret+=test7_GetUserPercentageReport($client);
 	$ret+=test8_filterQuizUserEntry($client);
+	$ret+=test9_addAnonimousUserQuiz($client,$dc,$partnerId);
 	return ($ret);
 }
 
