@@ -140,7 +140,7 @@ function addKalturaUser($client,$userId)
   //print ("\nAdd User ID:".$result->id);
   return $result;
 }
-function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag')
+function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag', $referenceId = 'testRefID')
 {
     $entry                                  = new KalturaMediaEntry();
     $type                                   = KalturaEntryType::MEDIA_CLIP;
@@ -151,6 +151,7 @@ function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId =
     $entry->userId                          = $userId;
     $entry->description                     = $description;
     $entry->tags                            = $tags;
+    $entry->referenceId                     = $referenceId;
     $result                                 = $client->baseEntry->add($entry, $type);
     //print ("\nAdd entry ID:".$result->id);
     return $result;
@@ -239,6 +240,14 @@ function isSubmitting($client, $id)
 	if ($result->status == 4) // status submitting
 		return true;
 	return false;
+}
+
+function isRemoving($client, $id)
+{
+    $result = $client->entryDistribution->get($id);
+    if ($result->status == 6) // status submitting
+        return true;
+    return false;
 }
 
 function helper_createEntryAndUploadJpgContent($client)
