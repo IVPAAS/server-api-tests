@@ -1,7 +1,7 @@
 <?php
 //require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
 require_once('/opt/kaltura/web/content/clientlibs/php5API_Testing/KalturaClient.php');
-require_once(dirname(__FILE__).'/testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__).'/testsHelpers/runAllTestsHelper.php');
 
 main();
 
