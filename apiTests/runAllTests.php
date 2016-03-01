@@ -270,7 +270,7 @@ function runTvinciDistributionTest($dc,$userName,$userPassword)
   try {
     print("\n\r tvinciDistributionTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testUser1");
+    $testPartner = createTestPartner($client, "testUser");
 
     addPartnerPermissions($client, $testPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
 
