@@ -26,7 +26,7 @@ function runAllTests($dc,$userName,$userPassword)
     foreach (new RecursiveIteratorIterator($di) as $filename => $file) {
       if (is_file($filename))  {
         $TotalCount++;
-        runBasicTest($dc, $userName, $userPassword, basename($filename, ".php"), $filename);
+        $failedCount = $failedCount + runBasicTest($dc, $userName, $userPassword, basename($filename, ".php"), $filename);
       }
     }
 
