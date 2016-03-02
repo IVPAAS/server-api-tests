@@ -1,5 +1,5 @@
 <?php
-require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 
 const LOG_FILE="./executionLog.txt";
 //start session and setting KS function
