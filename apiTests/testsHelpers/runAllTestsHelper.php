@@ -1,8 +1,7 @@
 <?php
-//require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('/opt/kaltura/web/content/clientlibs/php5API_Testing/KalturaClient.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 
-const HTML_LOG_FILE="../runAllTestsLog.html";
+const HTML_LOG_FILE = "runAllTestsLog.html";
 
 const FAIL=1;
 
@@ -190,7 +189,7 @@ function createCrossKalturaDistributionProfile($client, $dc, $sourceTestPartner,
     $client->setPartnerId($sourceTestPartner->id);
     $distributionProfile = new KalturaCrossKalturaDistributionProfile();
     $distributionProfile->providerType = KalturaDistributionProviderType::CROSS_KALTURA;
-    $distributionProfile->name = 'testDistributionProfile';
+    $distributionProfile->name = 'testCrossKalturaDistributionProfile';
     $distributionProfile->status = KalturaDistributionProfileStatus::ENABLED;
     $distributionProfile->submitEnabled = KalturaDistributionProfileActionStatus::MANUAL;
     $distributionProfile->updateEnabled = KalturaDistributionProfileActionStatus::MANUAL;
@@ -215,6 +214,34 @@ function createCrossKalturaDistributionProfile($client, $dc, $sourceTestPartner,
     $contentdistributionPlugin = KalturaContentdistributionClientPlugin::get($client);
     $result = $contentdistributionPlugin->distributionProfile->add($distributionProfile);
     print("\n\r createDistributionProfile finished successfully");
+    return $result;
+}
+
+function createTvinciDistributionProfile($client, $testPartner)
+{
+
+    print("\n\r start createTvinciDistributionProfile");
+    $client->setPartnerId($testPartner->id);
+    $distributionProfile = new KalturaTvinciDistributionProfile();
+    $distributionProfile->providerType = KalturaDistributionProviderType::TVINCI;
+    $distributionProfile->name = 'testTvinciDistributionProfile';
+    $distributionProfile->status = KalturaDistributionProfileStatus::ENABLED;
+    $distributionProfile->submitEnabled = KalturaDistributionProfileActionStatus::MANUAL;
+    $distributionProfile->updateEnabled = KalturaDistributionProfileActionStatus::MANUAL;
+    $distributionProfile->deleteEnabled = KalturaDistributionProfileActionStatus::MANUAL;
+    $distributionProfile->reportEnabled = KalturaDistributionProfileActionStatus::MANUAL;
+    $distributionProfile->ingestUrl = '54.72.1.39:8030/catalog_v3_4/service.svc';
+    $distributionProfile->username = 'Kaltura Sus Regular-main';
+    $distributionProfile->password = 'Kaltura Mus-main';
+    $distributionProfile->ismFileName = 'Web HD';
+    $distributionProfile->ismPpvModule = 'ism PPV-Module1 update 1';
+    $distributionProfile->ipadnewFileName = 'Mobile_Devices_Main_HD';
+    $distributionProfile->ipadnewPpvModule = 'PPV Main_HD _2 update2';
+    $distributionProfile->iphonenewFileName = 'Mobile_Devices_Main_SD';
+    $distributionProfile->iphonenewPpvModule = 'PPV Main_SD _3 update 3';
+    $contentdistributionPlugin = KalturaContentdistributionClientPlugin::get($client);
+    $result = $contentdistributionPlugin->distributionProfile->add($distributionProfile);
+    print("\n\r createTvinciDistributionProfile finished successfully");
     return $result;
 }
 

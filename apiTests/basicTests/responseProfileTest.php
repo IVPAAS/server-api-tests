@@ -1,6 +1,6 @@
 <?php
-require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
 function helper_createEntryWithCaptions( $client, $captionsPath)
 {
@@ -57,7 +57,7 @@ function testEntriesWithCaptionItem( $client )
 
 
 	//wait for index sphinx
-	$retries = 10;
+	$retries = 24;
 	$relatedList = null;
 	for ($i=0; $i<$retries; $i++) {
 		info("sleep 20 seconds");
@@ -73,7 +73,7 @@ function testEntriesWithCaptionItem( $client )
 				return success(__FUNCTION__);
 		}
 	}
-	return fail ( __FUNCTION__ . $relatedList->totalCount);
+	return fail ( __FUNCTION__ .($relatedList != null  ? $relatedList->totalCount : 0) );
 }
 
 function main($dc,$partnerId,$adminSecret,$userSecret)

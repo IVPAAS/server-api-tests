@@ -1,7 +1,6 @@
 <?php
-//require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('/opt/kaltura/web/content/clientlibs/php5API_Testing/KalturaClient.php');
-require_once(dirname(__FILE__).'/testsHelpers/apiTestHelper.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
+require_once(dirname(__FILE__).'/testsHelpers/runAllTestsHelper.php');
 
 main();
 
@@ -46,6 +45,10 @@ function runAllTests($dc,$userName,$userPassword)
     info("\n********** runLiveEntryTest *****************");
     $TotalCount++;
     $failedCount = $failedCount + runLiveEntryTest($dc, $userName, $userPassword);
+
+    info("\n********** runTvinciDistributionTest *****************");
+    $TotalCount++;
+    $failedCount = $failedCount + runTvinciDistributionTest($dc, $userName, $userPassword);
 
     print("\n*********************************************");
     printInfoAndlogOutput("\nRunning All Tests Finished - " . date("F j, Y, g:i a"));
@@ -261,4 +264,38 @@ function runYoutubeDistributionTest($dc,$userName,$userPassword)
 }
 
 
+function runTvinciDistributionTest($dc,$userName,$userPassword)
+{
+  try {
+    print("\n\r tvinciDistributionTest init.");
+    $client = login($dc, $userName, $userPassword);
+    $testPartner = createTestPartner($client, "testUser");
 
+    addPartnerPermissions($client, $testPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
+
+    $tvinciDistributionProfile = createTvinciDistributionProfile($client, $testPartner);
+
+    info(" executing tvinciDistributionTest ...");
+    $output = array();
+    exec("php advancedTests/tvinciDistributionTest.php $dc $testPartner->id $testPartner->adminSecret $tvinciDistributionProfile->id ", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  }
+  catch (Exception $e) {
+    fail(" tvinciDistributionTest failed: $e");
+    $result = 1;
+  }
+  //finally {
+  info(" tvinciDistributionTest tear down.");
+  if ($testPartner != null) {
+    $client = login($dc, $userName, $userPassword);
+    //removePartner($dc, $client, $testPartner);
+  }
+  //}
+  if ($result) {
+    printFailAndlogOutput("tvinciDistributionTest");
+    return FAIL;
+  }
+  printSuccessAndlogOutput("tvinciDistributionTest");
+}
