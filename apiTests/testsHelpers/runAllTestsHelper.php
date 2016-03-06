@@ -42,7 +42,7 @@ function main()
     exit($res);
 }
 
-function login($dc, $userName, $userPassword)
+function login($dc, $userName, $userPassword, $partnerId = null)
 {
     print("\n\r login to get super user ks");
     $config = new KalturaConfiguration();
@@ -50,7 +50,7 @@ function login($dc, $userName, $userPassword)
     $client = new KalturaClient($config);
     $loginId = $userName;
     $password = $userPassword;
-    $partnerId = null;
+//    $partnerId = null;
     $expiry = null;
     $privileges = null;
     $ks = $client->user->loginbyloginid($loginId, $password, $partnerId, $expiry, $privileges);

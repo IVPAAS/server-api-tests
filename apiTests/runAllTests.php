@@ -50,6 +50,10 @@ function runAllTests($dc,$userName,$userPassword)
     $TotalCount++;
     $failedCount = $failedCount + runTvinciDistributionTest($dc, $userName, $userPassword);
 
+    info("\n********* runFairplayDRMProfileTest ******************");
+    $TotalCount++;
+    $failedCount = $failedCount + runFairplayDRMProfileTest($dc, $userName, $userPassword);
+    
     print("\n*********************************************");
     printInfoAndlogOutput("\nRunning All Tests Finished - " . date("F j, Y, g:i a"));
     print("\n*********************************************\n");
@@ -298,4 +302,22 @@ function runTvinciDistributionTest($dc,$userName,$userPassword)
     return FAIL;
   }
   printSuccessAndlogOutput("tvinciDistributionTest");
+}
+
+function runFairplayDRMProfileTest($dc,$userName,$userPassword)
+{
+  try {
+    print("\n\r fairplayDrmProfileTest init.");
+    info(" executing fairplayDrmProfileTest ...");
+    $output = array();
+    exec("php advancedTests/testForFairplayDRMProfile.php $dc $userName $userPassword", $output, $result);
+  } catch (Exception $e) {
+    fail("fairplayDrmProfileTest failed: $e");
+    $result = 1;
+  }
+  if ($result) {
+    printFailAndlogOutput("fairplayDrmProfileTest");
+    return FAIL;
+  }
+  printSuccessAndlogOutput("fairplayDrmProfileTest");
 }
