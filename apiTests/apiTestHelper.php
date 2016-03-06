@@ -5,12 +5,12 @@ const LOG_FILE="./executionLog.txt";
 //start session and setting KS function
 class bcolors
 {
-    const OKBLUE = "\033[34;1m";
-    const OKGREEN = "\033[32;1m";
-    const FAIL = "\033[31;1m";
+    const OKBLUE = "\033[94m";
+    const OKGREEN = "\033[92m";
+    const WARNING = "\033[94m";
+    const INFO = "\033[93m";
+    const FAIL = "\033[91m";
     const ENDC = "\033[0m";
-    const WARNING = "\033[34;1m";
-    const INFO = "\033[33;1m";
     const BOLD = "\033[1m";
     const UNDERLINE = "\033[4m";
 }
@@ -53,7 +53,6 @@ function logOutput($msg)
 function printUsage()
 {
     print ("\n\rUsage: " .$GLOBALS['argv'][0] . " <DC URL> 	<parnter id> <admin secret> <user secret>");
-    print ("\n\r for adding quiz.\r\n");
 }
 function goMain()
 {
@@ -76,8 +75,8 @@ function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionTyp
 	{
 		$config = new KalturaConfiguration($partnerId);
 		$config->serviceUrl = $destUrl;
-        $client = new KalturaClient($config);
-        $result = $client->session->start($secret, $userId, $type, $partnerId, null, null);
+        	$client = new KalturaClient($config);
+		$result = $client->session->start($secret, $userId, $type, $partnerId, null, null);
 		$client->setKs($result);
 		//print("Started session successfully with KS [$result]\n");
 		return $client;
@@ -140,7 +139,7 @@ function addKalturaUser($client,$userId)
   //print ("\nAdd User ID:".$result->id);
   return $result;
 }
-function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag')
+function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='')
 {
     $entry                                  = new KalturaMediaEntry();
     $type                                   = KalturaEntryType::MEDIA_CLIP;
@@ -149,8 +148,6 @@ function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId =
     if ($profileId != null)
         $entry->conversionProfileId			= $profileId;
     $entry->userId                          = $userId;
-    $entry->description                     = $description;
-    $entry->tags                            = $tags;
     $result                                 = $client->baseEntry->add($entry, $type);
     //print ("\nAdd entry ID:".$result->id);
     return $result;
@@ -186,7 +183,7 @@ function helper_createEmptyEntry($client, $testName)
 
 function helper_createEntryAndUploaDmp4Content($client, $testName)
 {
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
+	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/Kaltura Test Upload.mp4';
 	$entry = addEntry($client, $testName);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
@@ -217,21 +214,11 @@ function helper_uploadThumbAsset($client, $entryId)
 
 function isEntryReady($client,$id)
 {
-        if($id!=null)
-        {
-                try{
-                        $result = $client->baseEntry->get($id, null);
-                        if ($result->status == 2)
-                        return true;
-                }
-                catch(Exception $e)
-                {
-                        return true;
-                }
-        }
-        return false;
+	$result = $client->baseEntry->get($id, null);
+	if ($result->status == 2)
+		return true;
+	return false;
 }
-
 
 function isSubmitting($client, $id)
 {

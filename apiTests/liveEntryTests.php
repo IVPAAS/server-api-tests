@@ -5,10 +5,12 @@ require_once('apiTestHelper.php');
 
 /**
  * @KalturaClient $client (admin KS)
- * $recordedEntryId 
- * @return live entry 
+ * $recordedEntryId
+ * @param KalturaClient $client
+ * @param null $recordedEntryId
+ * @return live entry
  */
-function helper_createLiveEntry($client, $recordedEntryId = null)
+function helper_createLiveEntry(KalturaClient $client, $recordedEntryId = null)
 {
 	$entry                                  = new KalturaLiveStreamEntry();
 	$entry->type                            = KalturaEntryType::LIVE_STREAM;
@@ -38,7 +40,7 @@ function helper_createVideoToken($client,$index=0)
 	$resource->token = $uploadToken->id;
 	return $resource;
 }
-/*
+
 function isEntryReady($client,$id)
 {
 	if($id!=null)
@@ -54,7 +56,7 @@ function isEntryReady($client,$id)
 		}
 	}
 	return false;
-}*/
+}
 
 function helper_appendRecording($client, $entry, $flavorAssetId, $resource)
 {
