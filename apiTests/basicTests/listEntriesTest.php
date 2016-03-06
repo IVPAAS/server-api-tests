@@ -1,6 +1,6 @@
 <?php
-require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('apiTestHelper.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
 function helper_createEntryWithTranscript( $client, $transcriptPath)
 {
@@ -46,7 +46,7 @@ function helper_createEntryWithCaptions( $client, $captionsPath)
 
 function helper_createEntryAndUploadContent($client, $entryName)
 {
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/KalturaTestUpload.mp4';
+	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 	$entry = addEntry($client,$entryName);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
@@ -137,8 +137,8 @@ function Test2_EntryTranscriptSearchFilter( $client, $keyWord )
 	$badEntries = array();
 
 	//entries with transcript
-	$goodEntries[] = helper_createEntryWithTranscript( $client, '/../resources/transcriptWithKeyword.txt');
-	$badEntries[] = helper_createEntryWithTranscript( $client, '/../resources/transcriptWithoutKeyword.txt');
+	$goodEntries[] = helper_createEntryWithTranscript( $client, '/../../resources/transcriptWithKeyword.txt');
+	$badEntries[] = helper_createEntryWithTranscript( $client, '/../../resources/transcriptWithoutKeyword.txt');
 
 	$filter = new KalturaBaseEntryFilter();
 	$transcriptSearchItem = new KalturaEntryTranscriptAssetSearchItem();
@@ -158,8 +158,8 @@ function Test3_EntryCaptionSearchFilter( $client, $keyWord )
 	$badEntries = array();
 
 	//entries with captions
-	$goodEntries[] = helper_createEntryWithCaptions( $client, '/../resources/KalturaTestCaptionWithKeyword.srt');
-	$badEntries[] = helper_createEntryWithCaptions( $client, '/../resources/KalturaTestCaption.srt');
+	$goodEntries[] = helper_createEntryWithCaptions( $client, '/../../resources/KalturaTestCaptionWithKeyword.srt');
+	$badEntries[] = helper_createEntryWithCaptions( $client, '/../../resources/KalturaTestCaption.srt');
 
 	$filter = new KalturaBaseEntryFilter();
 	$captionsSearchItem = new KalturaEntryCaptionAssetSearchItem();

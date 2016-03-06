@@ -1,6 +1,6 @@
 <?php
-require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('apiTestHelper.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
 function helper_createEntryWithCuePoint($client)
 {

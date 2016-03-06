@@ -1,50 +1,11 @@
 <?php
-require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('apiTestHelper.php');
-
-function helper_createEntryAndUploaDmp4Content($client)
-{
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/Kaltura Test Upload.mp4';
-	$entry = addEntry($client,'tvinciDistributionTest');
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $FILE_NAME_MP4;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $FILE_NAME_MP4;
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-	$result = $client->baseEntry->addcontent($entry->id, $resource);
-	return $result;
-}
-
-function isEntryReady($client,$id)
-{
-	$result = $client->baseEntry->get($id, null);
-	if ($result->status == 2)
-		return true;
-	return false;
-}
-
-function isSubmitting($client, $id)
-{
-	$result = $client->entryDistribution->get($id);
-	if ($result->status == 4) // status submitting
-		return true;
-	return false;
-}
-
-function isRemoving($client, $id)
-{
-	$result = $client->entryDistribution->get($id);
-	if ($result->status == 6) // status submitting
-		return true;
-	return false;
-}
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
+require_once(dirname( __FILE__ ).'/../testsHelpers/apiTestHelper.php');
 
 function Test1_DistributeEntry($client, $profileId)
 {
 	info("Create entry and upload content");
-	$MediaEntry = helper_createEntryAndUploaDmp4Content($client);
+	$MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'tvinciDistributionTest');
 
 	info("Wait for entry to be ready id =".$MediaEntry->id);
 	while(isEntryReady($client,$MediaEntry->id)!=true)

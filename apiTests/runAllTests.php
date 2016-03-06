@@ -1,7 +1,6 @@
 <?php
-//require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('/opt/kaltura/web/content/clientlibs/php5API_Testing/KalturaClient.php');
-require_once('runAllTestsHelper.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
+require_once(dirname(__FILE__).'/testsHelpers/runAllTestsHelper.php');
 
 main();
 
@@ -20,10 +19,17 @@ function runAllTests($dc,$userName,$userPassword)
     print("\n*********************************************");
     printInfoAndlogOutput("Running All Tests - " . date("F j, Y, g:i a"));
     print("\n*********************************************\n");
-    info("\n********** runUserCategoryTest **************");
-    $TotalCount++;
-    $failedCount = $failedCount + runUserCategoryTest($dc, $userName, $userPassword);
 
+    // Run all basic tests that require only partner creation
+    $di = new RecursiveDirectoryIterator('basicTests');
+    foreach (new RecursiveIteratorIterator($di) as $filename => $file) {
+      if (is_file($filename))  {
+        $TotalCount++;
+        $failedCount = $failedCount + runBasicTest($dc, $userName, $userPassword, basename($filename, ".php"), $filename);
+      }
+    }
+
+    // Run Advanced Tests
     info("\n********** runCrossKalturaDistributionTest **");
     $TotalCount++;
     $failedCount = $failedCount + runCrossKalturaDistributionTest($dc, $userName, $userPassword);
@@ -36,25 +42,13 @@ function runAllTests($dc,$userName,$userPassword)
     $TotalCount++;
     $failedCount = $failedCount + runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
 
-    info("\n********** runVideoQuizTest *****************");
-    $TotalCount++;
-    $failedCount = $failedCount + runInVideoQuizTest($dc, $userName, $userPassword);
-
-    info("\n********** runListEntriesTest ***************");
-    $TotalCount++;
-    $failedCount = $failedCount + runListEntriesTest($dc, $userName, $userPassword);
-
-    info("\n********** runCloneEntryTest ****************");
-    $TotalCount++;
-    $failedCount = $failedCount + runCloneEntryTest($dc, $userName, $userPassword);
-
     info("\n********** runLiveEntryTest *****************");
     $TotalCount++;
     $failedCount = $failedCount + runLiveEntryTest($dc, $userName, $userPassword);
 
-    info("\n********** runCloneEntryWithCuePointsTest ******");
+    info("\n********** runTvinciDistributionTest *****************");
     $TotalCount++;
-    $failedCount = $failedCount + runCloneEntryWithCuePointsTest($dc, $userName, $userPassword);
+    $failedCount = $failedCount + runTvinciDistributionTest($dc, $userName, $userPassword);
 
     print("\n*********************************************");
     printInfoAndlogOutput("\nRunning All Tests Finished - " . date("F j, Y, g:i a"));
@@ -77,36 +71,36 @@ function runAllTests($dc,$userName,$userPassword)
   }
 }
 
-function runInVideoQuizTest($dc,$userName,$userPassword)
+function runBasicTest($dc,$userName,$userPassword, $testName, $testPath)
 {
   try {
-    info("InVideoQuizTests init.");
+    info("\n********** Running  $testName **************");
+    print("\n\r $testName init.");
     $client = login($dc, $userName, $userPassword);
     $testPartner = createTestPartner($client, "testPartner");
-    addPartnerPermissions($client, $testPartner, "QUIZ_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
 
-    info("Executing InVideoQuizTests...");
+    info(" executing $testName...");
     $output = array();
-    exec("php InVideoQuizTests.php $dc $testPartner->id $testPartner->adminSecret $testPartner->secret", $output, $result);
+    exec("php $testPath $dc $testPartner->id $testPartner->adminSecret  $testPartner->secret", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
   } catch (Exception $e) {
-    fail(" InVideoQuizTests failed: $e");
+    fail(" $testName failed: $e");
     $result = 1;
   }
-  //finally{
+  // finally{
   if ($testPartner != null) {
-    info("\n\r InVideoQuizTests tear down.");
+    info(" $testName tear down.");
     $client = login($dc, $userName, $userPassword);
     removePartner($dc, $client, $testPartner);
   }
-  //}
+  // }
   if ($result) {
-    printFailAndlogOutput("InVideoQuizTests");
+    printFailAndlogOutput("$testName");
     return FAIL;
   }
-  printSuccessAndlogOutput("InVideoQuizTests");
+  printSuccessAndlogOutput("$testName");
 }
 
 function runLiveEntryTest($dc,$userName,$userPassword)
@@ -120,9 +114,10 @@ function runLiveEntryTest($dc,$userName,$userPassword)
     setDefaultConversionProfile($dc, $testPartner, $conversionProfile->id);
 
     info(" executing liveEntryTests...");
+    $client = login($dc, $userName, $userPassword);
     $liveStreamPartner = getPartner($client, '-5'); //get the live streaming partner required for the test
     $output = array();
-    exec("php liveEntryTests.php $dc $testPartner->id $testPartner->adminSecret $liveStreamPartner->adminSecret", $output, $result);
+    exec("php advancedTests/liveEntryTests.php $dc $testPartner->id $testPartner->adminSecret $liveStreamPartner->adminSecret", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
@@ -142,131 +137,6 @@ function runLiveEntryTest($dc,$userName,$userPassword)
     return FAIL;
   }
   printSuccessAndlogOutput("liveEntryTests");
-}
-
-
-function runListEntriesTest($dc,$userName,$userPassword)
-{
-  try {
-    print("\n\r listEntriesTest init.");
-    $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testPartner");
-
-    info(" executing listEntriesTest...");
-    $output = array();
-    exec("php listEntriesTest.php $dc $testPartner->id $testPartner->adminSecret  $testPartner->secret", $output, $result);
-    foreach ($output as $item) {
-      print("\n\r $item");
-    }
-  } catch (Exception $e) {
-    fail(" listEntriesTest failed: $e");
-    $result = 1;
-  }
-  // finally{
-  if ($testPartner != null) {
-    info(" listEntriesTest tear down.");
-    $client = login($dc, $userName, $userPassword);
-    removePartner($dc, $client, $testPartner);
-  }
-  // }
-  if ($result) {
-    printFailAndlogOutput("listEntriesTest");
-    return FAIL;
-  }
-  printSuccessAndlogOutput("listEntriesTest");
-}
-
-function runCloneEntryTest($dc,$userName,$userPassword)
-{
-  try {
-    print("\n\r cloneEntryTest init.");
-    $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testPartner");
-
-    info(" executing cloneEntryTest...");
-    $output = array();
-    exec("php cloneEntryTest.php $dc $testPartner->id $testPartner->adminSecret  $testPartner->secret", $output, $result);
-    foreach ($output as $item) {
-      print("\n\r $item");
-    }
-  } catch (Exception $e) {
-    fail(" cloneEntryTest failed: $e");
-    $result = 1;
-  }
-  //finally{
-  if ($testPartner != null) {
-    info(" cloneEntryTest tear down.");
-    $client = login($dc, $userName, $userPassword);
-    removePartner($dc, $client, $testPartner);
-  }
-  //}
-  if ($result) {
-    printFailAndlogOutput("cloneEntryTest");
-    return FAIL;
-  }
-  printSuccessAndlogOutput("cloneEntryTest");
-}
-
-function runUserCategoryTest($dc,$userName,$userPassword)
-{
-  try {
-    print("\n\r userCategoryTest init.");
-    $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testPartner");
-
-    info(" executing userCategoryTest...");
-    $output = array();
-    exec("php userCategoryTest.php $dc $testPartner->id $testPartner->adminSecret  $testPartner->secret", $output, $result);
-    foreach ($output as $item) {
-      print("\n\r $item");
-    }
-  } catch (Exception $e) {
-    fail(" userCategoryTest failed: $e");
-    $result = 1;
-  }
-  // finally{
-  if ($testPartner != null) {
-    info(" userCategoryTest tear down.");
-    $client = login($dc, $userName, $userPassword);
-    removePartner($dc, $client, $testPartner);
-  }
-  //}
-  if ($result) {
-    printFailAndlogOutput("userCategoryTest");
-    return FAIL;
-  }
-  printSuccessAndlogOutput("userCategoryTest");
-}
-
-function runCloneEntryWithCuePointsTest($dc,$userName,$userPassword)
-{
-  try {
-    print("\n\r cloneEntryWithCuePointsTest init.");
-    $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testPartner");
-
-    info(" executing cloneEntryWithCuePointsTest ...");
-    $output = array();
-    exec("php cloneEntrywithCuePointsTest.php $dc $testPartner->id $testPartner->adminSecret  $testPartner->secret", $output, $result);
-    foreach ($output as $item) {
-      print("\n\r $item");
-    }
-  } catch (Exception $e) {
-    fail(" cloneEntryWithCuePointsTest failed:  $e");
-    $result = 1;
-  }
-  //finally {
-  if ($testPartner != null) {
-    info(" cloneEntryWithCuePointsTest tear down.");
-    $client = login($dc, $userName, $userPassword);
-    removePartner($dc, $client, $testPartner);
-  }
-  // }
-  if ($result) {
-    printFailAndlogOutput("cloneEntryWithCuePointsTest");
-    return FAIL;
-  }
-  printSuccessAndlogOutput("cloneEntryWithCuePointsTest");
 }
 
 function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
@@ -293,7 +163,7 @@ function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
 
     info(" executing crossKalturaDistributionTest ...");
     $output = array();
-    exec("php crossKalturaDistributionTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $targetTestPartner->id $targetTestPartner->adminSecret $distributionProfile->id", $output, $result);
+    exec("php advancedTests/crossKalturaDistributionTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $targetTestPartner->id $targetTestPartner->adminSecret $distributionProfile->id", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
@@ -337,7 +207,7 @@ function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remot
     print ("\n\r remote profile id: $remoteStorageProfile->id");
     info(" executing remoteStorageTest...");
     $output = array();
-    exec("php remoteStorageTest.php $dc $testPartner->id $testPartner->adminSecret $remoteHost $storageUsername $storageUserPassword $storageUrl $storageBaseDir", $output, $result);
+    exec("php advancedTests/remoteStorageTest.php $dc $testPartner->id $testPartner->adminSecret $remoteHost $storageUsername $storageUserPassword $storageUrl $storageBaseDir", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
@@ -375,7 +245,7 @@ function runYoutubeDistributionTest($dc,$userName,$userPassword)
 
     info(" executing youtubeDistributionTest ...");
     $output = array();
-    exec("php youtubeDistributionTest.php $dc $testPartner->id $testPartner->adminSecret $youTubeDistributionProfileId ", $output, $result);
+    exec("php advancedTests/youtubeDistributionTest.php $dc $testPartner->id $testPartner->adminSecret $youTubeDistributionProfileId ", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
@@ -383,7 +253,9 @@ function runYoutubeDistributionTest($dc,$userName,$userPassword)
     fail(" youtubeDistributionTest failed: $e");
     $result = 1;
   }
-  // No need to remove the default template partner (99)
+  // No need to remove the default template partner (99) but we need to remove the entries we upladed
+  markBaseEntriesForPartnersAsDeleted($dc, $testPartner);
+  removeDeletedBaseEntriesForPartnerFromFileSystem($testPartner); //can only be used on server side invocation
   if ($result) {
     printFailAndlogOutput("youtubeDistributionTest");
     return FAIL;
@@ -392,4 +264,38 @@ function runYoutubeDistributionTest($dc,$userName,$userPassword)
 }
 
 
+function runTvinciDistributionTest($dc,$userName,$userPassword)
+{
+  try {
+    print("\n\r tvinciDistributionTest init.");
+    $client = login($dc, $userName, $userPassword);
+    $testPartner = createTestPartner($client, "testUser");
 
+    addPartnerPermissions($client, $testPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
+
+    $tvinciDistributionProfile = createTvinciDistributionProfile($client, $testPartner);
+
+    info(" executing tvinciDistributionTest ...");
+    $output = array();
+    exec("php advancedTests/tvinciDistributionTest.php $dc $testPartner->id $testPartner->adminSecret $tvinciDistributionProfile->id ", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  }
+  catch (Exception $e) {
+    fail(" tvinciDistributionTest failed: $e");
+    $result = 1;
+  }
+  //finally {
+  info(" tvinciDistributionTest tear down.");
+  if ($testPartner != null) {
+    $client = login($dc, $userName, $userPassword);
+    //removePartner($dc, $client, $testPartner);
+  }
+  //}
+  if ($result) {
+    printFailAndlogOutput("tvinciDistributionTest");
+    return FAIL;
+  }
+  printSuccessAndlogOutput("tvinciDistributionTest");
+}

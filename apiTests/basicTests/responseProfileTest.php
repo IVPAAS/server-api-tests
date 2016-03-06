@@ -1,6 +1,6 @@
 <?php
-require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
-require_once('apiTestHelper.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
 function helper_createEntryWithCaptions( $client, $captionsPath)
 {
@@ -25,7 +25,7 @@ function helper_createEntryWithCaptions( $client, $captionsPath)
 
 function testEntriesWithCaptionItem( $client )
 {
-	$entryId = helper_createEntryWithCaptions( $client, '/../resources/KalturaTestCaption.srt');
+	$entryId = helper_createEntryWithCaptions( $client, '/../../resources/KalturaTestCaption.srt');
 
 	$captionItemFilter = new KalturaCaptionAssetItemFilter();
 	$captionMapping = new KalturaResponseProfileMapping();
@@ -55,21 +55,25 @@ function testEntriesWithCaptionItem( $client )
 
 	$client->setResponseProfile($nestedResponseProfile);
 
+
 	//wait for index sphinx
-	for ($j = 0; $j < 20; $j++) {
-		sleep(1);
-		print(".");
-	}
+	$retries = 24;
+	$relatedList = null;
+	for ($i=0; $i<$retries; $i++) {
+		info("sleep 20 seconds");
+		for ($j = 0; $j < 20; $j++) {
+			sleep(1);
+			print(".");
+		}
 
-	$entry = $client->baseEntry->get($entryId);
-	$relatedList = $entry->relatedObjects[0];
-	if ( $relatedList instanceof KalturaCaptionAssetItemListResponse )
-	{
-		if ( $relatedList->totalCount > 0 && ($relatedList->objects[0] instanceof KalturaCaptionAssetItem))
-			return success ( __FUNCTION__);
+		$entry = $client->baseEntry->get($entryId);
+		$relatedList = $entry->relatedObjects[0];
+		if ($relatedList instanceof KalturaCaptionAssetItemListResponse) {
+			if ($relatedList->totalCount > 0 && ($relatedList->objects[0] instanceof KalturaCaptionAssetItem))
+				return success(__FUNCTION__);
+		}
 	}
-
-	return fail ( __FUNCTION__ . $relatedList->totalCount);
+	return fail ( __FUNCTION__ .($relatedList != null  ? $relatedList->totalCount : 0) );
 }
 
 function main($dc,$partnerId,$adminSecret,$userSecret)

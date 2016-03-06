@@ -1,5 +1,5 @@
 <?php
-require_once('/opt/kaltura/web/content/clientlibs/php5/KalturaClient.php');
+require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 
 const LOG_FILE="./executionLog.txt";
 //start session and setting KS function
@@ -139,7 +139,7 @@ function addKalturaUser($client,$userId)
   //print ("\nAdd User ID:".$result->id);
   return $result;
 }
-function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='')
+function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag', $referenceId = 'testRefID')
 {
     $entry                                  = new KalturaMediaEntry();
     $type                                   = KalturaEntryType::MEDIA_CLIP;
@@ -148,6 +148,9 @@ function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId =
     if ($profileId != null)
         $entry->conversionProfileId			= $profileId;
     $entry->userId                          = $userId;
+    $entry->description                     = $description;
+    $entry->tags                            = $tags;
+    $entry->referenceId                     = $referenceId;
     $result                                 = $client->baseEntry->add($entry, $type);
     //print ("\nAdd entry ID:".$result->id);
     return $result;
@@ -183,7 +186,7 @@ function helper_createEmptyEntry($client, $testName)
 
 function helper_createEntryAndUploaDmp4Content($client, $testName)
 {
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../resources/Kaltura Test Upload.mp4';
+	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 	$entry = addEntry($client, $testName);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
@@ -200,7 +203,7 @@ function helper_uploadThumbAsset($client, $entryId)
 {
 	$thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
 
-	$THUMB_NAME = dirname ( __FILE__ ).'/../resources/thumb_300_150.jpg';
+	$THUMB_NAME = dirname ( __FILE__ ).'/../../resources/thumb_300_150.jpg';
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $THUMB_NAME;
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
@@ -228,9 +231,17 @@ function isSubmitting($client, $id)
 	return false;
 }
 
+function isRemoving($client, $id)
+{
+    $result = $client->entryDistribution->get($id);
+    if ($result->status == 6) // status submitting
+        return true;
+    return false;
+}
+
 function helper_createEntryAndUploadJpgContent($client)
 {
-	$FILE_NAME_JPG = dirname ( __FILE__ ).'/../resources/kalturaIcon.jpg';
+	$FILE_NAME_JPG = dirname ( __FILE__ ).'/../../resources/kalturaIcon.jpg';
 	$entry = addEntry($client,__FUNCTION__,KalturaMediaType::IMAGE);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_JPG;
