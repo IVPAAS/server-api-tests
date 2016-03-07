@@ -4,14 +4,16 @@ require_once(dirname(__FILE__).'/testsHelpers/runAllTestsHelper.php');
 
 main();
 
+$TotalCount = 0;
+$failedCount = 0;
+
 function runAllTests($dc,$userName,$userPassword)
 {
+  global $TotalCount, $failedCount;
 
   HTMLLogger::init();
   $time_start = microtime(true);
 
-  $TotalCount = 0;
-  $failedCount = 0;
   $res = 0;
 
   try {
@@ -21,6 +23,7 @@ function runAllTests($dc,$userName,$userPassword)
     print("\n*********************************************\n");
 
     // Run all basic tests that require only partner creation
+
     $di = new RecursiveDirectoryIterator('basicTests');
     foreach (new RecursiveIteratorIterator($di) as $filename => $file) {
       if (is_file($filename))  {
@@ -30,30 +33,13 @@ function runAllTests($dc,$userName,$userPassword)
     }
 
     // Run Advanced Tests
-    info("\n********** runCrossKalturaDistributionTest **");
-    $TotalCount++;
-    $failedCount = $failedCount + runCrossKalturaDistributionTest($dc, $userName, $userPassword);
-
-    info("\n********** runYoutubeDistributionTest **");
-    $TotalCount++;
-    $failedCount = $failedCount + runYoutubeDistributionTest($dc, $userName, $userPassword);
-
-    info("\n********** runRemoteStorageDistributionTest **");
-    $TotalCount++;
-    $failedCount = $failedCount + runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/');
-
-    info("\n********** runLiveEntryTest *****************");
-    $TotalCount++;
-    $failedCount = $failedCount + runLiveEntryTest($dc, $userName, $userPassword);
-
-    info("\n********** runTvinciDistributionTest *****************");
-    $TotalCount++;
-    $failedCount = $failedCount + runTvinciDistributionTest($dc, $userName, $userPassword);
-
-    info("\n********* runFairplayDRMProfileTest ******************");
-    $TotalCount++;
-    $failedCount = $failedCount + runFairplayDRMProfileTest($dc, $userName, $userPassword);
-    
+    runTest('runCrossKalturaDistributionTest', array($dc, $userName, $userPassword));
+    runTest('runYoutubeDistributionTest', array($dc, $userName, $userPassword));
+    runTest('runRemoteStorageExportAndImportTest', array($dc, $userName, $userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/'));
+    runTest('runLiveEntryTest',array($dc, $userName, $userPassword));
+    runTeset('runTvinciDistributionTest', array($dc, $userName, $userPassword));
+    runTest('runFairplayDRMProfileTest', array($dc, $userName, $userPassword));
+   
     print("\n*********************************************");
     printInfoAndlogOutput("\nRunning All Tests Finished - " . date("F j, Y, g:i a"));
     print("\n*********************************************\n");
@@ -73,6 +59,15 @@ function runAllTests($dc,$userName,$userPassword)
   if ($res) {
     exit(FAIL);
   }
+}
+
+function runTest($testName, $testParams)
+{
+  global $TotalCount,$failedCount;
+  info("\n********* $testName ******************");
+  $TotalCount++;
+
+  $failedCount = $failedCount + call_user_func_array($testName, $testParams);
 }
 
 function runBasicTest($dc,$userName,$userPassword, $testName, $testPath)
