@@ -37,7 +37,7 @@ function runAllTests($dc,$userName,$userPassword)
     runTest('runYoutubeDistributionTest', array($dc, $userName, $userPassword));
     runTest('runRemoteStorageExportAndImportTest', array($dc, $userName, $userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/'));
     runTest('runLiveEntryTest',array($dc, $userName, $userPassword));
-    runTeset('runTvinciDistributionTest', array($dc, $userName, $userPassword));
+    runTest('runTvinciDistributionTest', array($dc, $userName, $userPassword));
     runTest('runFairplayDRMProfileTest', array($dc, $userName, $userPassword));
    
     print("\n*********************************************");
