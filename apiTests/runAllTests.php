@@ -6,12 +6,15 @@ main();
 
 $TotalCount = 0;
 $failedCount = 0;
+$paramsMap = array();
 
 function runAllTests($dc,$userName,$userPassword)
 {
-  global $TotalCount, $failedCount;
+  global $TotalCount, $failedCount, $paramsMap;
 
   HTMLLogger::init();
+  initParams($dc, $userName, $userPassword);
+
   $time_start = microtime(true);
 
   $res = 0;
@@ -33,13 +36,12 @@ function runAllTests($dc,$userName,$userPassword)
     }
 
     // Run Advanced Tests
-    runTest('runCrossKalturaDistributionTest', array($dc, $userName, $userPassword));
-    runTest('runYoutubeDistributionTest', array($dc, $userName, $userPassword));
-    runTest('runRemoteStorageExportAndImportTest', array($dc, $userName, $userPassword, 'allinone-be.dev.kaltura.com', 'root', 'Kaltura12#', '../var/www/html/testingStorage/'));
-    runTest('runLiveEntryTest',array($dc, $userName, $userPassword));
-    runTest('runTvinciDistributionTest', array($dc, $userName, $userPassword));
-    runTest('runFairplayDRMProfileTest', array($dc, $userName, $userPassword));
-   
+    $ini = parse_ini_file(dirname(__FILE__).'/testsConfig.ini');
+    foreach ($ini['advanced-test'] as $advanced){
+      print ($advanced. "\n");
+      runTest($advanced, array( $paramsMap["dc"], $paramsMap["username"], $paramsMap["userPass"]));
+    }
+
     print("\n*********************************************");
     printInfoAndlogOutput("\nRunning All Tests Finished - " . date("F j, Y, g:i a"));
     print("\n*********************************************\n");
@@ -59,6 +61,18 @@ function runAllTests($dc,$userName,$userPassword)
   if ($res) {
     exit(FAIL);
   }
+}
+
+function initParams($dc, $userName, $userPassword){
+  global $paramsMap;
+
+  $paramsMap["dc"] = $dc;
+  $paramsMap["username"] = $userName;
+  $paramsMap["userPass"] = $userPassword;
+  $paramsMap["remoteStorageBaseDir"] = '../var/www/html/testingStorage/';
+  $paramsMap["remoteStoragePassword"] = 'Kaltura12#';
+  $paramsMap["remoteStorageUser"] = 'root';
+  $paramsMap["remoteStorageHost"] = 'allinone-be.dev.kaltura.com';
 }
 
 function runTest($testName, $testParams)
@@ -190,9 +204,15 @@ catch (Exception $e) {
 }
 
 
-function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword, $remoteHost, $storageUsername, $storageUserPassword, $storageBaseDir)
+function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword)
 {
+  global $paramsMap;
   try {
+    $remoteHost = $paramsMap["remoteStorageHost"];
+    $storageUsername = $paramsMap["remoteStorageUser"];
+    $storageUserPassword = $paramsMap["remoteStoragePassword"];
+    $storageBaseDir = $paramsMap["remoteStorageBaseDir"] ;
+
     print("\n\r remoteStorageTest init.");
     $client = login($dc, $userName, $userPassword);
     $testPartner = createTestPartner($client, "testPartner");
