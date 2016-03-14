@@ -436,7 +436,7 @@ function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
 }
 
 
-	function main($dc,$partnerId,$adminSecret,$userSecret)
+function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc); 
 	$ret=Test1_Basicflow($client);
