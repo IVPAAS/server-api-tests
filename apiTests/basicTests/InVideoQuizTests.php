@@ -292,7 +292,7 @@ function test7_GetUserPercentageReport($client)
 	return success(__FUNCTION__);
 }
 
-function test8_filterQuizUserEntry($client)
+function test12_filterQuizUserEntry($client)
 {
 	//Get list of all quiz user entry
 	$filter = new KalturaQuizUserEntryFilter();
@@ -329,7 +329,7 @@ function test8_filterQuizUserEntry($client)
 
 	return success(__FUNCTION__);
 }
-function test9_addAnonimousUserQuiz($client,$dc,$partnerId)
+function test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId)
 {
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
@@ -339,7 +339,7 @@ function test9_addAnonimousUserQuiz($client,$dc,$partnerId)
 		$questionCue = addQuestionsOnQuiz($client,$entry->id,"Question".$questionIndex);
 		$questions[$questionIndex]=$questionCue->id;
 	}
-	$wgClient = startWidgetSession($dc,$partnerId);
+	$wgClient = startWidgetSession($dc,$partnerId,$widgetId);
 	$quizUserEntry = addQuizUserEntry($wgClient,0,$entry->id);
 	for ( $answerIndex=0 ; $answerIndex < 4 ; $answerIndex ++)
 	{
@@ -350,7 +350,7 @@ function test9_addAnonimousUserQuiz($client,$dc,$partnerId)
 	return success(__FUNCTION__);
 }
 
-function test10_anonmymousUserMultyRequest($client,$dc,$partnerId)
+function test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId)
 
 {
         $entry=addEntry($client,__FUNCTION__);
@@ -361,7 +361,7 @@ function test10_anonmymousUserMultyRequest($client,$dc,$partnerId)
                 $questionCue = addQuestionsOnQuiz($client,$entry->id,"Question".$questionIndex);
                 $questions[$questionIndex]=$questionCue->id;
         }
-        $wgClient = startWidgetSession($dc,$partnerId);
+        $wgClient = startWidgetSession($dc,$partnerId,$widgetId);
         $quizUserEntry = addQuizUserEntry($wgClient,0,$entry->id);
         for ( $answerIndex=0 ; $answerIndex < 4 ; $answerIndex ++)
         {
@@ -369,24 +369,7 @@ function test10_anonmymousUserMultyRequest($client,$dc,$partnerId)
         }
         $res = submitQuiz($wgClient,$quizUserEntry->id);
 
-	$wgClient->startMultiRequest();
-	$request1filter = new KalturaQuestionCuePointFilter();
-	$request1filter->cuePointTypeEqual = KalturaCuePointType::QUIZ_QUESTION;
-	$request1filter->entryIdEqual = $entry->id;
-	$request1pager = new KalturaFilterPager();
-	$cuepointPlugin = KalturaCuepointClientPlugin::get($wgClient);
-	$cuepointPlugin->cuePoint->listAction($request1filter, $request1pager);
-	$request2filter = new KalturaAnswerCuePointFilter();
-	$request2pager = null;
-	$request2filter->entryIdEqual = $entry->id;
-	$request2filter->cuePointTypeEqual = KalturaCuePointType::QUIZ_ANSWER;
-	$request2filter->quizUserEntryIdEqual = $quizUserEntry->id;
-	$cuepointPlugin = KalturaCuepointClientPlugin::get($wgClient);
-	$cuepointPlugin->cuePoint->listAction($request2filter, $request2pager);
-	$results = $wgClient->doMultiRequest();
-
-	//Validate that there are questions and answers on the response
-	//
+	$results = helper_getQuizUserEntryAnswerAndQuestion($wgClient,$entry->id,$quizUserEntry->id);
 	if(count($results[0]->objects)!=4)
 	{
 		warning("Should have 4 questions in response, found - ".count($results[0]->objects));
@@ -402,11 +385,80 @@ function test10_anonmymousUserMultyRequest($client,$dc,$partnerId)
 }
 
 
+function helper_getQuizUserEntryAnswerAndQuestion($wgClient,$entryId,$quizUserEntryId)
+{
+	$wgClient->startMultiRequest();
+	$request1filter = new KalturaQuestionCuePointFilter();
+	$request1filter->cuePointTypeEqual = KalturaCuePointType::QUIZ_QUESTION;
+	$request1filter->entryIdEqual = $entryId;
+	$request1pager = new KalturaFilterPager();
+	$cuepointPlugin = KalturaCuepointClientPlugin::get($wgClient);
+	$cuepointPlugin->cuePoint->listAction($request1filter, $request1pager);
+	$request2filter = new KalturaAnswerCuePointFilter();
+	$request2pager = null;
+	$request2filter->entryIdEqual =$entryId;
+	$request2filter->cuePointTypeEqual = KalturaCuePointType::QUIZ_ANSWER;
+	$request2filter->quizUserEntryIdEqual = $quizUserEntryId;
+	$cuepointPlugin = KalturaCuepointClientPlugin::get($wgClient);
+	$cuepointPlugin->cuePoint->listAction($request2filter, $request2pager);
+	$results = $wgClient->doMultiRequest();
+	return $results;
+}
+
+
+function test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId)
+
+{
+	$entry=addEntry($client,__FUNCTION__);
+	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
+	$questions = array();
+	for ( $questionIndex=0 ; $questionIndex < 4 ; $questionIndex ++)
+	{
+		$questionCue = addQuestionsOnQuiz($client,$entry->id,"Question".$questionIndex);
+		$questions[$questionIndex]=$questionCue->id;
+	}
+	$wgClient = startWidgetSession($dc,$partnerId,$widgetId);
+
+	for ($i=1;$i<5;$i++)
+	{
+		$quizUserEntry = addQuizUserEntry($wgClient,0,$entry->id);
+		info("Anonymous user - {$i} taking quiz id {$quizUserEntry->id}");
+		$results = helper_getQuizUserEntryAnswerAndQuestion($wgClient, $entry->id,$quizUserEntry->id);
+		$numQuestions = count($results[0]->objects);
+		$numAnswers = count($results[1]->objects);
+		if ($numQuestions != 4 || $numAnswers!= 0)
+		{
+			warning("Should have 4 questions and 0 answers in response, found - questions: {$numQuestions} answers:{$numAnswers}");
+			return fail(__FUNCTION__);
+		}
+
+		for ($answerIndex = 0; $answerIndex < 4; $answerIndex++) {
+			addAnswer($wgClient, $entry->id, $questions[$answerIndex], $quizUserEntry->id, "Q");
+		}
+		$res = submitQuiz($wgClient, $quizUserEntry->id);
+
+		$results = helper_getQuizUserEntryAnswerAndQuestion($wgClient, $entry->id,$quizUserEntry->id);
+		//Validate that there are questions and answers on the response
+
+		$numQuestions = count($results[0]->objects);
+		$numAnswers = count($results[1]->objects);
+		if ($numQuestions != 4 || $numAnswers!= 4)
+		{
+			warning("Should have 4 questions and 4 answers in response, found - questions: {$numQuestions} answers:{$numAnswers}");
+			return fail(__FUNCTION__);
+		}
+	}
+
+	return success(__FUNCTION__);
+}
+
 
 
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
-	$client = startKalturaSession($partnerId,$adminSecret,$dc); 
+	$client = startKalturaSession($partnerId,$adminSecret,$dc);
+	$widgetId = helper_create_widget($client,"IVQ_WIDGET_SESSION_ROLE" );
+	info("New widget ID {$widgetId}");
 	$ret=Test1_Basicflow($client);
 	$ret+=Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc);
 	$ret+=Test3_ValidateScoreUponSubmitWithAdminKS($client);
@@ -415,9 +467,10 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret+=Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
 	$ret+=Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc);
 	$ret+=test7_GetUserPercentageReport($client);
-	$ret+=test8_filterQuizUserEntry($client);
-	$ret+=test9_addAnonimousUserQuiz($client,$dc,$partnerId);
-	$ret+=test10_anonmymousUserMultyRequest($client,$dc,$partnerId);
+	$ret+=test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId);
+	$ret+=test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId);
+	$ret+=test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId);
+	$ret+=test12_filterQuizUserEntry($client);
 	return ($ret);
 }
 

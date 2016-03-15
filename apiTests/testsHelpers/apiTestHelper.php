@@ -90,15 +90,17 @@ function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionTyp
 	}
 }	
 
-function startWidgetSession($destUrl,$partnerId)
+function startWidgetSession($destUrl,$partnerId,$widgetId=0)
 {
     try
     {
         $config = new KalturaConfiguration($partnerId);
         $config->serviceUrl = $destUrl;
         $client = new KalturaClient($config);
-        $widgetId = "_".$partnerId;
+        if($widgetId===0)
+			$widgetId = "_".$partnerId;
         $expiry = null;
+		print("\n Moshe --".$widgetId);
         $result = $client->session->startwidgetsession($widgetId, $expiry);  
         $client->setKs($result->ks);
         return $client;
@@ -276,4 +278,16 @@ function helper_createPlaylist($client)
 	$type = KalturaEntryType::PLAYLIST;
 	$result = $client->baseEntry->add($entry, $type);
 	return $result;
+}
+
+function helper_create_widget($client,$role)
+{
+	$filter = new KalturaUiConfFilter();
+	$result = $client->uiConf->listAction($filter, null);
+	$uiconfId = $result->objects[0]->id;
+	$widget = new KalturaWidget();
+	$widget->uiConfId = $uiconfId;
+	$widget->roles = $role;
+	$result = $client->widget->add($widget);
+	return $result->id;
 }
