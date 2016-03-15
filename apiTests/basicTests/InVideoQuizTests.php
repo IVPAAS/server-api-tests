@@ -340,6 +340,7 @@ function test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId)
 		$questions[$questionIndex]=$questionCue->id;
 	}
 	$wgClient = startWidgetSession($dc,$partnerId,$widgetId);
+	sleep(3);
 	$quizUserEntry = addQuizUserEntry($wgClient,0,$entry->id);
 	for ( $answerIndex=0 ; $answerIndex < 4 ; $answerIndex ++)
 	{
@@ -486,7 +487,7 @@ function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
 }
 
 
-function test13_createToUserEntriesWithForSameUser($client,$dc,$partnerId)
+function test13_createTwoUserEntriesWithForSameUser($client,$dc,$partnerId)
 {
 	$entry = addEntry($client, __FUNCTION__);
 	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
