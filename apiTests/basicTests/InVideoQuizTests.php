@@ -402,7 +402,6 @@ function test10_anonmymousUserMultyRequest($client,$dc,$partnerId)
 }
 
 function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
-
 {
 	$entry = addEntry($client, __FUNCTION__);
 	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
@@ -436,10 +435,28 @@ function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
 }
 
 
+function test12_createToUserEntriesWithForSameUser($client,$dc,$partnerId)
+{
+	$entry = addEntry($client, __FUNCTION__);
+	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
+	$quizUserEntry1 = addQuizUserEntry($client, 0, $entry->id);
+	try
+	{
+		$quizUserEntry2 = addQuizUserEntry($client, 0, $entry->id);
+	}
+	catch (Exception $e)
+	{
+		return success(__FUNCTION__);
+	}
+	info("Was able to create two user entries with the same user");
+	return fail(__FUNCTION__);
+}
+
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
-	$client = startKalturaSession($partnerId,$adminSecret,$dc); 
-	$ret=Test1_Basicflow($client);
+	$client = startKalturaSession($partnerId,$adminSecret,$dc);
+	$ret = true;
+	$ret+=Test1_Basicflow($client);
 	$ret+=Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc);
 	$ret+=Test3_ValidateScoreUponSubmitWithAdminKS($client);
 	$ret+=Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
@@ -451,6 +468,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret+=test9_addAnonimousUserQuiz($client,$dc,$partnerId);
 	$ret+=test10_anonmymousUserMultyRequest($client,$dc,$partnerId);
 	$ret+=test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId);
+	$ret += test12_createToUserEntriesWithForSameUser($client, $dc, $partnerId);
 	return ($ret);
 }
 
