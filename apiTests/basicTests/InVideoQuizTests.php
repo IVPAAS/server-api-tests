@@ -452,14 +452,64 @@ function test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId)
 	return success(__FUNCTION__);
 }
 
+function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
+{
+	$entry = addEntry($client, __FUNCTION__);
+	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
+	$questions = array();
+	for ($questionIndex = 0; $questionIndex < 4; $questionIndex++)
+	{
+		$questionCue = addQuestionsOnQuiz($client, $entry->id, "Question" . $questionIndex);
+		$questions[$questionIndex] = $questionCue->id;
+	}
+	$wgClient = startWidgetSession($dc, $partnerId);
+	$quizUserEntry = addQuizUserEntry($wgClient, 0, $entry->id);
+	for ($answerIndex = 0; $answerIndex < 4; $answerIndex++)
+	{
+		addAnswer($wgClient, $entry->id, $questions[$answerIndex], $quizUserEntry->id, "Q");
+	}
+	$res = submitQuiz($wgClient, $quizUserEntry->id);
 
+	$request2filter = new KalturaAnswerCuePointFilter();
+	$request2pager = null;
+	$request2filter->entryIdEqual = $entry->id;
+	$request2filter->cuePointTypeEqual = KalturaCuePointType::QUIZ_ANSWER;
+	$cuepointPlugin = KalturaCuepointClientPlugin::get($wgClient);
+	$results = $cuepointPlugin->cuePoint->listAction($request2filter, $request2pager);
+	if (count($results->objects) != 0)
+	{
+		warning("Should have 0 answers in response, found - " . count($results->objects));
+		return fail(__FUNCTION__);
+	}
+
+	return success(__FUNCTION__);
+}
+
+
+function test13_createToUserEntriesWithForSameUser($client,$dc,$partnerId)
+{
+	$entry = addEntry($client, __FUNCTION__);
+	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
+	$quizUserEntry1 = addQuizUserEntry($client, 0, $entry->id);
+	try
+	{
+		$quizUserEntry2 = addQuizUserEntry($client, 0, $entry->id);
+	}
+	catch (Exception $e)
+	{
+		return success(__FUNCTION__);
+	}
+	info("Was able to create two user entries with the same user");
+	return fail(__FUNCTION__);
+}
 
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$widgetId = helper_create_widget($client,"IVQ_WIDGET_SESSION_ROLE" );
 	info("New widget ID {$widgetId}");
-	$ret=Test1_Basicflow($client);
+	$ret = true;
+	$ret+=Test1_Basicflow($client);
 	$ret+=Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc);
 	$ret+=Test3_ValidateScoreUponSubmitWithAdminKS($client);
 	$ret+=Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
@@ -471,6 +521,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret+=test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId);
 	$ret+=test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId);
 	$ret+=test12_filterQuizUserEntry($client);
+	$ret += test13_createTwoUserEntriesWithForSameUser($client, $dc, $partnerId);
 	return ($ret);
 }
 
