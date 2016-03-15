@@ -100,8 +100,7 @@ function startWidgetSession($destUrl,$partnerId,$widgetId=0)
         if($widgetId===0)
 			$widgetId = "_".$partnerId;
         $expiry = null;
-		print("\n Moshe --".$widgetId);
-        $result = $client->session->startwidgetsession($widgetId, $expiry);  
+        $result = $client->session->startwidgetsession($widgetId, $expiry);
         $client->setKs($result->ks);
         return $client;
     }
