@@ -486,14 +486,16 @@ function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
 }
 
 
-function test13_createToUserEntriesWithForSameUser($client,$dc,$partnerId)
+function test13_createTwoUserEntriesWithForSameUser($client,$dc,$partnerId)
 {
 	$entry = addEntry($client, __FUNCTION__);
 	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
-	$quizUserEntry1 = addQuizUserEntry($client, 0, $entry->id);
+
+	$user = addKalturaUser($client,"UU1");
+	$quizUserEntry1 = addQuizUserEntry($client,$user->id,$entry->id);
 	try
 	{
-		$quizUserEntry2 = addQuizUserEntry($client, 0, $entry->id);
+		$quizUserEntry2 = addQuizUserEntry($client, $user->id, $entry->id);
 	}
 	catch (Exception $e)
 	{
