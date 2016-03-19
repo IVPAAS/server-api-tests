@@ -279,7 +279,7 @@ function helper_createPlaylist($client)
 	return $result;
 }
 
-function helper_create_widget($client,$role)
+function helper_create_widget($client,$role=null)
 {
 	$filter = new KalturaUiConfFilter();
 	$result = $client->uiConf->listAction($filter, null);
