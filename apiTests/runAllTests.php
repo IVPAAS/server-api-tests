@@ -90,7 +90,7 @@ function runBasicTest($dc,$userName,$userPassword, $testName, $testPath)
     info("\n********** Running  $testName **************");
     print("\n\r $testName init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testPartner");
+    $testPartner = createTestPartner($client, "Kaltura.testapp1");
 
     info(" executing $testName...");
     $output = array();
@@ -121,7 +121,7 @@ function runLiveEntryTest($dc,$userName,$userPassword)
   try {
     print("\n\r liveEntryTests init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testPartner");
+    $testPartner = createTestPartner($client, "Kaltura.testapp1");
     addPartnerPermissions($client, $testPartner, "QUIZ_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
     $conversionProfile = getConversionProfileForSpecficPartner($client, $testPartner->id, 'Passthrough', KalturaConversionProfileType::LIVE_STREAM);
     setDefaultConversionProfile($dc, $testPartner, $conversionProfile->id);
@@ -157,8 +157,8 @@ function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
   try {
     print("\n\r crossKalturaDistributionTest init.");
     $client = login($dc, $userName, $userPassword);
-    $sourceTestPartner = createTestPartner($client, "testUser1");
-    $targetTestPartner = createTestPartner($client, "testUser2");
+    $sourceTestPartner = createTestPartner($client, "Kaltura.testapp1");
+    $targetTestPartner = createTestPartner($client, "Kaltura.testapp2");
 
     addPartnerPermissions($client, $sourceTestPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
     addPartnerPermissions($client, $targetTestPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
@@ -215,7 +215,7 @@ function runRemoteStorageExportAndImportTest($dc,$userName,$userPassword)
 
     print("\n\r remoteStorageTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testPartner");
+    $testPartner = createTestPartner($client, "Kaltura.testapp1");
     $storageUrl = 'http://'.$remoteHost.':90/testingStorage/';
     updatePartnerWithRemoteStoragePriority ($client, $testPartner->id, KalturaStorageServePriority::EXTERNAL_ONLY , 1 );
     $deliveryProfile = createDeliveryProfile($client, $testPartner->id, "testDeliveryProfile", KalturaDeliveryProfileType::HTTP, KalturaPlaybackProtocol::HTTP, $storageUrl , KalturaDeliveryStatus::ACTIVE);
@@ -288,7 +288,7 @@ function runTvinciDistributionTest($dc,$userName,$userPassword)
   try {
     print("\n\r tvinciDistributionTest init.");
     $client = login($dc, $userName, $userPassword);
-    $testPartner = createTestPartner($client, "testUser");
+    $testPartner = createTestPartner($client, "Kaltura.testapp1");
 
     addPartnerPermissions($client, $testPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
 
