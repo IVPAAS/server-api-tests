@@ -2,7 +2,7 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
 
-function createCategory($client,$categoryName, $parentId = null)
+function createCategory($client,$categoryName, $parentId = null, $inheritanceType = KalturaInheritanceType::INHERIT)
 {
 	$category = new KalturaCategory();
 	$category->name = $categoryName;
@@ -14,7 +14,7 @@ function createCategory($client,$categoryName, $parentId = null)
 	$category->privacyContext = 'PrivacyContext';
 	if ( $parentId )
 	{
-		$category->inheritanceType = KalturaInheritanceType::INHERIT;
+		$category->inheritanceType = $inheritanceType;
 		$category->parentId = $parentId;
 	}
 
@@ -160,12 +160,15 @@ function createCategoryTreeAndLeafDeleteWithMovingEntries( $client )
 	$rootCat1 = null;
 	$CategoryChildLeaf1 = null;
 	$CategoryChildLevel1 = null;
-	createCategoryTreeWithEntry($client, $rootCat, $CategoryChildLeaf1, $CategoryChildLevel1);
+	createCategoryTreeWithEntry($client, $rootCat, $CategoryChildLeaf1, $CategoryChildLevel1, true);
 
 	if (validateCategoryTreeCreation($client, $rootCat, 14))
 		return false;
 
 	if (validateCategoryEntriesCreation($client, $rootCat, 9))
+		return false;
+
+	if (validateCategoryUsersCreation($client, $rootCat, 9))
 		return false;
 
 	$parent = deleteCategoryAndRetrieveParentId($client, $CategoryChildLeaf1, true);
@@ -175,6 +178,9 @@ function createCategoryTreeAndLeafDeleteWithMovingEntries( $client )
 
 	if (validateCategoryTreeEntryCount($client, $parent, 9))
 		return fail(__FUNCTION__ . " Category entries weren't deleted successfully !");
+
+	if (validateCategoryUsersCount($client, $parent, 2))
+		return fail(__FUNCTION__ . " Category users weren't deleted successfully !");
 
 	if (validateCategoryEntryCountForSpecificCategory($client, $parent, 1))
 		return fail(__FUNCTION__ . " Category entries moved to category when requested not to be moved!");
@@ -244,7 +250,8 @@ function validateCategoryEntryCountForSpecificCategory($client, $category, $coun
 
 /**
  * @param $client
- * @param $parentCategoryOfLeaf
+ * @param $topCategory
+ * @param $count
  * @return int|string
  */
 function validateCategoryTreeEntryCount($client, $topCategory, $count)
@@ -268,6 +275,36 @@ function validateCategoryTreeEntryCount($client, $topCategory, $count)
 	info("Total categories entries for category tree starting at category $topCategory->id is: $categoriesEntryList->totalCount");
 	if ($categoriesEntryList->totalCount != $count)
 		return fail(__FUNCTION__ . " Category tree entry count doesn't match expected $count and got $categoriesEntryList->totalCount !");
+	else
+		return info("Category tree entry count match.");
+}
+
+/**
+ * @param $client
+ * @param $parentCategoryOfLeaf
+ * @return int|string
+ */
+function validateCategoryUsersCount($client, $topCategory, $count)
+{
+	$filter = new KalturaCategoryUserFilter();
+	$filter->categoryFullIdsStartsWith = $topCategory->fullIds;
+
+	$retries = 3;
+	$categoriesEntryList = 0;
+	for ($i = 0; $i < $retries; $i++) {
+		info("sleep 30 seconds");
+		for ($j = 0; $j < 30; $j++) {
+			sleep(1);
+			print(".");
+		}
+		$categoriesUsersList = $client->categoryUser->listAction($filter);
+		if ($categoriesUsersList->totalCount == $count)
+			break;
+	}
+
+	info("Total categories users for category tree starting at category $topCategory->id is: $categoriesUsersList->totalCount");
+	if ($categoriesUsersList->totalCount != $count)
+		return fail(__FUNCTION__ . " Category tree entry count doesn't match expected $count and got $categoriesUsersList->totalCount !");
 	else
 		return info("Category tree entry count match.");
 }
@@ -330,6 +367,25 @@ function validateCategoryEntriesCreation($client, $rootCat ,$count)
  * @param $count
  * @return int|string
  */
+function validateCategoryUsersCreation($client, $rootCat ,$count)
+{
+	$filter = new KalturaCategoryUserFilter();
+	$filter->categoryFullIdsStartsWith = $rootCat->fullIds;;
+	$categoryUserList = $client->categoryUser->listAction($filter ,null);
+	info("total categories users created $categoryUserList->totalCount");
+	if ($categoryUserList->totalCount != $count)
+		return fail(__FUNCTION__ . " Category users weren't created!");
+	else
+		return info("Category users created successfully");
+}
+
+
+/**
+ * @param $client
+ * @param $rootCat
+ * @param $count
+ * @return int|string
+ */
 function validateCategoryTreeCreation($client, $rootCat, $count)
 {
 	$filter = new KalturaCategoryFilter();
@@ -349,11 +405,12 @@ function validateCategoryTreeCreation($client, $rootCat, $count)
  * @param $rootCat
  * @param $CategoryLeaf
  * @param $CategoryChild
+ * @param $shouldAddUserAndBindToCategroy
  */
-function createCategoryTreeWithEntry($client, &$rootCat, &$CategoryLeaf, &$CategoryChild )
+function createCategoryTreeWithEntry($client, &$rootCat, &$CategoryLeaf, &$CategoryChild, $shouldAddUserAndBindToCategroy = false )
 {
-	$rootCat = createCategory($client, 'rootCat' . rand(0, 1000000));
-	$CategoryChildLevel1 = createCategory($client, "childOf $rootCat->name", $rootCat->id);
+	$rootCat = createCategory($client, 'rootCat' . rand(0, 1000000), null, KalturaInheritanceType::MANUAL);
+	$CategoryChildLevel1 = createCategory($client, "childOf $rootCat->name", $rootCat->id, KalturaInheritanceType::MANUAL);
 	$CategoryChild = $CategoryChildLevel1;
 	$MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'categoryEntryTest');
 	info("Wait for entry to be ready id =" . $MediaEntry->id);
@@ -365,10 +422,15 @@ function createCategoryTreeWithEntry($client, &$rootCat, &$CategoryLeaf, &$Categ
 	$CategoryChildLeaf = null;
 	info("Creating category tree with entries");
 	for ($i = 0; $i < 3; $i++) {
-		$CategoryChildLevel2 = createCategory($client, rand(0, 1000000000000000), $CategoryChildLevel1->id);
+		$CategoryChildLevel2 = createCategory($client, rand(0, 1000000000000000), $CategoryChildLevel1->id, KalturaInheritanceType::MANUAL);
 		for ($j = 0; $j < 3; $j++) {
-			$CategoryChildLeaf = createCategory($client, rand(0, 1000000000000000), $CategoryChildLevel2->id);
+			$CategoryChildLeaf = createCategory($client, rand(0, 1000000000000000), $CategoryChildLevel2->id, KalturaInheritanceType::MANUAL);
 			addCategoryEntry($client, $CategoryChildLeaf->id, $MediaEntry->id);
+			if ($shouldAddUserAndBindToCategroy)
+			{
+				$userId = 'user' .rand(0,1000000) . $rootCat->id;
+				AddUserToCategory($client, $CategoryChildLeaf->id, $userId);
+			}
 		}
 	}
 	$CategoryLeaf = $CategoryChildLeaf;
