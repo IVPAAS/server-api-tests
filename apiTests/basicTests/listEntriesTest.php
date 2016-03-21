@@ -44,10 +44,11 @@ function helper_createEntryWithCaptions( $client, $captionsPath)
 	return $entryId;
 }
 
-function helper_createEntryAndUploadContent($client, $entryName)
+function helper_createEntryAndUploadContent($client, $entryName, $referenceId='testRefID')
 {
+
 	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
-	$entry = addEntry($client,$entryName);
+	$entry = addEntry($client,$entryName,KalturaMediaType::VIDEO,null,'','test media description','test tag',$referenceId);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
@@ -164,6 +165,24 @@ function Test3_EntryCaptionSearchFilter( $client, $keyWord )
 	return success(__FUNCTION__);
 }
 
+function Test4_referenceIdFilter( $client )
+{
+	$referenceId = '9780133965803-9780133965803-2016-03-11-21-06-07-562138';
+	$goodEntries = array();
+	$badEntries = array();
+
+	$goodEntries[] = helper_createEntryAndUploadContent( $client, "correctReferenceId", $referenceId );
+	$badEntries[] = helper_createEntryAndUploadContent( $client, "wrongReferenceId", $referenceId . 'aa' );
+
+	$filter = new KalturaBaseEntryFilter();
+	$filter->referenceIdEqual = $referenceId;
+
+	if ( !helper_validateEntryList($client, $filter, $goodEntries, $badEntries))
+		return fail(__FUNCTION__);
+
+	return success(__FUNCTION__);
+}
+
 function main($dc,$partnerId,$adminSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
@@ -171,7 +190,7 @@ function main($dc,$partnerId,$adminSecret)
 	$ret = Test1_BaseEntryList($client, $keyWord);
 	$ret  += Test2_EntryTranscriptSearchFilter($client, $keyWord);
 	$ret  += Test3_EntryCaptionSearchFilter($client, $keyWord);
-
+	$ret += Test4_referenceIdFilter($client);
 	return ($ret);
 }
 
