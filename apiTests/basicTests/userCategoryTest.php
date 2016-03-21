@@ -228,7 +228,7 @@ function validateCategoryEntryCountForSpecificCategory($client, $category, $coun
 	$filter = new KalturaCategoryEntryFilter();
 	$filter->categoryIdEqual = $category->id;
 
-	$retries = 3;
+	$retries = 10;
 	$categoryEntryList = 0;
 	for ($i = 0; $i < $retries; $i++) {
 		info("sleep 30 seconds");
@@ -289,8 +289,8 @@ function validateCategoryUsersCount($client, $topCategory, $count)
 	$filter = new KalturaCategoryUserFilter();
 	$filter->categoryFullIdsStartsWith = $topCategory->fullIds;
 
-	$retries = 3;
-	$categoriesEntryList = 0;
+	$retries = 10;
+	$categoriesUsersList = 0;
 	for ($i = 0; $i < $retries; $i++) {
 		info("sleep 30 seconds");
 		for ($j = 0; $j < 30; $j++) {
