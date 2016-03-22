@@ -183,7 +183,7 @@ function createCategoryTreeAndLeafDeleteWithMovingEntries( $client )
 		return fail(__FUNCTION__ . " Category users weren't deleted successfully !");
 
 	if (validateCategoryEntryCountForSpecificCategory($client, $parent, 1))
-		return fail(__FUNCTION__ . " Category entries moved to category when requested not to be moved!");
+		return fail(__FUNCTION__ . " Category entries didn't move to category when requested to.");
 
 	return success(__FUNCTION__);
 
@@ -441,11 +441,11 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$ret = createCategoryAndBindUsers($client);
-	$ret += createCategoryTree($client);
+//	$ret += createCategoryTree($client);
 	$ret += createCategoryTreeAndLeafDeleteWithMovingEntries($client);
-	$ret += createCategoryTreeAndLeafDeleteWithoutMovingEntries( $client );
-	$ret += createCategoryTreeAndDeleteChildWithMovingEntries($client);
-	$ret += createCategoryTreeAndDeleteChildWithoutMovingEntries($client);
+//	$ret += createCategoryTreeAndLeafDeleteWithoutMovingEntries( $client );
+//	$ret += createCategoryTreeAndDeleteChildWithMovingEntries($client);
+//	$ret += createCategoryTreeAndDeleteChildWithoutMovingEntries($client);
 
 	return ($ret);
 }
