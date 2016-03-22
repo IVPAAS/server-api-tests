@@ -511,7 +511,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$widgetId = helper_create_widget($client,"IVQ_WIDGET_SESSION_ROLE" );
 	info("New widget ID {$widgetId}");
-	$ret = true;
+	$ret = 0;
 	$ret+=Test1_Basicflow($client);
 	$ret+=Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc);
 	$ret+=Test3_ValidateScoreUponSubmitWithAdminKS($client);
