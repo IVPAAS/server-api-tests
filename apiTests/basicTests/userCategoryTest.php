@@ -441,11 +441,11 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$ret = createCategoryAndBindUsers($client);
-//	$ret += createCategoryTree($client);
+	$ret += createCategoryTree($client);
 	$ret += createCategoryTreeAndLeafDeleteWithMovingEntries($client);
-//	$ret += createCategoryTreeAndLeafDeleteWithoutMovingEntries( $client );
-//	$ret += createCategoryTreeAndDeleteChildWithMovingEntries($client);
-//	$ret += createCategoryTreeAndDeleteChildWithoutMovingEntries($client);
+	$ret += createCategoryTreeAndLeafDeleteWithoutMovingEntries( $client );
+	$ret += createCategoryTreeAndDeleteChildWithMovingEntries($client);
+	$ret += createCategoryTreeAndDeleteChildWithoutMovingEntries($client);
 
 	return ($ret);
 }

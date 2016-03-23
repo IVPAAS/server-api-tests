@@ -6,11 +6,13 @@ main();
 
 $TotalCount = 0;
 $failedCount = 0;
+$skipCount = 0;
+
 $paramsMap = array();
 
 function runAllTests($dc,$userName,$userPassword)
 {
-  global $TotalCount, $failedCount, $paramsMap;
+  global $TotalCount, $failedCount, $skipCount, $paramsMap;
 
   HTMLLogger::init();
   initParams($dc, $userName, $userPassword);
@@ -19,27 +21,44 @@ function runAllTests($dc,$userName,$userPassword)
 
   $res = 0;
 
-  try {
-
+  try
+  {
+    $ini = parse_ini_file(dirname(__FILE__) . '/testsConfig.ini');
     print("\n*********************************************");
     printInfoAndlogOutput("Running All Tests - " . date("F j, Y, g:i a"));
     print("\n*********************************************\n");
 
     // Run all basic tests that require only partner creation
-
     $di = new RecursiveDirectoryIterator('basicTests');
-    foreach (new RecursiveIteratorIterator($di) as $filename => $file) {
-      if (is_file($filename))  {
-        $TotalCount++;
-        $failedCount = $failedCount + runBasicTest($dc, $userName, $userPassword, basename($filename, ".php"), $filename);
+    foreach (new RecursiveIteratorIterator($di) as $filename => $file)
+    {
+      $testName = basename($filename, ".php");
+      if (is_file($filename))
+      {
+        if (shouldRun($ini, $testName))
+        {
+          $TotalCount++;
+          $failedCount = $failedCount + runBasicTest($dc, $userName, $userPassword, $testName, $filename);
+        } else
+        {
+          print ("$testName is disabled in configuration file. Skipping test \n");
+          $skipCount++;
+        }
       }
     }
 
     // Run Advanced Tests
-    $ini = parse_ini_file(dirname(__FILE__).'/testsConfig.ini');
-    foreach ($ini['advanced-test'] as $advanced){
-      print ($advanced. "\n");
-      runTest($advanced, array( $paramsMap["dc"], $paramsMap["username"], $paramsMap["userPass"]));
+    foreach ($ini['advanced-test'] as $advanced)
+    {
+      if (shouldRun($ini, $advanced))
+      {
+        print ($advanced . "\n");
+        runTest($advanced, array($paramsMap["dc"], $paramsMap["username"], $paramsMap["userPass"]));
+      } else
+      {
+        print ("$advanced is disabled in configuration file. Skipping test \n");
+        $skipCount++;
+      }
     }
 
     print("\n*********************************************");
@@ -61,6 +80,15 @@ function runAllTests($dc,$userName,$userPassword)
   if ($res) {
     exit(FAIL);
   }
+}
+
+function shouldRun($configFile, $testName){
+  foreach ($configFile['disabled'] as $disabled)
+  {
+    if ($disabled == $testName)
+        return false;
+  }
+      return true;
 }
 
 function initParams($dc, $userName, $userPassword){
