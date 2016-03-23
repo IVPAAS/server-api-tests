@@ -38,9 +38,9 @@ function testAnonymousCache($dc,$partnerId,$client,$entryId)
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$ret = 0;
-$client = startKalturaSession($partnerId,$adminSecret,$dc);
+	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$entry=addEntry($client,__FUNCTION__);
-createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
+	createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
 	$ret += testAnonymousCache($dc,$partnerId,$client,$entry->id);
 	return ($ret);
 }

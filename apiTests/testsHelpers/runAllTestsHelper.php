@@ -302,28 +302,25 @@ function removeDeletedBaseEntriesForPartnerFromFileSystem( $partner )
 function markBaseEntriesForPartnersAsDeleted($dc, $partner)
 {
     print("\r\n Start markBaseEntriesForPartnersAsDeleted for partner $partner->id.");
-    try {
+    try
+    {
         $client = startKalturaSession($partner->id, $partner->adminSecret, $dc, KalturaSessionType::ADMIN, null);
         $filter = null;
         $counter = 0;
+
         $pager = new KalturaFilterPager();
-        $pager->pageSize = 500;
-        $pageIndex = 0;
-        $pager->pageIndex = $pageIndex;
+        $pager->pageSize = 100;
+        $pager->pageIndex = 1;
         $result = $client->baseEntry->listAction($filter, $pager);
-        $totalCount = $result->totalCount;
-        print("\r\n Total Base Entries Count for partner $partner->id is: $totalCount");
-        while ($totalCount > 0) {
-            $result = $client->baseEntry->listAction($filter, $pager);
-            foreach ($result->objects as $item) {
-                print("\n\r Marking item $item->id as deleted");
-                $client->baseEntry->delete($item->id);
-                $counter = $counter + 1;
+        do
+        {
+            foreach ($result->objects as $item)
+            {
+                    $client->baseEntry->delete($item->id);
+                    $counter = $counter + 1;
             }
-            $totalCount = $totalCount - 500;
-            $pageIndex = $pageIndex + 1;
-            $pager->pageIndex = $pageIndex;
-        }
+            $result = $client->baseEntry->listAction($filter, $pager);
+        } while (count($result->objects) == $pager->pageSize);
         print("\n\r Total Base Entries marked as deleted for partner $partner->id: $counter");
     }
     catch(Exception $e)
