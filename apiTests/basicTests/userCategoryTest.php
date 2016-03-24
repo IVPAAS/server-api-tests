@@ -108,12 +108,15 @@ function createCategoryTreeAndDeleteChildWithoutMovingEntries( $client )
 	$rootCat = null;
 	$CategoryChildLeaf = null;
 	$CategoryChild = null;
-	createCategoryTreeWithEntry($client, $rootCat, $CategoryChildLeaf, $CategoryChild);
+	createCategoryTreeWithEntry($client, $rootCat, $CategoryChildLeaf, $CategoryChild,true);
 
 	if (validateCategoryTreeCreation($client, $rootCat, 14))
 		return false;
 
 	if (validateCategoryEntriesCreation($client, $rootCat, 9))
+		return false;
+
+	if (validateCategoryUsersCreation($client, $rootCat, 9))
 		return false;
 
 	info("Deleting child category of root category and not moving entries to parent category");
@@ -122,8 +125,14 @@ function createCategoryTreeAndDeleteChildWithoutMovingEntries( $client )
 	if (validateCategoryTreeCount($client, $parentCategory, 1))
 		return fail(__FUNCTION__ . " Category leaf $CategoryChild->id wasn't deleted!");
 
+	if (validateCategoryTreeEntryCount($client, $parentCategory, 0))
+		return fail(__FUNCTION__ . " Category entries weren't deleted successfully !");
+
 	if (validateCategoryEntryCountForSpecificCategory($client, $parentCategory, 0))
 		return fail(__FUNCTION__ . " Category entries moved to category when requested not to be moved!");
+
+	if (validateCategoryUsersCount($client, $parentCategory, 0))
+		return fail(__FUNCTION__ . " Category users weren't deleted successfully !");
 
 	return success(__FUNCTION__);
 }
@@ -134,12 +143,15 @@ function createCategoryTreeAndDeleteChildWithMovingEntries( $client )
 	$rootCat = null;
 	$CategoryChildLeaf = null;
 	$CategoryChildLevel1 = null;
-	createCategoryTreeWithEntry($client, $rootCat, $CategoryChildLeaf, $CategoryChildLevel1);
+	createCategoryTreeWithEntry($client, $rootCat, $CategoryChildLeaf, $CategoryChildLevel1,true );
 
 	if (validateCategoryTreeCreation($client, $rootCat, 14))
 		return false;
 
 	if (validateCategoryEntriesCreation($client, $rootCat, 9))
+		return false;
+
+	if (validateCategoryUsersCreation($client, $rootCat, 9))
 		return false;
 
 	info("Deleting child category of root category");
@@ -150,6 +162,12 @@ function createCategoryTreeAndDeleteChildWithMovingEntries( $client )
 
 	if (validateCategoryEntryCountForSpecificCategory($client, $parentCategory, 1))
 		return fail(__FUNCTION__ . " Category entries didn't move to parent category when requested to be moved!");
+
+	 if (validateCategoryTreeEntryCount($client, $parentCategory, 1))
+                return fail(__FUNCTION__ . " Category entries weren't deleted successfully !");
+
+	if (validateCategoryUsersCount($client, $parentCategory, 0))
+		return fail(__FUNCTION__ . " Category users weren't deleted successfully !");
 
 	return success(__FUNCTION__);
 }
@@ -176,7 +194,7 @@ function createCategoryTreeAndLeafDeleteWithMovingEntries( $client )
 	if (validateCategoryTreeCount($client, $parent, 3))
 		return fail(__FUNCTION__ . " Category leaf $CategoryChildLeaf1->id wasn't deleted!");
 
-	if (validateCategoryTreeEntryCount($client, $parent, 9))
+	if (validateCategoryTreeEntryCount($client, $parent, 3))
 		return fail(__FUNCTION__ . " Category entries weren't deleted successfully !");
 
 	if (validateCategoryUsersCount($client, $parent, 2))
@@ -194,7 +212,7 @@ function createCategoryTreeAndLeafDeleteWithoutMovingEntries( $client )
 	$rootCat2 = null;
 	$CategoryChildLeaf2 = null;
 	$CategoryChild2 = null;
-	createCategoryTreeWithEntry($client, $rootCat2, $CategoryChildLeaf2, $CategoryChild2);
+	createCategoryTreeWithEntry($client, $rootCat2, $CategoryChildLeaf2, $CategoryChild2, true);
 
 
 	if (validateCategoryTreeCreation($client, $rootCat2, 14))
@@ -211,8 +229,11 @@ function createCategoryTreeAndLeafDeleteWithoutMovingEntries( $client )
 	if (validateCategoryEntryCountForSpecificCategory($client, $parentCategory, 0))
 		return fail(__FUNCTION__ . " Category entries moved to category when requested not to be moved!");
 
-//	if (validateCategoryTreeEntryCount($client, $parentCategory, 8))
-//		return fail(__FUNCTION__ . " Category entries weren't deleted successfully !");
+	if (validateCategoryTreeEntryCount($client, $parentCategory, 2))
+		return fail(__FUNCTION__ . " Category entries weren't deleted successfully !");
+
+	if (validateCategoryUsersCount($client, $parentCategory, 2))
+                return fail(__FUNCTION__ . " Category users weren't deleted successfully !");
 
 	return success(__FUNCTION__);
 }
@@ -257,7 +278,8 @@ function validateCategoryEntryCountForSpecificCategory($client, $category, $coun
 function validateCategoryTreeEntryCount($client, $topCategory, $count)
 {
 	$filter = new KalturaCategoryEntryFilter();
-	$filter->fullIdsStartsWith = $topCategory->fullIds;
+	$filter->categoryFullIdsStartsWith = $topCategory->fullIds;
+	print( "FULL ID IS $topCategory->fullIds");
 
 	$retries = 3;
 	$categoriesEntryList = 0;
@@ -289,7 +311,7 @@ function validateCategoryUsersCount($client, $topCategory, $count)
 	$filter = new KalturaCategoryUserFilter();
 	$filter->categoryFullIdsStartsWith = $topCategory->fullIds;
 
-	$retries = 10;
+	$retries = 3;
 	$categoriesUsersList = 0;
 	for ($i = 0; $i < $retries; $i++) {
 		info("sleep 30 seconds");
