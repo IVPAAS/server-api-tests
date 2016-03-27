@@ -167,15 +167,17 @@ function Test3_EntryCaptionSearchFilter( $client, $keyWord )
 
 function Test4_referenceIdFilter( $client )
 {
-	$referenceId = '9780133965803-9780133965803-2016-03-11-21-06-07-562138';
+	$referenceIds = array( '9780133965803-9780133965803-2016-03-11-27-06-07-562138', ' with space', 'shortOne', 'specialChars!@#$%^&*()' );
 	$goodEntries = array();
 	$badEntries = array();
 
-	$goodEntries[] = helper_createEntryAndUploadContent( $client, "correctReferenceId", $referenceId );
-	$badEntries[] = helper_createEntryAndUploadContent( $client, "wrongReferenceId", $referenceId . 'aa' );
+	foreach ( $referenceIds as $refId ) {
+		$goodEntries[] = helper_createEntryAndUploadContent( $client, "correctReferenceId", $refId );
+		$badEntries[] = helper_createEntryAndUploadContent( $client, "wrongReferenceId", $refId . 'aa' );
+	}
 
 	$filter = new KalturaBaseEntryFilter();
-	$filter->referenceIdEqual = $referenceId;
+	$filter->referenceIdIn = implode( ",", $referenceIds);
 
 	if ( !helper_validateEntryList($client, $filter, $goodEntries, $badEntries))
 		return fail(__FUNCTION__);
