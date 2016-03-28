@@ -167,7 +167,7 @@ function Test3_EntryCaptionSearchFilter( $client, $keyWord )
 
 function Test4_referenceIdFilter( $client )
 {
-	$referenceIds = array( '9780133965803-9780133965803-2016-03-11-27-06-07-562138', ' with space', 'shortOne', 'specialChars!@#$%^&*()' );
+	$referenceIds = array( '9780133965803-9780133965803-2016-03-11-27-06-07-562135', ' with space ', 'abc', 'HelLo WorlD', 'TEST', '#specialChars!@#$%^&*()<>~_|\\/' );
 	$goodEntries = array();
 	$badEntries = array();
 
