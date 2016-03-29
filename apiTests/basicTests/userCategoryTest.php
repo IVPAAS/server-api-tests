@@ -279,7 +279,6 @@ function validateCategoryTreeEntryCount($client, $topCategory, $count)
 {
 	$filter = new KalturaCategoryEntryFilter();
 	$filter->categoryFullIdsStartsWith = $topCategory->fullIds;
-	print( "FULL ID IS $topCategory->fullIds");
 
 	$retries = 3;
 	$categoriesEntryList = 0;
@@ -326,7 +325,7 @@ function validateCategoryUsersCount($client, $topCategory, $count)
 
 	info("Total categories users for category tree starting at category $topCategory->id is: $categoriesUsersList->totalCount");
 	if ($categoriesUsersList->totalCount != $count)
-		return fail(__FUNCTION__ . " Category tree entry count doesn't match expected $count and got $categoriesUsersList->totalCount !");
+		return fail(__FUNCTION__ . " Category tree user count doesn't match expected $count and got $categoriesUsersList->totalCount !");
 	else
 		return info("Category tree entry count match.");
 }
