@@ -496,6 +496,7 @@ function test13_createTwoUserEntriesWithForSameUser($client,$dc,$partnerId)
 	$quizUserEntry1 = addQuizUserEntry($client,$user->id,$entry->id);
 	try
 	{
+		sleep(5);
 		$quizUserEntry2 = addQuizUserEntry($client, $user->id, $entry->id);
 	}
 	catch (Exception $e)
