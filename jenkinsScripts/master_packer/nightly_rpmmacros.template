@@ -1,0 +1,9 @@
+%_signature gpg
+%_gpg_name Kaltura, Inc.
+%_kmc_version @rpmmacros_kmc_version@
+%clipapp_version @rpmmacros_clipapp_version@
+%html5_version @rpmmacros_html5_version@
+%kdp3_wrapper_version @rpmmacros_kdp3_wrapper_version@
+%kmc_login_version @rpmmacros_kmc_login_version@
+%kcw_uiconf_ver @rpmmacros_kcw_uiconf_ver@
+%kdp3_vers v3.9.7 @rpmmacros_kdp3_vers@

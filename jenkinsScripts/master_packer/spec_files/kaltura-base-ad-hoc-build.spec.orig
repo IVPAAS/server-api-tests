@@ -1,0 +1,289 @@
+%define kaltura_user	kaltura
+%define kaltura_group	kaltura
+%define apache_user	apache
+%define apache_group	apache
+%define prefix /opt/kaltura
+%define confdir %{prefix}/app/configurations
+%define logdir %{prefix}/log
+%define webdir %{prefix}/web
+
+Summary: Kaltura Open Source Video Platform 
+Name: kaltura-base
+#Version: %{_version_id}
+Version: %{_version}
+Release: %{_rc}
+License: AGPLv3+
+Group: Server/Platform 
+Source0: https://github.com/kaltura/server/archive/%{codename}-%{version}-TM.zip 
+Source4: emails_en.template.ini
+Source7: dwh.template
+Source10: entry_and_uiconf_templates.tar.gz
+# fixes https://github.com/kaltura/platform-install-packages/issues/37
+Source11: clear_cache.sh
+# monit templates
+Source13: sphinx.template.rc 
+Source14: httpd.template.rc 
+Source15: batch.template.rc 
+Source17: navigation.xml 
+Source18: monit.phtml 
+Source19: IndexController.php
+Source20: sphinx.populate.template.rc
+#Source22: 01.UserRole.99.template.xml
+Source23: 04.flavorParams.ini
+Source24: 04.liveParams.ini
+Source25: kaltura_populate.template
+Source26: kaltura_batch.template
+#Source27: kmc1Success.php 
+Source28: embedIframeJsAction.class.php
+
+URL: https://github.com/kaltura/server/tree/%{codename}-%{version}
+Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch: noarch
+Requires: rsync,mysql,kaltura-monit,kaltura-postinst,cronie, php-cli, php-xml, php-curl, php-mysql, php-gd, php-gmp, php-ldap, php-mbstring, ntp, mailx
+
+%description
+Kaltura is the world's first Open Source Online Video Platform, transforming the way people work, 
+learn, and entertain using online video. 
+The Kaltura platform empowers media applications with advanced video management, publishing, 
+and monetization tools that increase their reach and monetization and simplify their video operations. 
+Kaltura improves productivity and interaction among millions of employees by providing enterprises 
+powerful online video tools for boosting internal knowledge sharing, training, and collaboration, 
+and for more effective marketing. Kaltura offers next generation learning for millions of students and 
+teachers by providing educational institutions disruptive online video solutions for improved teaching,
+learning, and increased engagement across campuses and beyond. 
+For more information visit: http://corp.kaltura.com, http://www.kaltura.org and http://www.html5video.org.
+
+This is the base package, needed for any Kaltura server role.
+
+%prep
+%setup -qn server-%{codename}-%{version}
+
+
+%install
+mkdir -p $RPM_BUILD_ROOT%{prefix}/app
+mkdir -p $RPM_BUILD_ROOT%{prefix}/log
+mkdir -p $RPM_BUILD_ROOT%{prefix}/tmp
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web
+mkdir -p $RPM_BUILD_ROOT%{prefix}/app/cache
+mkdir -p $RPM_BUILD_ROOT%{prefix}/bin
+mkdir -p $RPM_BUILD_ROOT%{prefix}/lib
+mkdir -p $RPM_BUILD_ROOT%{prefix}/include
+mkdir -p $RPM_BUILD_ROOT%{prefix}/share
+
+mkdir -p $RPM_BUILD_ROOT%{prefix}/tmp/convert
+mkdir -p $RPM_BUILD_ROOT%{prefix}/tmp/thumb/
+
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/tmp
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/tmp/imports
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/tmp/convert
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/tmp/thumb
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/tmp/xml
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/dropfolders/monitor
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/control
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/content/cacheswf
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/content/uploads
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/content/entry
+mkdir -p $RPM_BUILD_ROOT%{prefix}web/content//metadata
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/content/batchfiles
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/content/templates
+
+
+
+mkdir -p $RPM_BUILD_ROOT/etc/kaltura.d
+# align faulty permissions.
+for i in "*.xml" "*.template" "*.ttf" "*.xsl" "*.xsd" "*.yml" "*.smil" "*.srt" "*.sql" "*.orig" "*.patch" "*.po" "*.pdf" "*.otf" "*.txt" "*.php" "*.phtml" "*.
+project" "*.png" "*.properties" "*.sample" "*.swf" "*.sf" "*.swz" "*.uad" "*.prefs" "*.psd" "*.rvmrc" "*.sln" "*.ini" "*.log" ;do
+	find . -iname "$i" -exec chmod 644 {} \;
+done
+
+for i in admin_console alpha api_v3 batch configurations deployment generator infra plugins start tests ui_infra var_console vendor VERSION.txt  license.txt release-notes.md;do 
+	mv  %{_builddir}/server-%{codename}-%{version}/$i $RPM_BUILD_ROOT%{prefix}/app
+done
+find  $RPM_BUILD_ROOT%{prefix}/app -name "*.sh" -type f -exec chmod +x {} \;
+
+
+sed -i 's@^IsmIndex@;IsmIndex@g' $RPM_BUILD_ROOT%{prefix}/app/configurations/plugins.template.ini
+sed -i "s#^;kmc_version = @KMC_VERSION@#kmc_version = %{_kmc_version}#g" $RPM_BUILD_ROOT%{prefix}/app/configurations/local.template.ini
+sed -i "s#^;html5_version = @HTML5LIB_VERSION@#html5_version = %{html5_version}#g" $RPM_BUILD_ROOT%{prefix}/app/configurations/local.template.ini
+sed -i "s#^;kmc_login_version = @KMC_LOGIN_VERSION@#kmc_login_version = %{kmc_login_version}#g" $RPM_BUILD_ROOT%{prefix}/app/configurations/local.template.ini
+sed -i "s@clipapp_version = @CLIPPAPP_VERSION@#clipapp_version = %{clipapp_version}#g" $RPM_BUILD_ROOT%{prefix}/app/configurations/local.template.ini
+sed -i "s#^clipapp_version =.*#clipapp_version = %{clipapp_version}#g" $RPM_BUILD_ROOT%{prefix}/app/configurations/base.ini
+sed -i "s#^;kdp3_wrapper_version = @KDP3_WRAPPER_VERSION@#kdp3_wrapper_version = %{kdp3_wrapper_version}#g" $RPM_BUILD_ROOT%{prefix}/app/configurations/local.template.ini
+sed -i 's@^writers.\(.*\).filters.priority.priority\s*=\s*7@writers.\1.filters.priority.priority=4@g' $RPM_BUILD_ROOT%{prefix}/app/configurations/logger.template.ini 
+# our Pentaho is correctly installed under its own dir and not %prefix/bin which is the known default so, adding -k path to kitchen.sh
+sed -i 's#\(@DWH_DIR@\)$#\1 -k %{prefix}/pentaho/pdi/kitchen.sh#g' $RPM_BUILD_ROOT%{prefix}/app/configurations/cron/dwh.template
+rm $RPM_BUILD_ROOT%{prefix}/app/generator/sources/android/DemoApplication/libs/libWVphoneAPI.so
+rm $RPM_BUILD_ROOT%{prefix}/app/configurations/.project
+# see https://github.com/kaltura/platform-install-packages/issues/58 - these are taken care of on lines 139 though 144:
+
+# we bring our own for kaltura-front and kaltura-batch.
+cp %{SOURCE4} $RPM_BUILD_ROOT%{prefix}/app/batch/batches/Mailer/emails_en.template.ini
+cp %{SOURCE7} $RPM_BUILD_ROOT%{prefix}/app/configurations/cron/dwh.template
+cp %{SOURCE23} $RPM_BUILD_ROOT%{prefix}/app/deployment/base/scripts/init_data/
+cp %{SOURCE24} $RPM_BUILD_ROOT%{prefix}/app/deployment/base/scripts/init_data/
+cp %{SOURCE11} $RPM_BUILD_ROOT%{prefix}/app/alpha/crond/kaltura/clear_cache.sh
+mkdir -p $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail
+cp %{SOURCE13} $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail/
+cp %{SOURCE20} $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail/
+cp %{SOURCE14} $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail/
+cp %{SOURCE15} $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail/
+cp $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.d/memcached.template.rc $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail/memcached.rc
+cp $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.d/mysqld.template.rc $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail/mysqld.rc
+cp $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.d/mariadb.template.rc $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.avail/mariadb.rc
+rm $RPM_BUILD_ROOT%{prefix}/app/configurations/monit/monit.d/*template*
+cp %{SOURCE25} $RPM_BUILD_ROOT%{prefix}/app/configurations/logrotate/
+cp %{SOURCE26} $RPM_BUILD_ROOT%{prefix}/app/configurations/logrotate/
+#cp %{SOURCE27} $RPM_BUILD_ROOT%{prefix}/app/alpha/apps/kaltura/modules/kmc/templates/
+
+
+# David Bezemer's Admin console and monit patches:
+cp %{SOURCE17} $RPM_BUILD_ROOT%{prefix}/app/admin_console/configs/navigation.xml
+cp %{SOURCE18} $RPM_BUILD_ROOT%{prefix}/app/admin_console/views/scripts/index/monit.phtml
+cp %{SOURCE19} $RPM_BUILD_ROOT%{prefix}/app/admin_console/controllers/IndexController.php
+# patch for auto embed to work, should be dropped when core merge.
+cp %{SOURCE28} $RPM_BUILD_ROOT%{prefix}/app/alpha/apps/kaltura/modules/extwidget/actions/embedIframeJsAction.class.php
+# we bring another in kaltura-batch
+rm $RPM_BUILD_ROOT%{prefix}/app/configurations/batch/batch.ini.template
+
+
+mkdir -p $RPM_BUILD_ROOT%{prefix}/web/content
+tar zxf %{SOURCE10} -C $RPM_BUILD_ROOT%{prefix}/web/content
+
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/profile.d
+cat > $RPM_BUILD_ROOT%{_sysconfdir}/profile.d/kaltura_base.sh << EOF
+PATH=\$PATH:%{prefix}/bin
+export PATH
+alias allkaltlog='grep --color "ERR:\|PHP\|trace\|CRIT\|\[error\]" %{prefix}/log/*.log %{prefix}/log/batch/*.log'
+alias kaltlog='tail -f %{prefix}/log/*.log %{prefix}/log/batch/*.log | grep -A 1 -B 1 --color "ERR:\|PHP\|trace\|CRIT\|\[error\]"'
+if [ -r /etc/kaltura.d/system.ini ];then
+	. /etc/kaltura.d/system.ini
+fi
+EOF
+
+%{__mkdir_p} $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d
+cat > $RPM_BUILD_ROOT%{_sysconfdir}/ld.so.conf.d/kaltura_base.conf << EOF
+%{prefix}/lib
+
+EOF
+
+%clean
+rm -rf %{buildroot}
+
+%pre
+
+# maybe one day we will support SELinux in which case this can be ommitted.
+if which getenforce >> /dev/null 2>&1; then
+	
+	if [ `getenforce` = 'Enforcing' ];then
+		echo "You have SELinux enabled, please change to permissive mode with:
+# setenforce permissive
+and then edit /etc/selinux/config to make the change permanent."
+		exit 1;
+	fi
+fi
+# create user/group, and update permissions
+groupadd -r %{kaltura_group} -g613 2>/dev/null || true
+useradd -M -r -u613 -d %{prefix} -s /bin/bash -c "Kaltura server" -g %{kaltura_group} %{kaltura_user} 2>/dev/null || true
+getent group %{apache_user} >/dev/null || groupadd -g 48 -r %{apache_group}
+getent passwd %{apache_user} >/dev/null || \
+  useradd -r -u 48 -g %{apache_group} -s /sbin/nologin \
+    -d /var/www -c "Apache" %{apache_user}
+usermod -a -G %{kaltura_group} %{apache_user}
+
+usermod -g %{kaltura_group} %{kaltura_user} 2>/dev/null || true
+
+
+%post
+
+ln -sf %{prefix}/app/configurations/system.ini /etc/kaltura.d/system.ini
+ln -sf %{prefix}/app/api_v3/web %{prefix}/app/alpha/web/api_v3
+chown apache.kaltura -R %{prefix}/web/content/entry %{prefix}/web/content/uploads/  %{prefix}/web/tmp/
+find %{prefix}/web/content/entry %{prefix}/web/content/uploads/  %{prefix}/web/tmp/ -type d -exec chmod 775 {} \;
+service ntpd start
+if [ "$1" = 2 ];then
+	if [ -r "%{prefix}/app/configurations/local.ini" -a -r "%{prefix}/app/configurations/base.ini" ];then
+		sed -i "s@^\(kaltura_version\).*@\1 = %{version}@g" %{prefix}/app/configurations/local.ini
+		echo "Regenarating client libs.. this will take up to 2 minutes to complete."
+		if service httpd status;then
+			service httpd stop
+		fi
+		# this is read by kaltura-sphinx-schema-update.sh to determine rather or not to run
+		touch %{prefix}/app/configurations/sphinx_schema_update
+		rm -rf %{prefix}/app/cache/*
+		php %{prefix}/app/generator/generate.php
+		find %{prefix}/app/cache/ %{prefix}/log -type d -exec chmod 775 {} \;
+		find %{prefix}/app/cache/ %{prefix}/log -type f -exec chmod 664 {} \;
+		chown -R %{kaltura_user}.%{apache_user} %{prefix}/app/cache/ %{prefix}/log
+		chmod 775 %{prefix}/web/content
+
+		if ! service httpd status;then
+			service httpd start
+		fi
+
+		# we now need CREATE and DROP priv for 'kaltura' on kaltura.*
+		if [ -r /etc/kaltura.d/system.ini ];then
+			. /etc/kaltura.d/system.ini
+			echo "GRANT INSERT,UPDATE,DELETE,SELECT,ALTER,DROP,CREATE ON kaltura.* TO 'kaltura'@'%';FLUSH PRIVILEGES;"|mysql -h$DB1_HOST -u $SUPER_USER -p$SUPER_USER_PASSWD -P$DB1_PORT
+		fi
+		php %{prefix}/app/deployment/updates/update.php -i -d >> /opt/kaltura/log/kalt_up.log 2>&1
+		php %{prefix}/app/deployment/updates/update.php -i -s >> /opt/kaltura/log/kalt_up.log 2>&1
+		php %{prefix}/app/deployment/base/scripts/installPlugins.php >> /opt/kaltura/log/kalt_up.log 2>&1
+	#	#php %{prefix}/app/tests/standAloneClient/exec.php %{prefix}/app/tests/standAloneClient/emailDropFolderFileFailedStatus.xml
+	#	php %{prefix}/app/deployment/updates/scripts/2014_05_27_create_delivery_profiles.php  >> /opt/kaltura/log/kalt_up.log 2>&1
+
+	fi
+
+fi
+
+
+%preun
+if [ "$1" = 0 ] ; then
+	rm -f %{_sysconfdir}/kaltura.d/system.ini
+	rm -f %{prefix}/app/alpha/web/api_v3
+	rm -f %{_sysconfdir}/logrotate.d/kaltura_base
+	# get rid of stray symlinks.
+	find %{_sysconfdir}/httpd/conf.d/ -type l -name "*kaltura*" -exec rm {} \;
+	find %{prefix}/app -maxdepth 1 -name "*.lock" -exec rm {} \;
+fi
+
+%postun
+
+%files
+%{prefix}/app/admin_console
+%{prefix}/app/var_console
+%{prefix}/app/alpha
+%{prefix}/app/api_v3
+%{prefix}/app/batch
+%{prefix}/app/deployment
+%{prefix}/app/generator
+%{prefix}/app/infra
+%{prefix}/app/ui_infra
+%{prefix}/app/plugins
+%{prefix}/app/start
+%{prefix}/app/vendor
+%{prefix}/app/tests
+
+%config %{prefix}/app/configurations/*
+%config %{_sysconfdir}/profile.d/kaltura_base.sh
+%config %{_sysconfdir}/ld.so.conf.d/kaltura_base.conf
+
+
+%dir /etc/kaltura.d
+%defattr(-, %{kaltura_user}, %{apache_group} , 0775)
+%dir %{prefix}/log
+%dir %{prefix}/tmp
+%dir %{prefix}/app/cache
+%{prefix}/web/*
+%defattr(-, %{kaltura_user}, %{kaltura_group} , 0755)
+%dir %{prefix}
+%dir %{prefix}/web/control
+%dir %{prefix}/web/dropfolders
+%defattr(-, root,root, 0755)
+%dir %{prefix}/app/configurations/monit/monit.d
+%dir %{prefix}/bin
+%dir %{prefix}/lib
+%dir %{prefix}/include
+%dir %{prefix}/share
+%doc %{prefix}/app/release-notes.md
+%doc %{prefix}/app/license.txt
+%doc %{prefix}/app/VERSION.txt
