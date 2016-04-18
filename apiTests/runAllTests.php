@@ -364,3 +364,42 @@ function runFairplayDRMProfileTest($dc,$userName,$userPassword)
   }
   printSuccessAndlogOutput("fairplayDrmProfileTest");
 }
+
+function runFtpApiServerTest($dc,$userName,$userPassword)
+{
+  try {
+    print("\n\r runFtpApiServcerTest init.");
+    $client = login($dc, $userName, $userPassword);
+    $sourceTestPartner = createTestPartner($client, "Kaltura.testapp1");
+
+    $tempPartnerPassword = '!Trz271985';
+    resetPartnerPassword($client, $targetTestPartner, $tempPartnerPassword);
+
+    info(" executing runFtpApiServcerTest ...");
+    $output = array();
+    exec("php advancedTests/ftpApiServerTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $sourceTestPartner->adminEmail $tempPartnerPassword", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  }
+  catch (Exception $e) {
+    fail(" runFtpApiServcerTest failed: $e");
+    $result = 1;
+  }
+  //finally {
+  info(" runFtpApiServcerTest tear down.");
+  if ($sourceTestPartner != null) {
+    $client = login($dc, $userName, $userPassword);
+    removePartner($dc, $client, $sourceTestPartner);
+  }
+  if ($targetTestPartner != null) {
+    $client = login($dc, $userName, $userPassword);
+    removePartner($dc, $client, $targetTestPartner);
+  }
+  //}
+  if ($result) {
+    printFailAndlogOutput("runFtpApiServcerTest");
+    return FAIL;
+  }
+  printSuccessAndlogOutput("runFtpApiServcerTest");
+}
