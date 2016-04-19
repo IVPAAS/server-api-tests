@@ -370,14 +370,17 @@ function runFtpApiServerTest($dc,$userName,$userPassword)
   try {
     print("\n\r runFtpApiServcerTest init.");
     $client = login($dc, $userName, $userPassword);
-    $sourceTestPartner = createTestPartner($client, "Kaltura.testapp1");
 
+    $testPartner = getPartner($client, '99');
+
+//    $sourceTestPartner = createTestPartner($client, "Kaltura.testapp1");
     $tempPartnerPassword = '!Trz271985';
-    resetPartnerPassword($client, $targetTestPartner, $tempPartnerPassword);
+    resetPartnerPassword($client, $testPartner, $tempPartnerPassword);
 
     info(" executing runFtpApiServcerTest ...");
     $output = array();
-    exec("php advancedTests/ftpApiServerTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $sourceTestPartner->adminEmail $tempPartnerPassword", $output, $result);
+//    exec("php advancedTests/ftpApiServerTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $sourceTestPartner->adminEmail $tempPartnerPassword", $output, $result);
+    exec("php advancedTests/ftpApiServerTest.php $dc $testPartner->id $testPartner->adminSecret $testPartner->adminEmail $tempPartnerPassword", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
@@ -388,14 +391,10 @@ function runFtpApiServerTest($dc,$userName,$userPassword)
   }
   //finally {
   info(" runFtpApiServcerTest tear down.");
-  if ($sourceTestPartner != null) {
-    $client = login($dc, $userName, $userPassword);
-    removePartner($dc, $client, $sourceTestPartner);
-  }
-  if ($targetTestPartner != null) {
-    $client = login($dc, $userName, $userPassword);
-    removePartner($dc, $client, $targetTestPartner);
-  }
+//  if ($sourceTestPartner != null) {
+//    $client = login($dc, $userName, $userPassword);
+//    removePartner($dc, $client, $sourceTestPartner);
+//  }
   //}
   if ($result) {
     printFailAndlogOutput("runFtpApiServcerTest");
