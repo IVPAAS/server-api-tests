@@ -367,36 +367,38 @@ function runFairplayDRMProfileTest($dc,$userName,$userPassword)
 
 function runFtpApiServerTest($dc,$userName,$userPassword)
 {
-  try {
-    print("\n\r runFtpApiServcerTest init.");
+  try
+  {
+    print("\n\r runFtpApiServerTest init.");
     $client = login($dc, $userName, $userPassword);
 
-    $testPartner = getPartner($client, '99');
-
-//    $sourceTestPartner = createTestPartner($client, "Kaltura.testapp1");
+    $sourceTestPartner = createTestPartner($client, "Kaltura.testapp1");
     $tempPartnerPassword = '!Trz271985';
-    resetPartnerPassword($client, $testPartner, $tempPartnerPassword);
+    resetPartnerPassword($client, $sourceTestPartner, $tempPartnerPassword);
 
-    info(" executing runFtpApiServcerTest ...");
+    sleep(15);
+    info(" executing runFtpApiServerTest ...");
     $output = array();
-//    exec("php advancedTests/ftpApiServerTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $sourceTestPartner->adminEmail $tempPartnerPassword", $output, $result);
-    exec("php advancedTests/ftpApiServerTest.php $dc $testPartner->id $testPartner->adminSecret $testPartner->adminEmail $tempPartnerPassword", $output, $result);
-    foreach ($output as $item) {
+    exec("php advancedTests/ftpApiServerTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $sourceTestPartner->adminEmail $tempPartnerPassword", $output, $result);
+    foreach ($output as $item)
+    {
       print("\n\r $item");
     }
-  }
-  catch (Exception $e) {
-    fail(" runFtpApiServcerTest failed: $e");
+  } catch (Exception $e)
+  {
+    fail(" runFtpApiServerTest failed: $e");
     $result = 1;
   }
   //finally {
-  info(" runFtpApiServcerTest tear down.");
-//  if ($sourceTestPartner != null) {
-//    $client = login($dc, $userName, $userPassword);
-//    removePartner($dc, $client, $sourceTestPartner);
-//  }
+  info(" runFtpApiServerTest tear down.");
+  if ($sourceTestPartner != null)
+  {
+    $client = login($dc, $userName, $userPassword);
+    removePartner($dc, $client, $sourceTestPartner);
+  }
   //}
-  if ($result) {
+  if ($result)
+  {
     printFailAndlogOutput("runFtpApiServcerTest");
     return FAIL;
   }

@@ -27,24 +27,24 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 {
 	info("\nStarting testInValidFtpRequests \n");
 
-	$emptyEntry =  helper_createEmptyEntry($client, 'EmptyEntryTest');
+	$entry = helper_createEntryAndUploadJpgContent($client);
 	$scheduleEvent = createEmptyScheduleEvent($client);
 
-	while(isEmptyEntryUploaded($client,$emptyEntry->id)!=true)
+	while (isEmptyEntryUploaded($client, $entry->id) != true)
 	{
 		sleep(1);
 		print (".");
 	}
 
-	while(isScheduleEventUploaded($client,$scheduleEvent->id)!=true)
+	while (isScheduleEventUploaded($client, $scheduleEvent->id) != true)
 	{
 		sleep(1);
 		print (".");
 	}
 
 	$conn_id = connectAndLoginToFtpServer($dc, $partnerId, $userName, $password);
-	info ("connection is: $conn_id");
-	if (!$conn_id || $conn_id == null ||  $conn_id == -1)
+	info("connection is: $conn_id");
+	if (!$conn_id || $conn_id == null || $conn_id == -1)
 	{
 		return fail(__FUNCTION__);
 	}
@@ -146,6 +146,17 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 		}
 
 		$contents = ftp_nlist($conn_id, $url);
+		for ($i = 0; $i < 3; $i++)
+		{
+			if (!isset($contents) || count($contents) < 20)
+			{
+				sleep(6);
+				$contents = ftp_nlist($conn_id, $url);
+			} else
+			{
+				break;
+			}
+		}
 		if (!isset($contents) || count($contents) < 20)
 		{
 			$result += fail("Error while testing ftp url $url, Expecting to receive a list of services for format [$formatType] but received: ");
@@ -175,11 +186,21 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 			}
 		} else
 		{
-//			$baseEntryFileName = "$emptyEntry->id.$formatType";
-			$baseEntryFileName = $contents[0];
+			$baseEntryFileName = "$entry->id.$formatType";
 			$fileUrl = "/format/$formatType/baseEntry/$baseEntryFileName";
 			info(" Trying to get file $fileUrl ");
 			$contents = ftp_get($conn_id, "temp.$formatType", $fileUrl, FTP_TEXT);
+			for ($i = 0; $i < 3; $i++)
+			{
+				if (!isset($contents) || $contents == null)
+				{
+					sleep(4);
+					$contents = ftp_get($conn_id, "temp.$formatType", $fileUrl, FTP_TEXT);
+				} else
+				{
+					break;
+				}
+			}
 			if (!isset($contents) || $contents == null)
 			{
 				$result += fail("Error while testing ftp url $fileUrl, Fail to get a baseEntry file.");
@@ -208,20 +229,21 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 		}
 
 		$scheduleEventFileName = "$scheduleEvent->id.$formatType";
-//		$scheduleEventFileName = $contents[0];
 		$fileUrl = "/format/$formatType/scheduleEvent/$scheduleEventFileName";
 		info(" Trying to get file $fileUrl ");
 		$contents = ftp_get($conn_id, "temp.$formatType", $fileUrl, FTP_TEXT);
-		for ( $i = 0 ; $i < 3; $i++)
+		for ($i = 0; $i < 3; $i++)
 		{
-			if (!isset($contents) || $contents == null ){
+			if (!isset($contents) || $contents == null)
+			{
 				sleep(4);
 				$contents = ftp_get($conn_id, "temp.$formatType", $fileUrl, FTP_TEXT);
-			}else {
+			} else
+			{
 				break;
 			}
 		}
-		if (!isset($contents) || $contents == null )
+		if (!isset($contents) || $contents == null)
 		{
 			$result += fail("Error while testing ftp url $fileUrl, Fail to get a scheduleEvent file.");
 			print_r($contents);
@@ -230,20 +252,21 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 			success("Successfully retrieved file $scheduleEventFileName with url: $fileUrl ");
 		}
 	}
-
 //	close the connection
 	ftp_close($conn_id);
-	
-	return($result);
+
+	return ($result);
 
 }
+
 function testInValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 {
 	info("\nStarting testInValidFtpRequests \n");
 
 	$conn_id = connectAndLoginToFtpServer($dc, $partnerId, $userName, $password);
-	info ("connection is: $conn_id");
-	if (!$conn_id || $conn_id == null ||  $conn_id == -1){
+	info("connection is: $conn_id");
+	if (!$conn_id || $conn_id == null || $conn_id == -1)
+	{
 		return fail(__FUNCTION__);
 	}
 	ftp_pasv($conn_id, true);
@@ -255,7 +278,7 @@ function testInValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 	$invalidUrls = array("InValidFolder", "InValidFolder/", "/format/InValidFolder", "/format/InValidFolder/", "/format/json/InValidFolder", "/format/ical/InValidFolder", "/format/xml/InValidFolder", "/format/json/scheduleEvent/InValidFolder");
 	foreach ($invalidUrls as $invalidUrl)
 	{
-		info(" Testing url $invalidUrl \n");
+		info(" Testing url directory $invalidUrl \n");
 		$res = ftp_chdir($conn_id, $invalidUrl);
 		if (!$res)
 		{
@@ -265,6 +288,7 @@ function testInValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 			$result += fail("Didn't receive error while testing ftp invalid url $invalidUrl. result is: $res");
 		}
 
+		info(" Testing url list $invalidUrl \n");
 		$contents = ftp_nlist($conn_id, $invalidUrl);
 		if (!isset($contents) || count($contents) != 0)
 		{
@@ -281,7 +305,7 @@ function testInValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 	{
 		info(" Testing invalid file url $invalidUrl \n");
 		$contents = ftp_get($conn_id, "temp.tmp", $invalidUrl, FTP_TEXT);
-		if (!isset($contents) || $contents == null )
+		if (!isset($contents) || $contents == null)
 		{
 			success("Expected Failure in retrieving invalid file url $invalidUrl. ");
 		} else
@@ -310,36 +334,34 @@ function createEmptyScheduleEvent($client)
 
 function main($dc,$partnerId, $adminSecret, $userName, $password)
 {
-	info ("$dc,$partnerId, $adminSecret, $userName, $password");
-	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-
+	$client = startKalturaSession($partnerId, $adminSecret, $dc);
 	$ret = testValidFtpRequests($client, $dc, $partnerId, $userName, $password);
-	$ret = testInValidFtpRequests($client, $dc, $partnerId, $userName, $password);
+	$ret += testInValidFtpRequests($client, $dc, $partnerId, $userName, $password);
 	return ($ret);
 }
 
 
 function printTestUsage()
 {
-	print ("\n\rUsage: " .$GLOBALS['argv'][0] . " <DC URL> <partner ID> <admin secret> <username> <password>");
+	print ("\n\rUsage: " . $GLOBALS['argv'][0] . " <DC URL> <partner ID> <admin secret> <username> <password>");
 	print ("\n\r * Note: Kaltura FTP-api-server must be on and configured properly to run this test.\r\n");
 }
 
 function go()
 {
-	if ($GLOBALS['argc']!=6 )
+	if ($GLOBALS['argc'] != 6)
 	{
 		printTestUsage();
 		exit (1);
 	}
 
-	$dcUrl 			= 	$GLOBALS['argv'][1];
-	$partnerId 		= 	$GLOBALS['argv'][2];
-	$adminSecret	= 	$GLOBALS['argv'][3];
-	$userName			= 	$GLOBALS['argv'][4];
-	$password	   		= 	$GLOBALS['argv'][5];
+	$dcUrl = $GLOBALS['argv'][1];
+	$partnerId = $GLOBALS['argv'][2];
+	$adminSecret = $GLOBALS['argv'][3];
+	$userName = $GLOBALS['argv'][4];
+	$password = $GLOBALS['argv'][5];
 
-	$res 				=  main($dcUrl,$partnerId, $adminSecret, $userName, $password);
+	$res = main($dcUrl, $partnerId, $adminSecret, $userName, $password);
 	exit($res);
 }
 
@@ -348,14 +370,14 @@ go();
 
 function isScheduleEventUploaded($client,$id)
 {
-	if($id!=null)
+	if ($id != null)
 	{
-		try{
+		try
+		{
 			$result = $client->scheduleEvent->get($id, null);
 			if ($result)
 				return true;
-		}
-		catch(Exception $e)
+		} catch (Exception $e)
 		{
 			return true;
 		}
@@ -365,14 +387,14 @@ function isScheduleEventUploaded($client,$id)
 
 function isEmptyEntryUploaded($client,$id)
 {
-	if($id!=null)
+	if ($id != null)
 	{
-		try{
+		try
+		{
 			$result = $client->baseEntry->get($id, null);
 			if ($result)
 				return true;
-		}
-		catch(Exception $e)
+		} catch (Exception $e)
 		{
 			return true;
 		}
