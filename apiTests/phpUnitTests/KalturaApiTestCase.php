@@ -41,7 +41,11 @@ class KalturaApiTestCase extends PHPUnit_Framework_TestCase implements IKalturaL
 	 * @var string
 	 */
 	protected $alternateAdminSecret;
-	
+
+	/**
+	 * @var string
+	 */
+	protected $partnerEmail;
 	/**
 	 * @var string
 	 */
@@ -92,19 +96,67 @@ class KalturaApiTestCase extends PHPUnit_Framework_TestCase implements IKalturaL
 	 */
 	public function __construct()
 	{
+		global $argv, $argc;
+		if ($GLOBALS['argc']< 6)
+		{
+			$this->printUsage();
+			exit (1);
+		}
+
+		$host = $argv[2];
+		$userName = $argv[3];
+		$password = $argv[4];
+		$partnerId = $argv[5];
+
+		if ($this->partnerId != null ){return;}
+
+		$loginClient = $this->login($host, $userName, $password);
+		$testAdminPartner = $this->getPartner($loginClient, '-2');
+		$testPartner = $this->getPartner($loginClient, $partnerId);
+
 		$this->config = new KalturaConfiguration();
 		$this->config->curlTimeout = 1000;
-		
-		$this->config->serviceUrl = 'http://allinone-be.dev.kaltura.com';
-		$this->partnerId = 2054;
-		$this->adminSecret = '26119aeb9b6258bb6c2ba952024d7b95';
+
+		$this->config->serviceUrl = "http://$host";
+
+		$this->partnerId = $testPartner->id;
+		$this->adminSecret = $testPartner->adminSecret;
+		$this->adminEmail = $testPartner->adminEmail;
+
+		$this->alternatePartnerId = $testAdminPartner->id;
+		$this->alternateAdminSecret = $testAdminPartner->adminSecret;
 
 		$this->config->setLogger($this);
-
-		$this->alternatePartnerId = -2;
-		$this->alternateAdminSecret = 'eb59eef581b03fb2be930a9c705629dd';
 	}
-	
+
+
+	public function printUsage()
+	{
+		print ("\n\rUsage: " .$GLOBALS['argv'][0] . " <DC URL> <userName> <password> <additional partnerId>");
+		print ("\n\r Can't Run Tests - missing parameters.\r\n");
+	}
+
+
+	public function getPartner($client, $partnerId)
+	{
+		$systempartnerPlugin = KalturaSystempartnerClientPlugin::get($client);
+		return $systempartnerPlugin->systemPartner->get($partnerId);
+	}
+
+	public function login($dc, $userName, $userPassword, $partnerId = null)
+	{
+		$config = new KalturaConfiguration();
+		$config->serviceUrl = $dc;
+		$client = new KalturaClient($config);
+		$loginId = $userName;
+		$password = $userPassword;
+		$expiry = null;
+		$privileges = null;
+		$ks = $client->user->loginbyloginid($loginId, $password, $partnerId, $expiry, $privileges);
+		$client->setKs($ks);
+		return $client;
+	}
+
 	/* (non-PHPdoc)
 	 * @see PHPUnit_Framework_TestCase::setUp()
 	 */

@@ -9,7 +9,7 @@ require_once '/opt/kaltura/web/content/clientlibs/testsClient/KalturaPlugins/Kal
 /**
  * Real world test cases.
  */
-class ResponseProfileUseCasesTest extends ResponseProfileServiceTest
+class ResponseProfileCacheTest extends ResponseProfileServiceTest
 {
 	public function testCache()
 	{

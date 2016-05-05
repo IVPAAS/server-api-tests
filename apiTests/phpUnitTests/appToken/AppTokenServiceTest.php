@@ -29,8 +29,8 @@ class AppTokenServiceTest extends KalturaApiTestCase
 		
 		parent::tearDown();
 	}
-	
-	protected function getUserClient()
+
+	protected function getUserClient($userId = null)
 	{
 		return $this->getClient(KalturaSessionType::USER);
 	}

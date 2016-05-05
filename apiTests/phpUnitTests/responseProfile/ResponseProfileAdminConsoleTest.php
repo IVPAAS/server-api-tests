@@ -32,8 +32,7 @@ class ResponseProfileAdminConsoleTest extends ResponseProfileServiceTest
 	
 	protected function getAdminClient()
 	{
-//		return $this->getClient(KalturaSessionType::ADMIN, -2, 'moshe.maor@kaltura.com', 86400, '', 'eb59eef581b03fb2be930a9c705629dd');
-		return $this->getClient(KalturaSessionType::ADMIN, 2054, 'Kaltura.testapp1@kaltura.com', 86400, '', '26119aeb9b6258bb6c2ba952024d7b95');
+		return $this->getClient(KalturaSessionType::ADMIN, $this->partnerId , $this->adminEmail , 86400, '', $this->adminSecret);
 	}
 }
 
