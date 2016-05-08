@@ -333,7 +333,7 @@ class AppTokenServiceTest extends KalturaApiTestCase
 		$expiry = min($appToken->sessionDuration, $expiry, $tokenExpiry);
 		$expectedExpiry = $time + $expiry;
 		$gap = $expectedExpiry - $sessionInfo->expiry;
-		$this->assertLessThan(2, $gap, "Time[$time] Expiry[$expiry] Gap[$gap] expected[$expectedExpiry] actual[{$sessionInfo->expiry}]");
+		$this->assertLessThan(4, $gap, "Time[$time] Expiry[$expiry] Gap[$gap] expected[$expectedExpiry] actual[{$sessionInfo->expiry}]");
 		$this->assertGreaterThan(-2, $gap, "Time[$time] Expiry[$expiry] Gap[$gap] expected[$expectedExpiry] actual[{$sessionInfo->expiry}]");
 		$this->assertEquals($this->partnerId, $sessionInfo->partnerId);
 		if($sessionType)
