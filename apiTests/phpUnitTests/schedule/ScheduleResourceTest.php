@@ -794,7 +794,7 @@ class ScheduleResourceTest extends KalturaApiTestCase
 		$this->assertEquals($scheduleResources[1]->id, $scheduleResources[2]->parentId);
 	}
 
-	public function testBulkUploadAddOrUpdateWithSystemName()
+	public function _testBulkUploadAddOrUpdateWithSystemName()
 	{
 		$client = $this->getAdminClient();
 		$plugin = KalturaScheduleClientPlugin::get($client);
