@@ -515,6 +515,55 @@ $deliveryStatus, $pathManagerClass, $deliveryProfile)
     return $result;
 }
 
+function createDropFolder($client,$testPartner,$dropFolderName,$dropFolderPath)
+{
+    $createDir=mkdir($dropFolderPath, 0755,$recursive = true);
+    if(!$createDir)
+        return fail(__FUNCTION__ . " Couldn't create drop folder dir");
+
+    $dropFolder= new KalturaDropFolder();
+    $dropFolder->partnerId = $testPartner->id;
+    $dropFolder->name = $dropFolderName;
+    $dropFolder->type = KalturaDropFolderType::LOCAL;
+    $dropFolder->status = KalturaDropFolderStatus::ENABLED;
+   // $dropFolder->conversionProfileId = ??; //select the conversion profile
+    $dropFolder->dc = 0;
+    $dropFolder->path = $dropFolderPath;
+    $dropFolder->fileSizeCheckInterval = 30;
+    $dropFolder->fileDeletePolicy = KalturaDropFolderFileDeletePolicy::MANUAL_DELETE;
+    $dropFolder->autoFileDeleteDays = 0;
+    $dropFolder->fileHandlerType = KalturaDropFolderFileHandlerType::XML;
+    $dropFolder->fileNamePatterns = '*.xml';
+    $dropFolder->fileHandlerConfig = new KalturaDropFolderXmlBulkUploadFileHandlerConfig();
+
+    $dfPlugin = KalturaDropFolderClientPlugin::get($client);
+    $result = $dfPlugin->dropFolder->add($dropFolder);
+
+    return $result;
+}
+
+function removeDropFolder($client,$dropFolderID)
+{
+    try {
+        $dfPlugin = KalturaDropFolderClientPlugin::get($client);
+        $dropFolder = $dfPlugin->dropFolder->get($dropFolderID);
+        $dropFolderPath = $dropFolder->path;
+        //now remove drop folder
+        $dfPlugin->dropFolder->delete($dropFolderID);
+
+        $files = new DirectoryIterator($dropFolderPath);
+        foreach($files as $file) {
+            if ($file->isFile()) {
+                unlink($file->getRealPath());
+            }
+        }
+        rmdir($dropFolderPath);
+    } catch (Exception $e) {
+        fail("removeDropFolder failed");
+        throw $e;
+    }
+}
+
 class textColors
 {
     const OKBLUE = "\033[34;1m";

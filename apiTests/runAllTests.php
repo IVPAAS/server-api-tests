@@ -46,6 +46,7 @@ function runAllTests($dc,$userName,$userPassword)
         }
       }
     }
+  
 
     // Run Advanced Tests
     foreach ($ini['advanced-test'] as $advanced)
@@ -403,4 +404,52 @@ function runFtpApiServerTest($dc,$userName,$userPassword)
     return FAIL;
   }
   printSuccessAndlogOutput("runFtpApiServcerTest");
+}
+
+function runDropFolderTest($dc,$userName,$userPassword)
+{
+  global $paramsMap;
+  try
+  {
+    $storageUsername = $paramsMap['remoteStorageUser'];
+    $storageUserPassword = $paramsMap['remoteStoragePassword'];
+    $baseDropFolderPath = '/opt/kaltura/web/scp/testDropFolder/';
+
+    print("\n\r runDropFolderTest init.");
+    $client = login($dc, $userName, $userPassword);
+    $testPartner = createTestPartner($client, 'Kaltura.testapp1');
+    addPartnerPermissions($client, $testPartner, 'DROPFOLDER_PLUGIN_PERMISSION', KalturaPermissionStatus::ACTIVE);
+
+    $dropFolderPath=$baseDropFolderPath.date("F-j-Y-g-i-a");
+    $kalturaDropFolder = createDropFolder($client,$testPartner,'Test drop folder',$dropFolderPath);
+
+    info(" executing dropFolderTest ...");
+    $output = array();
+    exec("php advancedTests/dropFolderTest.php $dc $storageUsername $storageUserPassword $testPartner->id $testPartner->adminSecret $dropFolderPath ", $output, $result);
+    foreach ($output as $item)
+    {
+      print("\n\r $item");
+    }
+
+  } catch (Exception $e)
+    {
+      fail(" dropFolderTest failed: $e");
+      $result = 1;
+    }
+
+  //finally
+  if($kalturaDropFolder!= null){
+    info('drop folder tear down');
+    removeDropFolder($client,$kalturaDropFolder->id);
+  }
+  if ($testPartner != null) {
+    info(" DropFolderTest partner tear down.");
+    removePartner($dc, $client, $testPartner);
+  }
+
+  if ($result) {
+    printFailAndlogOutput("dropFolderTest");
+    return FAIL;
+  }
+  printSuccessAndlogOutput("dropFolderTest");
 }
