@@ -37,6 +37,9 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
         return fail(__FUNCTION__." Distribution Failed");
     }
 
+    info("Deleting youtube entry distribution");
+    $client->entryDistribution->submitDelete($entryDistribution->id);
+    
     info($MediaEntry->id . " Youtube Distribution Succeeded" );
     return success(__FUNCTION__);
 }
