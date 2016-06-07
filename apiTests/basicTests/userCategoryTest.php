@@ -467,7 +467,6 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret += createCategoryTreeAndLeafDeleteWithoutMovingEntries( $client );
 	$ret += createCategoryTreeAndDeleteChildWithMovingEntries($client);
 	$ret += createCategoryTreeAndDeleteChildWithoutMovingEntries($client);
-
 	return ($ret);
 }
 
