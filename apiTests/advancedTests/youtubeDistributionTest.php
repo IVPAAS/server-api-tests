@@ -30,6 +30,13 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
         sleep(1);
         print (".");
     }
+    $maxCount=30;
+    while($client->entryDistribution->get($entryDistribution->id)!=2  && maxCount>0)
+    {
+	sleep(1);
+	print("*");
+	$maxXCount--;
+    }   
 
     $entryDistribution = $client->entryDistribution->get($entryDistribution->id);
     if ($entryDistribution->status != 2)
