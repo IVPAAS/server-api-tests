@@ -228,7 +228,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesLike with system name: $scheduleResource1->systemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesLike = $scheduleResource1->systemName;
+	$filter->resourceSystemNamesLike = $scheduleResource1->systemName;
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -242,7 +242,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesLike with system name: InvalidSystemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesLike = "InvalidSystemName";
+	$filter->resourceSystemNamesLike = "InvalidSystemName";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -258,7 +258,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesMultiLikeAnd with system names: $scheduleResource1->systemName, $scheduleResource2->systemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesMultiLikeAnd = "$scheduleResource1->systemName,$scheduleResource2->systemName";
+	$filter->resourceSystemNamesMultiLikeAnd = "$scheduleResource1->systemName,$scheduleResource2->systemName";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -273,7 +273,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesMultiLikeAnd with system names: $scheduleResource1->systemName, InvalidSystemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesMultiLikeAnd = "$scheduleResource1->systemName,InvalidSystemName";
+	$filter->resourceSystemNamesMultiLikeAnd = "$scheduleResource1->systemName,InvalidSystemName";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -288,7 +288,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesMultiLikeAnd with system name: $scheduleResource2->systemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesMultiLikeAnd = "$scheduleResource2->systemName";
+	$filter->resourceSystemNamesMultiLikeAnd = "$scheduleResource2->systemName";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -303,7 +303,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesMultiLikeOr with system names: $scheduleResource1->systemName,$scheduleResource2->systemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesMultiLikeOr = "$scheduleResource1->systemName,$scheduleResource2->systemName";
+	$filter->resourceSystemNamesMultiLikeOr = "$scheduleResource1->systemName,$scheduleResource2->systemName";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -318,7 +318,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesMultiLikeOr with system names: $scheduleResource1->systemName,InvalidSystemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesMultiLikeOr = "$scheduleResource1->systemName,InvalidSystemName";
+	$filter->resourceSystemNamesMultiLikeOr = "$scheduleResource1->systemName,InvalidSystemName";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -333,7 +333,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 
 	info("Testing list with filter: systemNamesMultiLikeOr with system name: InvalidSystemName");
 	$filter = new KalturaScheduleEventFilter();
-	$filter->systemNamesMultiLikeOr = "InvalidSystemName";
+	$filter->resourceSystemNamesMultiLikeOr = "InvalidSystemName";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
@@ -402,6 +402,95 @@ function createScheduleEventResource($client, $eventId , $resourceId )
 	return $result;
 }
 
+
+function TestScheduleEventFilterByTemplateEntryId($client)
+{
+	//create template entry1
+	$MediaEntry1 = helper_createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
+	info("Wait for entry to be ready id =" . $MediaEntry1->id);
+	while (isEntryReady($client, $MediaEntry1->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	//create template entry2
+	$MediaEntry2 = helper_createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
+	info("Wait for entry to be ready id =" . $MediaEntry2->id);
+	while (isEntryReady($client, $MediaEntry2->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$scheduleEvent1 = createScheduleEvent($client, $MediaEntry1->id);
+	while (isScheduleEventUploaded($client, $scheduleEvent1->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$scheduleEvent2 = createScheduleEvent($client, $MediaEntry2->id);
+	while (isScheduleEventUploaded($client, $scheduleEvent2->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+	$failCount = 0;
+
+	info("Testing list with filter: templateEntryIdLike with id: $MediaEntry1->id");
+	$filter = new KalturaScheduleEventFilter();
+	$filter->templateEntryIdEqual = $MediaEntry1->id;
+	$pager = null;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
+	info("Total list count: $result->totalCount");
+	if ($result->totalCount != 1)
+	{
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent list result failed. expected <1> but resulted in <$result->totalCount> ");
+	} else
+	{
+		success("Successful list count");
+	}
+
+	info("Testing list with filter: templateEntryCategoriesIdsLike with InvalidID");
+	$filter = new KalturaScheduleEventFilter();
+	$filter->templateEntryIdEqual = "InvalidID";
+	$pager = null;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
+
+	info("Total list count: $result->totalCount");
+	if ($result->totalCount != 0)
+	{
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent list result failed. expected <0> but resulted in <$result->totalCount> ");
+	} else
+	{
+		success("Successful list count");
+	}
+
+	info("Testing list with filter: templateEntryCategoriesIdsLike with ids $MediaEntry2->id");
+	$filter = new KalturaScheduleEventFilter();
+	$filter->templateEntryIdEqual = "$MediaEntry2->id";
+	$pager = null;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$result = $schedulePlugin->scheduleEvent->listAction($filter, $pager);
+
+	info("Total list count: $result->totalCount");
+	if ($result->totalCount != 1)
+	{
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent list result failed. expected <1> but resulted in <$result->totalCount> ");
+	} else
+	{
+		success("Successful list count");
+	}
+
+	if ($failCount)
+		return fail(__FUNCTION__ . " Schedule Events list with filters failed - count doesn't match");
+
+	return success(__FUNCTION__);
+}
+
 function isScheduleEventUploaded($client,$id)
 {
 	if ($id != null)
@@ -422,7 +511,8 @@ function isScheduleEventUploaded($client,$id)
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$ret = TestScheduleEventFilterByTemplateEntryCategoriesId($client);
+	$ret = TestScheduleEventFilterByTemplateEntryId($client);
+	$ret += TestScheduleEventFilterByTemplateEntryCategoriesId($client);
 	$ret += TestScheduleEventFilterByResourceSystemName($client);
 	return ($ret);
 }

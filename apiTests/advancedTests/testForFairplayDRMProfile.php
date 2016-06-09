@@ -33,19 +33,28 @@ function Test1_AddFairplayDRMProfile(KalturaClient $client, $parnterId)
 
 function go()
 {
-	if ($GLOBALS['argc'] != 4)
-	{
-		print ("\n\rUsage: " .$GLOBALS['argv'][0] . " <DC URL> 	<admin_console user> <admin_console password>");
-	}
-	$dc = $GLOBALS['argv'][1];
-	$adminConsoleUser = $GLOBALS['argv'][2];
-	$adminConsolePass =	$GLOBALS['argv'][3];
+	try {
+		if ($GLOBALS['argc'] != 4) {
+			print ("\n\rUsage: " . $GLOBALS['argv'][0] . " <DC URL> 	<admin_console user> <admin_console password>");
+		}
+		$dc = $GLOBALS['argv'][1];
+		$adminConsoleUser = $GLOBALS['argv'][2];
+		$adminConsolePass = $GLOBALS['argv'][3];
 
-	$client = login($dc, $adminConsoleUser, $adminConsolePass, -2);
-	$testPartner = createTestPartner($client, "testUser");
-	addPartnerPermissions($client, $testPartner, "DRM_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
-	$ret = Test1_AddFairplayDRMProfile($client, $testPartner->id);
-	removePartner($dc, $client, $testPartner);
+		$client = login($dc, $adminConsoleUser, $adminConsolePass, -2);
+		$testPartner = createTestPartner($client, "Kaltura.testapp1");
+		addPartnerPermissions($client, $testPartner, "DRM_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
+		$ret = Test1_AddFairplayDRMProfile($client, $testPartner->id);
+
+	} catch (Exception $e) {
+	}
+	// finally
+	if ($testPartner != null) {
+		info(" DRM partner removal down.");
+		$client = login($dc, $adminConsoleUser, $adminConsolePass);
+		removePartner($dc, $client, $testPartner);
+	}
+
 	return ($ret);
 }
 
