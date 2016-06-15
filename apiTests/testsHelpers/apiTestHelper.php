@@ -188,7 +188,10 @@ function helper_createEmptyEntry($client, $testName)
 
 function helper_createEntryAndUploaDmp4Content($client, $testName)
 {
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
+    if($testName == 'youTubeDistributionTest')
+        helper_cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
+
+    $FILE_NAME_MP4 = ($testName == 'youTubeDistributionTest') ? dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4' : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 	$entry = addEntry($client, $testName);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
@@ -199,6 +202,19 @@ function helper_createEntryAndUploaDmp4Content($client, $testName)
 	$resource->token = $uploadToken->id;
 	$result = $client->baseEntry->addcontent($entry->id, $resource);
 	return $result;
+}
+
+function helper_cutRandomPartFromVideo($sourceFile,$outputFile,$duration)
+{
+    $sourceVideoLength = helper_getVideoLength($sourceFile);
+    $startSec = rand(0,$sourceVideoLength-$duration);
+    shell_exec("ffmpeg -ss ".$startSec." -i ".$sourceFile." -c copy -f mp4 -t ".$duration." -y ".$outputFile);
+}
+
+function helper_getVideoLength($sourceFileName)
+{
+    $duration = shell_exec("ffprobe -i ".$sourceFileName." -show_entries format=Duration -v quiet -of csv=\"p=0\"");
+    return $duration;
 }
 
 function helper_uploadThumbAsset($client, $entryId)
