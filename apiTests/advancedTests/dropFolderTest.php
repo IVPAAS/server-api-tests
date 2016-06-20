@@ -80,7 +80,7 @@ function Test2_UploadWebVTTCatptionToDropFolder($dc,$scp_user_name,$scp_user_pas
             return fail(__FUNCTION__ . " Couldn't upload file " . $file . " to drop folder: " . $dropFolderPath . " on server: " . $dc);
         else
         {
-            if (pathinfo($file, PATHINFO_EXTENSION) != 'xml')
+            if (pathinfo($file, PATHINFO_EXTENSION) == 'mp4')
                 $countUploaded++;
 
             info("Uploaded file: " . $file . " ,to drop folder: " . $dropFolderPath);
@@ -121,7 +121,7 @@ function Test2_UploadWebVTTCatptionToDropFolder($dc,$scp_user_name,$scp_user_pas
     $filter->entryIdIn = $entry->id;
     $pager = null;
     $captionPlugin = KalturaCaptionClientPlugin::get($client);
-    $result = $captionPlugin->captionasset->listAction($filter, $pager);
+    $result = $captionPlugin->captionAsset->listAction($filter, $pager);
 
     if (count($result->objects) != 1)
         return fail(__FUNCTION__ . " Drop folder test Failed - Caption Asset wasn't created for entry $entry->id ");
@@ -138,7 +138,6 @@ function Test2_UploadWebVTTCatptionToDropFolder($dc,$scp_user_name,$scp_user_pas
 
 function uploadFileToDropFolder($connection, $file,$target)
 {
-    print ("EREZ $connection, $file, $target");
     return ssh2_scp_send($connection,$file,$target,0644);
 }
 
