@@ -1,0 +1,36 @@
+WEBVTT 
+
+STYLE
+::cue {
+  background-image: linear-gradient(to bottom, dimgray, lightgray);
+  color: papayawhip;
+}
+/* Style blocks cannot use blank lines nor "dash dash greater than" */
+
+NOTE
+This file was written by EREZ. I hope
+you enjoy reading it. Some things to
+
+cap-subtitle1
+00:00:00.000 --> 00:00:01.000 line:0013 position:08% size:100%
+<c.cap-s2></c>
+
+NOTE
+This file was written by EREZ. I hope
+you enjoy reading it. Some things to
+
+sub-subtitle1
+00:00:00.000 --> 00:00:01.000 line:0013 position:08% size:100%
+<c.sub-s1></c>
+
+sub-subtitle2
+00:00:00.542 --> 00:00:14.083 line:0013 position:50% size:100%
+<c.sub-s1><b>It-it's an Earth Dragon!</b></c>
+
+sub-subtitle3
+00:00:24.375 --> 00:00:26.333 line:0013 position:50% size:100%
+<c.sub-s1><b>A Class 1 Dangerous Beast, Earth Dragon, eh?</b></c>
+
+NOTE
+This file was written by EREZ. I hope
+you enjoy reading it. Some things to
