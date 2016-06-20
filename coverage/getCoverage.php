@@ -9,15 +9,23 @@ header('Content-Type: application/json');
 $initialData = file_get_contents('./allServices.txt');
 //print_r($initialData);
 $dict = json_decode($initialData);
-$theFile = fopen("/tmp/theFile.txt","r");
+//$theFile = fopen("/tmp/theFile.txt","r");
+$theFile = fopen("/opt/kaltura/log/kaltura_apache_access.log","r");
+
+$excludedServices = array("thumbAsset", "schema");
+
 //$dict = array();
 while (($currLine = fgets ($theFile)) !== false)
 {
 //	echo "trying current line [$currLine] <br/>";
-	preg_match("/(service=)(.*)&(action=)(.*)$/", $currLine, $matches);
+	preg_match("/api_v3.*(service=)(.*)&(action=)([a-zA-Z]*)&.*$/", $currLine, $matches);
 	if (!count($matches))
 	{
-		continue;
+		preg_match("/.*api_v3.*.*\/(service)\/(.*)\/(action)\/(.*)[\/|\?|&|\s]HTTP.*$/", $currLine, $matches);
+		if (!count($matches))
+		{
+			continue;
+		}
 	}
 	$serviceName = $matches[2];
 	$actionName = $matches[4];
@@ -41,4 +49,5 @@ fclose($theFile);
 $jsonOutput = json_encode($dict);
 echo "$jsonOutput";
 //echo "finished <br />";
+
 ?>

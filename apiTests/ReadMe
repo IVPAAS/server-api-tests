@@ -1,12 +1,16 @@
 About the files in this directory 
 -----------------------------------
-1. The files under this directory contain scripts that requires the following arguments - 
+This Test directory contains 2 test flows:
+1. Basic tests - placed under the basicTest directory are stand alone tests that do not require any prerequisites besides having a test partner to run the test.
+    These tests can be invoked manually and automatically with the following parameters:
            <DC URL>
            <parnter id> 
            <admin secret>
-	   <user secret>
-  
-2. Each file is a standalone test that does not relay on any pre-condition
-3. You can use specific partner for each tests if the test require specific configuration.
+	       <user secret>
+2. Advanced tests - placed under the advancedTests directory are tests that require prerequisites additional to a test partner to run the tests.
+These prerequisites creation should be added to the initalization phase prior to invoking the tests (in the runAllTests.php file)
+
+Each file is a standalone test that does not relay on any pre-condition and can be invoked manually
+You can use specific partner for each tests if the test require specific configuration.
 
 
