@@ -47,7 +47,7 @@ class CaptionAssetTest extends KalturaApiTestCase
 	public function testValidWebVttParser1()
 	{
 		$webVttManager = new webVttCaptionsContentManager();
-		$vtt = file_get_contents("validWebVTT.vtt");
+		$vtt = file_get_contents(dirname(__FILE__)."/validWebVTT.vtt");
 		$itemsData = $webVttManager->parse($vtt);
 		$textIndex = 1;
 		foreach($itemsData as $itemData)
@@ -70,7 +70,7 @@ class CaptionAssetTest extends KalturaApiTestCase
 	public function testValidWebVttParser2()
 	{
 		$webVttManager = new webVttCaptionsContentManager();
-		$vtt = file_get_contents("validWebVTT2.vtt");
+		$vtt = file_get_contents(dirname(__FILE__)."/validWebVTT2.vtt");
 		$itemsData = $webVttManager->parse($vtt);
 		$val = count($itemsData);
 		$this->assertEquals($val, 4);
@@ -93,7 +93,7 @@ class CaptionAssetTest extends KalturaApiTestCase
 	public function testValidWebVttParser3()
 	{
 		$webVttManager = new webVttCaptionsContentManager();
-		$vtt = file_get_contents("validWebVTT3.vtt");
+		$vtt = file_get_contents(dirname(__FILE__)."/validWebVTT3.vtt");
 		$itemsData = $webVttManager->parse($vtt);
 		$val = count($itemsData);
 		$this->assertEquals($val, 4);
@@ -116,7 +116,7 @@ class CaptionAssetTest extends KalturaApiTestCase
 	public function testValidWebVttParserWithoutTrimmingTextTags()
 	{
 		$webVttManager = new webVttCaptionsContentManager();
-		$vtt = file_get_contents("validWebVTT4.vtt");
+		$vtt = file_get_contents(dirname(__FILE__)."/validWebVTT4.vtt");
 		$itemsData = $webVttManager->parseWebVTT($vtt);
 		$val = count($itemsData);
 		$this->assertEquals($val, 4);
@@ -140,7 +140,7 @@ class CaptionAssetTest extends KalturaApiTestCase
 	{
 		$this->log("Test: invalid vtt (in header) - expected failure to parse");
 		$webVttManager = new webVttCaptionsContentManager();
-		$vtt = file_get_contents("invalidWebVTTHeader.vtt");
+		$vtt = file_get_contents(dirname(__FILE__)."/invalidWebVTTHeader.vtt");
 		$itemsData = $webVttManager->parse($vtt);
 		$val = count($itemsData);
 
@@ -153,7 +153,7 @@ class CaptionAssetTest extends KalturaApiTestCase
 	{
 		$this->log("Test: invalid vtt (in header) - expected failure to parse");
 		$webVttManager = new webVttCaptionsContentManager();
-		$vtt = file_get_contents("invalidWebVTTDescription.vtt");
+		$vtt = file_get_contents(dirname(__FILE__)."/invalidWebVTTDescription.vtt");
 		$itemsData = $webVttManager->parse($vtt);
 		$val = count($itemsData);
 
