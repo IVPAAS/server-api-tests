@@ -439,7 +439,7 @@ function TestScheduleEventFilterByTemplateEntryId($client)
 	$failCount = 0;
 
 	info("Testing list with filter: templateEntryIdLike with id: $MediaEntry1->id");
-	$filter = new KalturaScheduleEventFilter();
+	$filter = new KalturaEntryScheduleEventFilter();
 	$filter->templateEntryIdEqual = $MediaEntry1->id;
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
@@ -453,8 +453,8 @@ function TestScheduleEventFilterByTemplateEntryId($client)
 		success("Successful list count");
 	}
 
-	info("Testing list with filter: templateEntryCategoriesIdsLike with InvalidID");
-	$filter = new KalturaScheduleEventFilter();
+	info("Testing list with filter: templateEntryIdLike with InvalidID");
+	$filter = new KalturaEntryScheduleEventFilter();
 	$filter->templateEntryIdEqual = "InvalidID";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
@@ -469,8 +469,8 @@ function TestScheduleEventFilterByTemplateEntryId($client)
 		success("Successful list count");
 	}
 
-	info("Testing list with filter: templateEntryCategoriesIdsLike with ids $MediaEntry2->id");
-	$filter = new KalturaScheduleEventFilter();
+	info("Testing list with filter: templateEntryIdLike with ids $MediaEntry2->id");
+	$filter = new KalturaEntryScheduleEventFilter();
 	$filter->templateEntryIdEqual = "$MediaEntry2->id";
 	$pager = null;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);

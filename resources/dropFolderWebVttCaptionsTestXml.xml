@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<mrss xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ingestion.xsd">
+    <channel>
+        <item>
+            <type>1</type>
+            <userId>2188</userId>
+            <name>WebVttCaptionSearchDropFolderTest</name>
+            <media>
+                <mediaType>1</mediaType>
+            </media>
+            <contentAssets>
+                <content flavorParamsId="2">
+                    <dropFolderFileContentResource filePath="KalturaTestUpload.mp4"/>
+                </content>
+            </contentAssets>
+            <subTitles>
+                <subTitle isDefault="true" format="3" lang="English">
+                    <tags>
+                        <tag>erezCaptionsVTT</tag>
+                    </tags>
+                    <dropFolderFileContentResource filePath="webVttCaptionsTest.vtt"></dropFolderFileContentResource>
+                </subTitle>
+            </subTitles>
+        </item>
+    </channel>
+</mrss>

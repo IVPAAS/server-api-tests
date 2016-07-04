@@ -57,6 +57,85 @@ function Test1_UploadToDropFolder($dc,$scp_user_name,$scp_user_pass,$testPartner
     return success(__FUNCTION__);
 }
 
+
+function Test2_UploadWebVTTCatptionToDropFolder($dc,$scp_user_name,$scp_user_pass,$testPartnerId,$testPartnerAdminSecret,$dropFolderPath)
+{
+    info("Connecting to SCP server on $dc");
+    $connection = ssh2_connect($dc, 22);
+    if (!$connection)
+        return fail(__FUNCTION__ . " Couldn't connect to SCP. Please check connection.");
+
+    info("Authenticating user and pass in SCP server on $dc");
+    $authenticate = ssh2_auth_password($connection, $scp_user_name, $scp_user_pass);
+    if (!$authenticate)
+        return fail(__FUNCTION__ . " Couldn't authenticate to server. Wrong username or password.");
+
+    $filesPath = dirname(__FILE__) . '/../../resources/';
+    $filesToUpload = getFilesWithCaptionsToUpload();
+    $countUploaded = 0;
+    foreach ($filesToUpload as $file)
+    {
+        $upload = uploadFileToDropFolder($connection, $filesPath . $file, $dropFolderPath . "/" . $file);
+        if (!$upload)
+            return fail(__FUNCTION__ . " Couldn't upload file " . $file . " to drop folder: " . $dropFolderPath . " on server: " . $dc);
+        else
+        {
+            if (pathinfo($file, PATHINFO_EXTENSION) == 'mp4')
+                $countUploaded++;
+
+            info("Uploaded file: " . $file . " ,to drop folder: " . $dropFolderPath);
+        }
+    }
+
+    $filter = new KalturaBaseEntryFilter();
+    $filter->freeText = 'WebVttCaptionSearchDropFolderTest';
+
+    $client = startKalturaSession($testPartnerId, $testPartnerAdminSecret, $dc);
+
+    $retry = 0;
+    $result = false;
+    while ($retry < 7)
+    {
+        info("waiting for entry to upload..\n");
+        sleep(30);
+        $entriesList = $client->baseEntry->listAction($filter);
+        info("count objects [" . count($entriesList->objects) . "] , count uploaded [" . $countUploaded . "]");
+        if (count($entriesList->objects) != $countUploaded)
+            $retry++;
+        else
+        {
+            $result = true;
+            break;
+        }
+    }
+
+
+    if (!$result)
+        return fail(__FUNCTION__ . " Drop folder test Failed - count doesn't match");
+
+
+    info("checking that webVtt caption assed was created successfully.\n");
+    $entry = $entriesList->objects[0];
+
+    $filter = new KalturaAssetFilter();
+    $filter->entryIdIn = $entry->id;
+    $pager = null;
+    $captionPlugin = KalturaCaptionClientPlugin::get($client);
+    $result = $captionPlugin->captionAsset->listAction($filter, $pager);
+
+    if (count($result->objects) != 1)
+        return fail(__FUNCTION__ . " Drop folder test Failed - Caption Asset wasn't created for entry $entry->id ");
+
+
+    $captionAsset = $result->objects[0];
+    if ($captionAsset->format != 3 || $captionAsset->fileExt != 'vtt')
+        return fail(__FUNCTION__ . " Drop folder test Failed - Caption Asset for entry $entry->id isn't in VTT format or file extension is not .vtt");
+
+    return success(__FUNCTION__);
+
+    }
+
+
 function uploadFileToDropFolder($connection, $file,$target)
 {
     return ssh2_scp_send($connection,$file,$target,0644);
@@ -69,6 +148,14 @@ function getFilesToUpload()
     return array($FILE_NAME_MP4, $FILE_NAME_XML);
 }
 
+function getFilesWithCaptionsToUpload()
+{ //files from resources dir
+    $FILE_NAME_MP4 = 'KalturaTestUpload.mp4';
+    $FILE_NAME_WEB_VTT_CAPTIONS= 'webVttCaptionsTest.vtt';
+    $FILE_NAME_XML = 'dropFolderWebVttCaptionsTestXml.xml';
+    return array($FILE_NAME_MP4, $FILE_NAME_WEB_VTT_CAPTIONS, $FILE_NAME_XML);
+}
+
 function printTestUsage()
 {
     print ("\n\rUsage: " .$GLOBALS['argv'][0] . " <DC URL> <SCP Username> <SCP Password> <testPartnerID> <TestPartnerAdminSecret> <dropFolderPath>");
@@ -78,6 +165,7 @@ function printTestUsage()
 function main($dc,$scp_user_name,$scp_user_pass,$testPartnerId,$testPartnerAdminSecret,$dropFolderPath)
 {
     $ret = Test1_UploadToDropFolder($dc,$scp_user_name,$scp_user_pass,$testPartnerId,$testPartnerAdminSecret,$dropFolderPath);
+    $ret += Test2_UploadWebVTTCatptionToDropFolder($dc,$scp_user_name,$scp_user_pass,$testPartnerId,$testPartnerAdminSecret,$dropFolderPath);
     return ($ret);
 }
 
