@@ -59,13 +59,13 @@ function login($dc, $userName, $userPassword, $partnerId = null)
     return $client;
 }
 
-function startKalturaSession($partnerId, $secret, $destUrl, $type = KalturaSessionType::ADMIN, $userId = null)
+function startKalturaSession($partnerId, $secret, $destUrl, $type = KalturaSessionType::ADMIN, $userId = null, $privileges=nul)
 {
     try {
         $config = new KalturaConfiguration($partnerId);
         $config->serviceUrl = $destUrl;
         $client = new KalturaClient($config);
-        $result = $client->session->start($secret, $userId, $type, $partnerId, null, null);
+        $result = $client->session->start($secret, $userId, $type, $partnerId, null, $privileges);
         $client->setKs($result);
         //print("Started session successfully with KS [$result]\n");
         return $client;

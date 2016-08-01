@@ -70,14 +70,14 @@ function goMain()
     $res =  main($dcUrl,$partnerId,$adminSecret,$userSecret);
     exit($res);
 }
-function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionType::ADMIN,$userId=null) 
+function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionType::ADMIN,$userId=null, $privileges=null)
 {
 	try
 	{
 		$config = new KalturaConfiguration($partnerId);
 		$config->serviceUrl = $destUrl;
         $client = new KalturaClient($config);
-        $result = $client->session->start($secret, $userId, $type, $partnerId, null, null);
+        $result = $client->session->start($secret, $userId, $type, $partnerId, null, $privileges);
 		$client->setKs($result);
 		//print("Started session successfully with KS [$result]\n");
 		return $client;
@@ -186,13 +186,13 @@ function helper_createEmptyEntry($client, $testName)
 }
 
 
-function helper_createEntryAndUploaDmp4Content($client, $testName)
+function helper_createEntryAndUploaDmp4Content($client, $testName, $userId=null)
 {
     if($testName == 'youTubeDistributionTest')
         helper_cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
 
     $FILE_NAME_MP4 = ($testName == 'youTubeDistributionTest') ? dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4' : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
-	$entry = addEntry($client, $testName);
+	$entry = addEntry($client, $testName, KalturaMediaType::VIDEO, null, $userId);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
@@ -203,6 +203,25 @@ function helper_createEntryAndUploaDmp4Content($client, $testName)
 	$result = $client->baseEntry->addcontent($entry->id, $resource);
 	return $result;
 }
+
+function helper_createEntryWithReferenceIdAndUploaDmp4Content($client, $testName, $refId=null, $userId=null)
+{
+	if($testName == 'youTubeDistributionTest')
+		helper_cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
+
+	$FILE_NAME_MP4 = ($testName == 'youTubeDistributionTest') ? dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4' : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
+	$entry = addEntry($client, $testName, KalturaMediaType::VIDEO, null, $userId, 'test media description', 'test tag', $refId);
+	$uploadTokenObj = new KalturaUploadToken();
+	$uploadTokenObj->fileName = $FILE_NAME_MP4;
+	$uploadToken = $client->uploadToken->add($uploadTokenObj);
+	$fileData = $FILE_NAME_MP4;
+	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+	$resource = new KalturaUploadedFileTokenResource();
+	$resource->token = $uploadToken->id;
+	$result = $client->baseEntry->addcontent($entry->id, $resource);
+	return $result;
+}
+
 
 function helper_cutRandomPartFromVideo($sourceFile,$outputFile,$duration)
 {
