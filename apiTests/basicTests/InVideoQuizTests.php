@@ -17,6 +17,7 @@ function report1($client,$userEntryId)
 
 function Test1_Basicflow($client)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,null);
 	$questions = array();
@@ -41,6 +42,7 @@ function Test1_Basicflow($client)
 }
 function Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,KalturaNullableBoolean::FALSE_VALUE);
 	$questions = array();
@@ -74,6 +76,7 @@ function Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc)
 }
 function Test3_ValidateScoreUponSubmitWithAdminKS($client)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,KalturaNullableBoolean::FALSE_VALUE);
 	$questions = array();
@@ -107,6 +110,7 @@ function Test3_ValidateScoreUponSubmitWithAdminKS($client)
 }
 function Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE);
 	$questions = array();
@@ -140,6 +144,7 @@ function Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc)
 }
 function Test5_CheckAllowDownload($client)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__.time());
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
 	$questions = array();
@@ -173,6 +178,7 @@ function Test5_CheckAllowDownload($client)
 }
 function Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
 	$questions = array();
@@ -210,6 +216,7 @@ function Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId)
 
 function Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,KalturaNullableBoolean::FALSE_VALUE,KalturaNullableBoolean::FALSE_VALUE,null,KalturaNullableBoolean::FALSE_VALUE,null,KalturaNullableBoolean::TRUE_VALUE);
 	$questions = array();
@@ -243,6 +250,7 @@ function Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret
 
 function test7_GetUserPercentageReport($client)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,null);
 	$questions = array();
@@ -294,6 +302,7 @@ function test7_GetUserPercentageReport($client)
 
 function test12_filterQuizUserEntry($client)
 {
+	info('start ' .  __FUNCTION__);
 	//Get list of all quiz user entry
 	$filter = new KalturaQuizUserEntryFilter();
 	$pager = null;
@@ -331,6 +340,7 @@ function test12_filterQuizUserEntry($client)
 }
 function test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId)
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
 	$questions = array();
@@ -354,6 +364,7 @@ function test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId)
 function test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId)
 
 {
+	info('start ' .  __FUNCTION__);
         $entry=addEntry($client,__FUNCTION__);
         $quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
         $questions = array();
@@ -410,6 +421,7 @@ function helper_getQuizUserEntryAnswerAndQuestion($wgClient,$entryId,$quizUserEn
 function test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId)
 
 {
+	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
 	$quiz = createNewQuiz($client,$entry->id,null,null,null,null,KalturaNullableBoolean::TRUE_VALUE,null);
 	$questions = array();
@@ -455,6 +467,7 @@ function test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId)
 
 function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
 {
+	info('start ' .  __FUNCTION__);
 	$entry = addEntry($client, __FUNCTION__);
 	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
 	$questions = array();
@@ -489,6 +502,7 @@ function test11_dontGetWithoutQuizUserEntryId($client,$dc,$partnerId)
 
 function test13_createTwoUserEntriesWithForSameUser($client,$dc,$partnerId)
 {
+	info('start ' .  __FUNCTION__);
 	$entry = addEntry($client, __FUNCTION__);
 	$quiz = createNewQuiz($client, $entry->id, null, null, null, null, KalturaNullableBoolean::TRUE_VALUE, null);
 
@@ -512,19 +526,18 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$widgetId = helper_create_widget($client,"IVQ_WIDGET_SESSION_ROLE" );
 	info("New widget ID {$widgetId}");
-	$ret = 0;
-	$ret+=Test1_Basicflow($client);
-	$ret+=Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc);
-	$ret+=Test3_ValidateScoreUponSubmitWithAdminKS($client);
-	$ret+=Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
-	$ret+=Test5_CheckAllowDownload($client);
-	$ret+=Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
-	$ret+=Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc);
-	$ret+=test7_GetUserPercentageReport($client);
-	$ret+=test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId);
-	$ret+=test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId);
-	$ret+=test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId);
-	$ret+=test12_filterQuizUserEntry($client);
+	$ret = Test1_Basicflow($client);
+	$ret += Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc);
+	$ret += Test3_ValidateScoreUponSubmitWithAdminKS($client);
+	$ret += Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
+	$ret += Test5_CheckAllowDownload($client);
+	$ret += Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
+	$ret += Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc);
+	$ret += test7_GetUserPercentageReport($client);
+	$ret += test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId);
+	$ret += test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId);
+	$ret += test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId);
+	$ret += test12_filterQuizUserEntry($client);
 	$ret += test13_createTwoUserEntriesWithForSameUser($client, $dc, $partnerId);
 	return ($ret);
 }

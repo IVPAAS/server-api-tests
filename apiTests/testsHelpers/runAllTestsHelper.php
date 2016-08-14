@@ -59,7 +59,7 @@ function login($dc, $userName, $userPassword, $partnerId = null)
     return $client;
 }
 
-function startKalturaSession($partnerId, $secret, $destUrl, $type = KalturaSessionType::ADMIN, $userId = null, $privileges=nul)
+function startKalturaSession($partnerId, $secret, $destUrl, $type = KalturaSessionType::ADMIN, $userId = null, $privileges=null)
 {
     try {
         $config = new KalturaConfiguration($partnerId);

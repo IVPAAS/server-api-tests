@@ -86,11 +86,11 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$entry2 = createEntry($client, $entry1);
 
 	$weakClient = startKalturaSession($partnerId,$adminSecret,$dc,KalturaSessionType::USER, null, 'privacycontext:MediaSpace,enableentitlement');
-	testGetRestrictedEntry($weakClient, $entry2);
-	testListRestrictedEntryIdEqual($weakClient, $entry2);
-	testListRestrictedEntryIdIn($weakClient, $entry2);
-	testLetRestrictedEntryByRefernceId($weakClient, $entry1);
-	return ;
+	$ret = testGetRestrictedEntry($weakClient, $entry2);
+	$ret += testListRestrictedEntryIdEqual($weakClient, $entry2);
+	$ret += testListRestrictedEntryIdIn($weakClient, $entry2);
+	$ret += testLetRestrictedEntryByRefernceId($weakClient, $entry1);
+	return $ret;
 }
 
 goMain();
