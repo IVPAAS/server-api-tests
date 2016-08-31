@@ -1,0 +1,4 @@
+[testClient]
+resourcesPath = @RESOURCES_PATH@
+outputPath = @OUTPUT_PATH@
+
