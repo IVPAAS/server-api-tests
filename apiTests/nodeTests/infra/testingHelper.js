@@ -14,8 +14,6 @@ const uuid = require('uuid');
 require('../lib/utils/KalturaUtils');
 const config = require('../lib/utils/KalturaConfig');
 
-let failedTestsCount = 0;
-
 const KalturaClientLogger = {
     log: function(str) {
         console.log(str);
