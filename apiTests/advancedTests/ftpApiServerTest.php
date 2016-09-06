@@ -2,10 +2,10 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
-function connectAndLoginToFtpServer($dc, $partnerId, $userName, $password)
+function connectAndLoginToFtpServer($dc, $partnerId, $userName, $password, $ftp_port)
 {
-	info("Connecting to FTP server on $dc");
-	$conn_id = ftp_connect($dc);
+	info("Connecting to FTP server on $dc on port $ftp_port");
+	$conn_id = ftp_connect($dc, $ftp_port);
 	if (!$conn_id)
 	{
 		return fail(__FUNCTION__ . " Couldn't connect to FTP-api-server. Please check connection.");
@@ -23,7 +23,7 @@ function connectAndLoginToFtpServer($dc, $partnerId, $userName, $password)
 	return $conn_id;
 }
 
-function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
+function testValidFtpRequests($client, $dc,$partnerId, $userName, $password, $ftp_port)
 {
 	info("\nStarting testInValidFtpRequests \n");
 
@@ -42,7 +42,7 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 		print (".");
 	}
 
-	$conn_id = connectAndLoginToFtpServer($dc, $partnerId, $userName, $password);
+	$conn_id = connectAndLoginToFtpServer($dc, $partnerId, $userName, $password, $ftp_port);
 	info("connection is: $conn_id");
 	if (!$conn_id || $conn_id == null || $conn_id == -1)
 	{
@@ -259,11 +259,11 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password)
 
 }
 
-function testInValidFtpRequests($client, $dc,$partnerId, $userName, $password)
+function testInValidFtpRequests($client, $dc,$partnerId, $userName, $password, $ftp_port)
 {
 	info("\nStarting testInValidFtpRequests \n");
 
-	$conn_id = connectAndLoginToFtpServer($dc, $partnerId, $userName, $password);
+	$conn_id = connectAndLoginToFtpServer($dc, $partnerId, $userName, $password, $ftp_port);
 	info("connection is: $conn_id");
 	if (!$conn_id || $conn_id == null || $conn_id == -1)
 	{
@@ -332,24 +332,24 @@ function createEmptyScheduleEvent($client)
 	return $result;
 }
 
-function main($dc,$partnerId, $adminSecret, $userName, $password)
+function main($dc,$partnerId, $adminSecret, $userName, $password, $ftp_port)
 {
 	$client = startKalturaSession($partnerId, $adminSecret, $dc);
-	$ret = testValidFtpRequests($client, $dc, $partnerId, $userName, $password);
-	$ret += testInValidFtpRequests($client, $dc, $partnerId, $userName, $password);
+	$ret = testValidFtpRequests($client, $dc, $partnerId, $userName, $password, $ftp_port);
+	$ret += testInValidFtpRequests($client, $dc, $partnerId, $userName, $password, $ftp_port);
 	return ($ret);
 }
 
 
 function printTestUsage()
 {
-	print ("\n\rUsage: " . $GLOBALS['argv'][0] . " <DC URL> <partner ID> <admin secret> <username> <password>");
+	print ("\n\rUsage: " . $GLOBALS['argv'][0] . " <DC URL> <partner ID> <admin secret> <username> <password> <port>");
 	print ("\n\r * Note: Kaltura FTP-api-server must be on and configured properly to run this test.\r\n");
 }
 
 function go()
 {
-	if ($GLOBALS['argc'] != 6)
+	if ($GLOBALS['argc'] != 7)
 	{
 		printTestUsage();
 		exit (1);
@@ -360,8 +360,9 @@ function go()
 	$adminSecret = $GLOBALS['argv'][3];
 	$userName = $GLOBALS['argv'][4];
 	$password = $GLOBALS['argv'][5];
+	$ftp_port = $GLOBALS['argv'][6];
 
-	$res = main($dcUrl, $partnerId, $adminSecret, $userName, $password);
+	$res = main($dcUrl, $partnerId, $adminSecret, $userName, $password, $ftp_port);
 	exit($res);
 }
 

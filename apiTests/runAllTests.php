@@ -380,7 +380,8 @@ function runFtpApiServerTest($dc,$userName,$userPassword)
     sleep(15);
     info(" executing runFtpApiServerTest ...");
     $output = array();
-    exec("php advancedTests/ftpApiServerTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $sourceTestPartner->adminEmail $tempPartnerPassword", $output, $result);
+    $ftp_port = 36;
+    exec("php advancedTests/ftpApiServerTest.php $dc $sourceTestPartner->id $sourceTestPartner->adminSecret $sourceTestPartner->adminEmail $tempPartnerPassword $ftp_port", $output, $result);
     foreach ($output as $item)
     {
       print("\n\r $item");
