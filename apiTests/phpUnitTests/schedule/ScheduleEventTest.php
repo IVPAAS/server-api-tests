@@ -441,7 +441,8 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$update->summary = uniqid('Test: ');
 		$update->startDate = time() + (60 * 60 * 24);
 		$update->duration = rand(60 * 60, 60 * 60 * 24);
-		
+		$update->recurrenceType = KalturaScheduleEventRecurrenceType::NONE;
+	
 		$client = $this->getAdminClient();
 		$plugin = KalturaScheduleClientPlugin::get($client);
 		$updatedScheduleEvent = $plugin->scheduleEvent->update($scheduleEvent->id, $update);
