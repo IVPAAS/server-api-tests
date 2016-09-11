@@ -338,7 +338,7 @@ function runTvinciDistributionTest($dc,$userName,$userPassword)
   info(" tvinciDistributionTest tear down.");
   if ($testPartner != null) {
     $client = login($dc, $userName, $userPassword);
-    //removePartner($dc, $client, $testPartner);
+    removePartner($dc, $client, $testPartner);
   }
   //}
   if ($result) {
