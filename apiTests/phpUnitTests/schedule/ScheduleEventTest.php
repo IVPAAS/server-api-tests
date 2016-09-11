@@ -2104,12 +2104,12 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals($until, $rule->until, "until [$rule->until]");
 	
 	
-		$until = time() - (60 * 60 * 24 * 365 * 6);
-		$rule = $this->doTestICalWithRules('FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU;UNTIL=' . kSchedulingICal::formatDate($until));
-		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
-		$this->assertEquals(10, $rule->byMonth, "byMonth [$rule->byMonth]");
-		$this->assertEquals('-1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+//		$until = time() - (60 * 60 * 24 * 365 * 6);
+//		$rule = $this->doTestICalWithRules('FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU;UNTIL=' . kSchedulingICal::formatDate($until));
+//		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
+//		$this->assertEquals(10, $rule->byMonth, "byMonth [$rule->byMonth]");
+//		$this->assertEquals('-1SU', $rule->byDay, "byDay [$rule->byDay]");
+//		$this->assertEquals($until, $rule->until, "until [$rule->until]");
 	
 	
 		$until = time() - (60 * 60 * 24 * 365 * 3);
