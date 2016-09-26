@@ -198,7 +198,6 @@ function TestScheduleEventFilterByTemplateEntryCategoriesId($client)
 	return success(__FUNCTION__);
 }
 
-
 function TestScheduleEventFilterByResourceSystemName($client)
 {
 	$scheduleEvent1 = createScheduleEvent($client);
@@ -352,6 +351,202 @@ function TestScheduleEventFilterByResourceSystemName($client)
 	return success(__FUNCTION__);
 }
 
+
+function TestScheduleChangeRecurringEventToSingleEvent($client)
+{
+	info("Testing update event from recurring type to single event");
+	$failCount = 0;
+	$scheduleEvent = createScheduleEventRecurring($client, null );
+	while (isScheduleEventUploaded($client, $scheduleEvent->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$filter = new KalturaEntryScheduleEventFilter();
+	$filter->parentIdEqual = $scheduleEvent->id;
+	$filter->recurrenceTypeEqual = KalturaScheduleEventRecurrenceType::RECURRENCE;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+
+	info("Total list count: $result->totalCount");
+	$retries = 5;
+	while ($result->totalCount == 0 && $retries > 0){
+		print ("Recurrences are not ready - waiting before retry...\n");
+		sleep(5);
+		$retries--;
+		$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+		info("Total list count: $result->totalCount");
+	}
+
+	if ($result->totalCount == 0)
+	{
+		$failCount += fail(__FUNCTION__ . " Failed to create recurrences for recurring event: " .$scheduleEvent->id );
+	}
+
+	else
+	{
+		$scheduleEvent->recurrenceType = KalturaScheduleEventRecurrenceType::NONE;
+		$scheduleEvent->duration = 3000;
+		$scheduleEvent->endDate = null;
+		$scheduleEvent->createdAt = null;
+		$scheduleEvent->updatedAt = null;
+
+		$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+		$updatedScheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent->id, $scheduleEvent);
+
+		info("Validating update from recurring type to single event");
+		if ($updatedScheduleEvent->recurrenceType != KalturaScheduleEventRecurrenceType::NONE)
+			$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting recurrence type NONE but got $updatedScheduleEvent->recurrenceType");
+
+		if ($updatedScheduleEvent->sequence != 1)
+			$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting sequence number 1 but got $updatedScheduleEvent->sequence");
+
+		$val = $updatedScheduleEvent->startDate + $updatedScheduleEvent->duration;
+		if ($updatedScheduleEvent->endDate != $val)
+			$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting endDate <$updatedScheduleEvent->endDate> to match startDate + duration <$val>");
+
+		if (!is_null($updatedScheduleEvent->recurrence))
+			$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting no recurrence object on the event but got object exists");
+
+		$filter = new KalturaScheduleEventFilter();
+		$filter->parentIdEqual = $updatedScheduleEvent->id;
+		$filter->statusEqual = KalturaScheduleEventStatus::ACTIVE;
+		$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+
+		info("Total Active recurrences count: $result->totalCount");
+		if ($result->totalCount != 0)
+			$failCount += fail(__FUNCTION__ . " ScheduleEvent should have deleted all recurrences but got <$result->totalCount> active recurrences");
+
+		$filter->statusEqual = KalturaScheduleEventStatus::DELETED;
+		$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+		info("Total Deleted recurrences count: $result->totalCount");
+		if ($result->totalCount != 0)
+			$failCount += fail(__FUNCTION__ . " ScheduleEvent should have deleted all recurrences but got <$result->totalCount> deleted recurrences");
+
+	}
+
+	if ($failCount)
+		return fail(__FUNCTION__ . " schedule event update from recurring event to single event count Failed!");
+
+	return success(__FUNCTION__." Successful schedule event update from recurring event to single event count");
+}
+
+
+function TestScheduleChangeSingleEventToRecurringEvent($client)
+{
+	info("Testing update event from single event type to recurring event");
+	$failCount = 0;
+
+	$scheduleEvent1 = createScheduleEvent($client);
+	while (isScheduleEventUploaded($client, $scheduleEvent1->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$scheduleEvent = createScheduleEventRecurring($client, null);
+	while (isScheduleEventUploaded($client, $scheduleEvent->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$filter = new KalturaEntryScheduleEventFilter();
+	$filter->parentIdEqual = $scheduleEvent->id;
+	$filter->recurrenceTypeEqual = KalturaScheduleEventRecurrenceType::RECURRENCE;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$recurrences = $schedulePlugin->scheduleEvent->listAction($filter, null);
+
+	info("Total list count: $recurrences->totalCount");
+	$retries = 5;
+	while ($recurrences->totalCount == 0 && $retries > 0)
+	{
+		print ("Recurrences are not ready - waiting before retry...\n");
+		sleep(5);
+		$retries--;
+		$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+		info("Total list count: $result->totalCount");
+	}
+
+	if ($recurrences->totalCount == 0)
+		$failCount += fail(__FUNCTION__ . " Failed to create recurrences for recurring event: " . $scheduleEvent->id);
+
+	$scheduleEvent1->recurrenceType = KalturaScheduleEventRecurrenceType::RECURRING;
+	$scheduleEvent1->duration = $scheduleEvent->duration;
+	$scheduleEvent1->startDate = $scheduleEvent->startDate;
+	$scheduleEvent1->endDate = $scheduleEvent->endDate;
+	$scheduleEvent1->createdAt = null;
+	$scheduleEvent1->updatedAt = null;
+	$scheduleEvent1->recurrence = $scheduleEvent->recurrence;
+
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$updatedScheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent1->id, $scheduleEvent1);
+
+	info("Validating update from single type to recurring event");
+	if ($updatedScheduleEvent->recurrenceType != $scheduleEvent->recurrenceType)
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting recurrence type RECURRING but got $updatedScheduleEvent->recurrenceType");
+
+	if ($updatedScheduleEvent->sequence != $scheduleEvent->sequence)
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting sequence number of recurrences but got $updatedScheduleEvent->sequence $scheduleEvent->sequence");
+
+	if ($updatedScheduleEvent->duration != $scheduleEvent->duration)
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting duration <$scheduleEvent->duration> but got <$updatedScheduleEvent->duration>");
+
+	if ($updatedScheduleEvent->startDate != $scheduleEvent->startDate)
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting startDate <$scheduleEvent->startDate> but got <$updatedScheduleEvent->startDate>");
+
+	if ($updatedScheduleEvent->endDate != $scheduleEvent->endDate)
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting endDate <$scheduleEvent->endDate> but got <$updatedScheduleEvent->endDate>");
+
+	if (is_null($updatedScheduleEvent->recurrence))
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting to create recurrence object on the event but got but got no recurrence");
+
+	$filter = new KalturaScheduleEventFilter();
+	$filter->parentIdEqual = $updatedScheduleEvent->id;
+	$filter->statusEqual = KalturaScheduleEventStatus::ACTIVE;
+	$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+
+	info("Total Active recurrences count: $result->totalCount");
+	if ($result->totalCount == 0)
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent should have created recurrences but got <$result->totalCount> active recurrences");
+
+	$filter->statusEqual = KalturaScheduleEventStatus::DELETED;
+	$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+	info("Total Deleted recurrences count: $result->totalCount");
+	if ($result->totalCount != 0)
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent should have no deleted recurrences but got <$result->totalCount> deleted recurrences");
+
+	if ($failCount)
+		return fail(__FUNCTION__ . " schedule event update from single event to recurring event count Failed!");
+
+	return success(__FUNCTION__ . " Successful schedule event update from single event to recurring event count");
+}
+
+function createScheduleEventRecurring($client, $templateEntryId = null)
+{
+	info("Creating scheduleEvent");
+	$scheduleEvent = new KalturaLiveStreamScheduleEvent();
+	$scheduleEvent->summary = 'testScheduleEvent';
+	$scheduleEvent->startDate = 1536326988;
+	$scheduleEvent->endDate = 1536326998;
+	$scheduleEvent->recurrenceType = KalturaScheduleEventRecurrenceType::RECURRING;
+	$scheduleEvent->duration = 1800;
+	$scheduleEvent->recurrence = new KalturaScheduleEventRecurrence();
+	$scheduleEvent->recurrence->name = 'TEST';
+	$scheduleEvent->recurrence->frequency = KalturaScheduleEventRecurrenceFrequency::WEEKLY;
+	$scheduleEvent->recurrence->until = 1538836188;
+	$scheduleEvent->recurrence->byDay = 'SU,MO,FR';
+	if ($templateEntryId != null)
+	{
+		$scheduleEvent->templateEntryId = $templateEntryId;
+	}
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$result = $schedulePlugin->scheduleEvent->add($scheduleEvent);
+	info("Created scheduleEvent id =" . $result->id);
+
+	return $result;
+}
 
 function createScheduleEvent($client, $templateEntryId = null)
 {
@@ -514,6 +709,8 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret = TestScheduleEventFilterByTemplateEntryId($client);
 	$ret += TestScheduleEventFilterByTemplateEntryCategoriesId($client);
 	$ret += TestScheduleEventFilterByResourceSystemName($client);
+	$ret += TestScheduleChangeRecurringEventToSingleEvent($client);
+	$ret += TestScheduleChangeSingleEventToRecurringEvent($client);
 	return ($ret);
 }
 
