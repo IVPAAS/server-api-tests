@@ -1,0 +1,113 @@
+<mrss xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ingestion.xsd">
+    <channel>
+        <item>
+            <action>add</action>
+            <type>1</type>
+            <userId>2188</userId>
+            <name>testWithStreams</name>
+            <description>A funny and furry 3D short about a giant rabbit who gets even with bullying rodents</description>
+            <tags>
+                <tag>Big buck bunny</tag>
+                <tag>trailer</tag>
+            </tags>
+            <categories>
+                <category>examples>example1</category>
+                <category>examples>example2</category>
+            </categories>
+            <media>
+                <mediaType>1</mediaType>
+            </media>
+            <contentAssets>
+                <content>
+                    <urlContentResource url="ftp://projects8:741@ftp.kaltura.com/BigBuckBunnyTrailerHD.mov"/>
+                    <streams>
+                        <stream type="audio" trackIndex="1" language="eng" label="something"/>
+                        <stream type="audio" trackIndex="2" channelLayout="front-left" label="somethingelse"/>
+                        <stream type="audio" trackIndex="3" channelIndex="2" channelLayout="front-right"/>
+                        <stream type="audio" trackIndex="4" language="spa" label="something1"/>
+                        <stream type="audio" trackIndex="5" channelLayout="front-left" label="somethingelse"/>
+                        <stream type="audio" trackIndex="6" channelIndex="2" channelLayout="front-right"/>
+                        <stream type="audio" trackIndex="7" language="heb" label="something2"/>
+                    </streams>
+                </content>
+            </contentAssets>
+        </item>
+        <item>
+            <action>add</action>
+            <type>1</type>
+            <userId>2188</userId>
+            <name>testWithoutStreams</name>
+            <description>A funny and furry 3D short about a giant rabbit who gets even with bullying rodents</description>
+            <tags>
+                <tag>Big buck bunny</tag>
+                <tag>trailer</tag>
+            </tags>
+            <categories>
+                <category>examples>example1</category>
+                <category>examples>example2</category>
+            </categories>
+            <media>
+                <mediaType>1</mediaType>
+            </media>
+            <contentAssets>
+                <content>
+                    <urlContentResource url="ftp://projects8:741@ftp.kaltura.com/BigBuckBunnyTrailerHD.mov"/>
+                    <streams>
+                    </streams>
+                </content>
+            </contentAssets>
+        </item>
+        <item>
+            <action>add</action>
+            <type>1</type>
+            <userId>2188</userId>
+            <name>testWithoutType</name>
+            <description>A funny and furry 3D short about a giant rabbit who gets even with bullying rodents</description>
+            <tags>
+                <tag>Big buck bunny</tag>
+                <tag>trailer</tag>
+            </tags>
+            <categories>
+                <category>examples>example1</category>
+                <category>examples>example2</category>
+            </categories>
+            <media>
+                <mediaType>1</mediaType>
+            </media>
+            <contentAssets>
+                <content>
+                    <urlContentResource url="ftp://projects8:741@ftp.kaltura.com/BigBuckBunnyTrailerHD.mov"/>
+                    <streams>
+                        <stream trackIndex="1" language="eng" label="something"/>
+                    </streams>
+                </content>
+            </contentAssets>
+        </item>
+        <item>
+            <action>add</action>
+            <type>1</type>
+            <userId>2188</userId>
+            <name>testWithWithoutTrackIndex</name>
+            <description>A funny and furry 3D short about a giant rabbit who gets even with bullying rodents</description>
+            <tags>
+                <tag>Big buck bunny</tag>
+                <tag>trailer</tag>
+            </tags>
+            <categories>
+                <category>examples>example1</category>
+                <category>examples>example2</category>
+            </categories>
+            <media>
+                <mediaType>1</mediaType>
+            </media>
+            <contentAssets>
+                <content>
+                    <urlContentResource url="ftp://projects8:741@ftp.kaltura.com/BigBuckBunnyTrailerHD.mov"/>
+                    <streams>
+                        <stream type="audio" language="eng" label="something"/>
+                    </streams>
+                </content>
+            </contentAssets>
+        </item>
+    </channel>
+</mrss>
