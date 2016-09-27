@@ -193,6 +193,7 @@ function Test3_UploadStreamsXmlToDropFolder($dc,$scp_user_name,$scp_user_pass,$t
         return fail(_FUNCTION__."Streams Drop folder test Failed - entry->streams count is [".count($entry->streams)."] but expected 7");
 
     //test without streams
+    $filter = new KalturaBaseEntryFilter();
     $filter->freeText = 'testWithoutStreams';
     $retry = 0;
     $result = false;
@@ -214,6 +215,7 @@ function Test3_UploadStreamsXmlToDropFolder($dc,$scp_user_name,$scp_user_pass,$t
         return fail(_FUNCTION__."Streams Drop folder test Failed - entry with empty stream session is uploaded, but expected to fail");
 
     //test without type
+    $filter = new KalturaBaseEntryFilter();
     $filter->freeText = 'testWithoutType';
     $retry = 0;
     $result = false;
@@ -235,6 +237,7 @@ function Test3_UploadStreamsXmlToDropFolder($dc,$scp_user_name,$scp_user_pass,$t
         return fail(_FUNCTION__."Streams Drop folder test Failed - entry without type in stream session is uploaded, but expected to fail");
 
     //test without TrackIndex
+    $filter = new KalturaBaseEntryFilter();
     $filter->freeText = 'testWithWithoutTrackIndex';
     $retry = 0;
     $result = false;
