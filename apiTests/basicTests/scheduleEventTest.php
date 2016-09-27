@@ -523,7 +523,130 @@ function TestScheduleChangeSingleEventToRecurringEvent($client)
 	return success(__FUNCTION__ . " Successful schedule event update from single event to recurring event count");
 }
 
-function createScheduleEventRecurring($client, $templateEntryId = null)
+
+function TestScheduleRecurringUntilAndCount($client)
+{
+	info("Testing creating and updating schedule recurring event with until and count");
+	$failCount = 0;
+
+	try{
+		$scheduleEvent = createScheduleEventRecurring($client, null, 200 );
+	}
+	catch (KalturaException $exception) {
+		if($exception->getCode() == 'PROPERTY_VALIDATION_ALL_MUST_BE_NULL_BUT_ONE')
+			success("Successful Error - expected to failed creating schedule recurrence object with both until and count");
+		else
+			$failCount += (fail(__FUNCTION__.$exception->getCode()));
+	}
+
+	$scheduleEvent = createScheduleEventRecurring($client, null);
+	while (isScheduleEventUploaded($client, $scheduleEvent->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$recurrencesUntilDate = $scheduleEvent->recurrence->until;
+
+	$filter = new KalturaEntryScheduleEventFilter();
+	$filter->parentIdEqual = $scheduleEvent->id;
+	$filter->recurrenceTypeEqual = KalturaScheduleEventRecurrenceType::RECURRENCE;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+
+	info("Total list count: $result->totalCount");
+	$retries = 5;
+	while ($result->totalCount == 0 && $retries > 0){
+		print ("Recurrences are not ready - waiting before retry...\n");
+		sleep(5);
+		$retries--;
+		$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
+		info("Total list count: $result->totalCount");
+	}
+
+	if ($result->totalCount == 0)
+	{
+		$failCount += fail(__FUNCTION__ . " Failed to create recurrences for recurring event: " .$scheduleEvent->id );
+	}
+
+	$primaryTotalRecurrences = $result->totalCount;
+
+	$recurrenceCount = 10;
+	$scheduleEvent->recurrence->count = $recurrenceCount;
+	$scheduleEvent->recurrence->until = null;
+	$scheduleEvent->createdAt =null;
+	$scheduleEvent->updatedAt =null;
+
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$scheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent->id, $scheduleEvent);
+
+	$filter = new KalturaEntryScheduleEventFilter();
+	$filter->parentIdEqual = $scheduleEvent->id;
+	$filter->recurrenceTypeEqual = KalturaScheduleEventRecurrenceType::RECURRENCE;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$resultAfterUpdate = $schedulePlugin->scheduleEvent->listAction($filter, null);
+
+	info("Total list count: $resultAfterUpdate->totalCount");
+	$retries = 5;
+	while ($resultAfterUpdate->totalCount == 0 && $retries > 0){
+		print ("Recurrences are not ready - waiting before retry...\n");
+		sleep(5);
+		$retries--;
+		$resultAfterUpdate = $schedulePlugin->scheduleEvent->listAction($filter, null);
+		info("Total list count: $result->totalCount");
+	}
+
+	if ($resultAfterUpdate->totalCount == 0)
+	{
+		$failCount += fail(__FUNCTION__ . " Failed to create recurrences for recurring event: " .$scheduleEvent->id );
+	}
+
+	if ($resultAfterUpdate->totalCount != $recurrenceCount)
+	{
+		$failCount += fail(__FUNCTION__ . " Failed to create recurrences for recurring event: " .$scheduleEvent->id ." should be $recurrenceCount " );
+	}
+
+	$scheduleEvent->recurrence->until = $recurrencesUntilDate;
+	$scheduleEvent->recurrence->count = null;
+	$scheduleEvent->createdAt =null;
+	$scheduleEvent->updatedAt =null;
+
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$scheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent->id, $scheduleEvent);
+
+	$filter = new KalturaEntryScheduleEventFilter();
+	$filter->parentIdEqual = $scheduleEvent->id;
+	$filter->recurrenceTypeEqual = KalturaScheduleEventRecurrenceType::RECURRENCE;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$resultAfterUpdate2 = $schedulePlugin->scheduleEvent->listAction($filter, null);
+
+	info("Total list count: $resultAfterUpdate2->totalCount");
+	$retries = 5;
+	while ($resultAfterUpdate2->totalCount == 0 && $retries > 0){
+		print ("Recurrences are not ready - waiting before retry...\n");
+		sleep(5);
+		$retries--;
+		$resultAfterUpdate2 = $schedulePlugin->scheduleEvent->listAction($filter, null);
+		info("Total list count: $resultAfterUpdate2->totalCount");
+	}
+
+	if ($resultAfterUpdate2->totalCount == 0)
+	{
+		$failCount += fail(__FUNCTION__ . " Failed to create recurrences for recurring event: " .$scheduleEvent->id );
+	}
+
+	if ($resultAfterUpdate2->totalCount !=  $primaryTotalRecurrences)
+	{
+		$failCount += fail(__FUNCTION__ . " Failed to create [$primaryTotalRecurrences] recurrences for recurring events: " .$scheduleEvent->id ." should be created  from until date[$recurrencesUntilDate] and not from count [$recurrenceCount] " );
+	}
+
+	if ($failCount)
+		return fail(__FUNCTION__ . " schedule event recurring creation with until and count failed");
+
+	return success(__FUNCTION__." Successful schedule event recurring creation with until and count");
+}
+
+function createScheduleEventRecurring($client, $templateEntryId = null, $count = null)
 {
 	info("Creating scheduleEvent");
 	$scheduleEvent = new KalturaLiveStreamScheduleEvent();
@@ -536,6 +659,10 @@ function createScheduleEventRecurring($client, $templateEntryId = null)
 	$scheduleEvent->recurrence->name = 'TEST';
 	$scheduleEvent->recurrence->frequency = KalturaScheduleEventRecurrenceFrequency::WEEKLY;
 	$scheduleEvent->recurrence->until = 1538836188;
+	if (!is_null($count))
+	{
+		$scheduleEvent->recurrence->count = $count;
+	}
 	$scheduleEvent->recurrence->byDay = 'SU,MO,FR';
 	if ($templateEntryId != null)
 	{
@@ -553,8 +680,8 @@ function createScheduleEvent($client, $templateEntryId = null)
 	info("Creating scheduleEvent");
 	$scheduleEvent = new KalturaLiveStreamScheduleEvent();
 	$scheduleEvent->summary = 'testScheduleEvent';
-	$scheduleEvent->startDate = 1584914400000;
-	$scheduleEvent->endDate = 1584914700000;
+	$scheduleEvent->startDate = 1584914400;
+	$scheduleEvent->endDate = 1584914700;
 	$scheduleEvent->recurrenceType = KalturaScheduleEventRecurrenceType::NONE;
 	if ($templateEntryId != null)
 	{
@@ -711,6 +838,8 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret += TestScheduleEventFilterByResourceSystemName($client);
 	$ret += TestScheduleChangeRecurringEventToSingleEvent($client);
 	$ret += TestScheduleChangeSingleEventToRecurringEvent($client);
+	$ret += TestScheduleRecurringUntilAndCount($client);
+
 	return ($ret);
 }
 

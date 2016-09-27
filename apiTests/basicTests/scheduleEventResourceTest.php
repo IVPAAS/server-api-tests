@@ -207,6 +207,40 @@ function TestScheduleEventFilterByEventIdOrItsParentIdEqual($client)
 	return success(__FUNCTION__);
 }
 
+function TestScheduleEventResourceCreation($client)
+{
+	$failCount = 0;
+
+	$scheduleEvent1 = createScheduleEvent($client, null );
+	while (isScheduleEventUploaded($client, $scheduleEvent1->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$scheduleResource1 = createScheduleResource($client, "resource1" , $systemName = null);
+	$scheduleResource2 = createScheduleResource($client, "resource2" , $systemName = null);
+
+	$scheduleEventResource1 = createScheduleEventResource($client, $scheduleEvent1->id , $scheduleResource1->id );
+	$scheduleEventResource2 = createScheduleEventResource($client, $scheduleEvent1->id , $scheduleResource2->id );
+
+	try
+	{
+		$scheduleEventResource1 = createScheduleEventResource($client, $scheduleEvent1->id , $scheduleResource1->id );
+	}
+	catch (KalturaException $exception) {
+		if($exception->getCode() == 'SCHEDULE_EVENT_RESOURCE_ALREADY_EXISTS')
+			success("Successful Error - expected to fail while creating scheduleEventResource with existing event id and resource id");
+		else
+			$failCount += (fail(__FUNCTION__.$exception->getCode()));
+	}
+
+	if($failCount )
+		return  fail(__FUNCTION__." Schedule Event Resource creation Failed.");
+
+	return success(__FUNCTION__);
+}
+
 function isScheduleEventUploaded($client,$id)
 {
 	if ($id != null)
@@ -228,6 +262,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$ret = TestScheduleEventFilterByEventIdOrItsParentIdEqual($client);
+	$ret += TestScheduleEventResourceCreation($client);
 	return ($ret);
 }
 
