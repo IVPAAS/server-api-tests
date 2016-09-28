@@ -322,8 +322,8 @@ function createEmptyScheduleEvent($client)
 	info("Creating empty scheduleEvent");
 	$scheduleEvent = new KalturaLiveStreamScheduleEvent();
 	$scheduleEvent->summary = 'testScheduleEvent';
-	$scheduleEvent->startDate = 1584914400000;
-	$scheduleEvent->endDate = 1584914700000;
+	$scheduleEvent->startDate = 1584914400;
+	$scheduleEvent->endDate = 1584914700;
 	$scheduleEvent->recurrenceType = KalturaScheduleEventRecurrenceType::NONE;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->add($scheduleEvent);
