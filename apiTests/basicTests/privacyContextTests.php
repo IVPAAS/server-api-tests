@@ -114,7 +114,8 @@ function runAllTestWithClient($client, $ksType, $description = null)
 {
     $clientDescription = "$ksType ks, $description";
     warning("running test with $clientDescription");
-    $runCategory = ($ksType == 'ADMIN') && (!$description || $description == 'PC');
+    $runCategory = ($description == 'MASTER'); // because default entitlement are enforced
+    //$runCategory = ($ksType == 'ADMIN') && (!$description || $description == 'PC');
     try {
         if ($runCategory && !runAllCategoryTests($client))
             throw new Exception('fail on category tests');
@@ -137,12 +138,18 @@ function runAllTestWithClient($client, $ksType, $description = null)
     }
     return success(__FUNCTION__);
 }
+function getUiConf($client) {
+    $result = $client->uiConf->listAction(null, null);
+    if ($result->totalCount <= 0)
+        return fail("can't run test without uiconf");
+    return $result->objects[0]->id;
 
-function createWidget($client, $EE) {
+}
+
+function createWidget($client, $EE, $uiConfId) {
     $widget = new KalturaWidget();
-    $widget->uiConfId = 23448230;
+    $widget->uiConfId = $uiConfId; //23448230;
     $widget->privacyContext = 'MediaSpace';
-    //$widget->privacyContext = 'somethingElse';
     if ($EE)
         $widget->privacyContext = 'MediaSpace,enableentitlement';
     else
@@ -189,7 +196,6 @@ function testShouldNotFind($clientList) {
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
     info('starting test');
-    global $entryId, $categoryId;
     $ret = "";
 
     $clientAdminMaster = startKalturaSession($partnerId,$adminSecret,$dc,KalturaSessionType::ADMIN, null, 'disableentitlement');
@@ -202,8 +208,12 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
     $clientUserEE = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, null, 'enableentitlement');
     $clientUserPCEE = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, null, 'privacycontext:MediaSpace,enableentitlement');
 
-    $widgetPC = createWidget($clientAdminMaster, false);
-    $widgetPCEE = createWidget($clientAdminMaster, true);
+
+    $uiConfId = getUiConf($clientAdminMaster);
+    if (!$uiConfId)
+        return fail("can't run test without uiconf");
+    $widgetPC = createWidget($clientAdminMaster, false, $uiConfId);
+    $widgetPCEE = createWidget($clientAdminMaster, true, $uiConfId);
     $clientWidgetPCEE = startWidgetSession($dc,$partnerId, $widgetPCEE);
     $clientWidgetPC = startWidgetSession($dc,$partnerId, $widgetPC); // enforce entitlement
     $clientWidget = startWidgetSession($dc,$partnerId);
@@ -226,11 +236,12 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
     $ret += testShouldNotFind(array($clientWidget, $clientWidgetPC, $clientWidgetPCEE));
     deleteCategoryAndEntry($clientAdminMaster);
 
-    return $ret;
+    //return $ret;
 
 
-/*
-    $ret = runAllTestWithClient($clientAdmin, 'ADMIN', null);
+    warning('checking ADMIN and USER client with himself');
+    $ret += runAllTestWithClient($clientAdminMaster, 'ADMIN', 'MASTER');
+    $ret += runAllTestWithClient($clientAdmin, 'ADMIN', null);
     $ret += runAllTestWithClient($clientAdminPC, 'ADMIN', 'PC');
     $ret += runAllTestWithClient($clientAdminEE, 'ADMIN', 'EE');
     $ret += runAllTestWithClient($clientAdminPCEE, 'ADMIN', 'PC-EE');
@@ -239,7 +250,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
     $ret += runAllTestWithClient($clientUserEE, 'USER','EE');
     $ret += runAllTestWithClient($clientUserPCEE, 'USER', 'PC-EE');
     return $ret;
-*/
+
 
 
 }
