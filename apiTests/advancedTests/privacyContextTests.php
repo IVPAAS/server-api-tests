@@ -1,6 +1,6 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
-require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 /**
  * Created by IntelliJ IDEA.
  * User: David.Winder
@@ -145,7 +145,20 @@ function getUiConf($client) {
     return $result->objects[0]->id;
 
 }
+/*
+function setDefaultEntitlementOn($client, $partnerId) {
+    $configuration = new KalturaSystemPartnerConfiguration();
 
+    $configuration->permissions = array();
+    $configuration->permissions[0] = new KalturaPermission();
+    $configuration->permissions[0]->name = "QUIZ_PLUGIN_PERMISSION";
+    $configuration->permissions[0]->status = KalturaPermissionStatus::ACTIVE;
+
+    $configuration->defaultEntitlementEnforcement = true;
+    $systempartnerPlugin = KalturaSystempartnerClientPlugin::get($client);
+    $systempartnerPlugin->systemPartner->updateconfiguration($partnerId, $configuration);
+}
+*/
 function createWidget($client, $EE, $uiConfId) {
     $widget = new KalturaWidget();
     $widget->uiConfId = $uiConfId; //23448230;
@@ -157,7 +170,6 @@ function createWidget($client, $EE, $uiConfId) {
     $result = $client->widget->add($widget);
     return $result->id;
 }
-
 
 $categoryId;
 $entryId;
@@ -193,11 +205,29 @@ function testShouldNotFind($clientList) {
 }
 
 
+function login($dc, $userName, $userPassword, $partnerId = null)
+{
+    print("\n\r login to get super user ks");
+    $config = new KalturaConfiguration();
+    $config->serviceUrl = $dc;
+    $client = new KalturaClient($config);
+    $loginId = $userName;
+    $password = $userPassword;
+//    $partnerId = null;
+    $expiry = null;
+    $privileges = null;
+    $ks = $client->user->loginbyloginid($loginId, $password, $partnerId, $expiry, $privileges);
+    $client->setKs($ks);
+    print("\n\r successful login");
+    return $client;
+}
+
+
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
     info('starting test');
     $ret = "";
-
+    
     $clientAdminMaster = startKalturaSession($partnerId,$adminSecret,$dc,KalturaSessionType::ADMIN, null, 'disableentitlement');
     $clientAdmin = startKalturaSession($partnerId,$adminSecret,$dc,KalturaSessionType::ADMIN, null, null);
     $clientAdminPC = startKalturaSession($partnerId,$adminSecret,$dc,KalturaSessionType::ADMIN, null, 'privacycontext:MediaSpace');

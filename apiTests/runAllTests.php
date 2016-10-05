@@ -348,6 +348,44 @@ function runTvinciDistributionTest($dc,$userName,$userPassword)
   printSuccessAndlogOutput("tvinciDistributionTest");
 }
 
+function runPrivacyContextTest($dc,$userName,$userPassword)
+{
+  $testName = 'privacyContextTest';
+  try {
+    print("\n\r $testName init.");
+    $client = login($dc, $userName, $userPassword);
+    $testPartner = createTestPartner($client, "Kaltura.testapp1");
+
+    $configuration = new KalturaSystemPartnerConfiguration();
+    $configuration->defaultEntitlementEnforcement = true;
+    $systempartnerPlugin = KalturaSystempartnerClientPlugin::get($client);
+    $systempartnerPlugin->systemPartner->updateconfiguration($testPartner->id, $configuration);
+
+    info(" executing $testName ...");
+    $output = array();
+    exec("php basicTests/privacyContextTests.php $dc $testPartner->id $testPartner->adminSecret $testPartner->secret ", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  }
+  catch (Exception $e) {
+    fail(" $testName failed: $e");
+    $result = 1;
+  }
+  //finally {
+  info(" $testName tear down.");
+  if ($testPartner != null) {
+    $client = login($dc, $userName, $userPassword);
+    removePartner($dc, $client, $testPartner);
+  }
+  //}
+  if ($result) {
+    printFailAndlogOutput($testName);
+    return FAIL;
+  }
+  printSuccessAndlogOutput($testName);
+}
+
 function runFairplayDRMProfileTest($dc,$userName,$userPassword)
 {
   try {
