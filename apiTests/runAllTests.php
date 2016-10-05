@@ -356,6 +356,7 @@ function runPrivacyContextTest($dc,$userName,$userPassword)
     $client = login($dc, $userName, $userPassword);
     $testPartner = createTestPartner($client, "Kaltura.testapp1");
 
+    //setting the default entitlement as true in order to "hide" context from widget
     $configuration = new KalturaSystemPartnerConfiguration();
     $configuration->defaultEntitlementEnforcement = true;
     $systempartnerPlugin = KalturaSystempartnerClientPlugin::get($client);
@@ -363,7 +364,7 @@ function runPrivacyContextTest($dc,$userName,$userPassword)
 
     info(" executing $testName ...");
     $output = array();
-    exec("php basicTests/privacyContextTests.php $dc $testPartner->id $testPartner->adminSecret $testPartner->secret ", $output, $result);
+    exec("php advancedTests/privacyContextTests.php $dc $testPartner->id $testPartner->adminSecret $testPartner->secret ", $output, $result);
     foreach ($output as $item) {
       print("\n\r $item");
     }
