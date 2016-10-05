@@ -125,23 +125,21 @@ function Test3_AddCuePointToLive($clientMS, $clientServer)
 	// end time : 1468768326.697, start time : 1468768265.697, cue point creation time : 1468768320
 	for ($i=0; $i<$numOfSegments; $i++) {
 		$liveEntry =  helper_CreateAndAppend($clientMS, $clientServer, $liveEntry, $flavorAssetIds->objects, 4, $i,  $i == ($numOfSegments-1));
-		if ($i == 0) {
-			//helper_createCuePoints($clientServer, $liveEntry->id, 1468768250);
-			//helper_createCuePoints($clientServer, $liveEntry->id, 1468768270);
-		}
 		if ($i == 1) {
 			helper_createCuePoints($clientServer, $liveEntry->id, 1468768300);
 			helper_createCuePoints($clientServer, $liveEntry->id, 1468768310);
 		}
-		if ($i == 2) {
-			//helper_createCuePoints($clientServer, $liveEntry->id, 1468768320);
-			//helper_createCuePoints($clientServer, $liveEntry->id, 1468768340);
-		}
+		//for checking extra times:
+		// in i == 0 can add times: 1468768250, 1468768270
+		// in i == 2 can add times: 1468768320, 1468768340
 	}
 	$recordEntryID = $liveEntry->recordedEntryId;
 	info("waiting for recorded id: " .$recordEntryID ." to be ready");
 
-	do sleep(10);
+	do {
+		sleep(5);
+		print (".");
+	}
 	while (!isEntryReady($clientServer,$recordEntryID));
 	info("recordedEntry ready!");
 
