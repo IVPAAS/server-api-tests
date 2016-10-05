@@ -49,9 +49,6 @@ function checkEntryExist($client, $entryId = null)
     //$filter->idEqual = $entryId;
     $filter->idIn = $entryId;
     $result = $client->baseEntry->listAction($filter, null);
-    //info("total CNT entry is: $result->totalCount");
-    //foreach ($result->objects as $entry)
-    //   info("$entry->id");
     if ($result->totalCount > 0)
         return true;
     return false;
@@ -115,7 +112,6 @@ function runAllTestWithClient($client, $ksType, $description = null)
     $clientDescription = "$ksType ks, $description";
     warning("running test with $clientDescription");
     $runCategory = ($description == 'MASTER'); // because default entitlement are enforced
-    //$runCategory = ($ksType == 'ADMIN') && (!$description || $description == 'PC');
     try {
         if ($runCategory && !runAllCategoryTests($client))
             throw new Exception('fail on category tests');
@@ -145,23 +141,10 @@ function getUiConf($client) {
     return $result->objects[0]->id;
 
 }
-/*
-function setDefaultEntitlementOn($client, $partnerId) {
-    $configuration = new KalturaSystemPartnerConfiguration();
 
-    $configuration->permissions = array();
-    $configuration->permissions[0] = new KalturaPermission();
-    $configuration->permissions[0]->name = "QUIZ_PLUGIN_PERMISSION";
-    $configuration->permissions[0]->status = KalturaPermissionStatus::ACTIVE;
-
-    $configuration->defaultEntitlementEnforcement = true;
-    $systempartnerPlugin = KalturaSystempartnerClientPlugin::get($client);
-    $systempartnerPlugin->systemPartner->updateconfiguration($partnerId, $configuration);
-}
-*/
 function createWidget($client, $EE, $uiConfId) {
     $widget = new KalturaWidget();
-    $widget->uiConfId = $uiConfId; //23448230;
+    $widget->uiConfId = $uiConfId;
     $widget->privacyContext = 'MediaSpace';
     if ($EE)
         $widget->privacyContext = 'MediaSpace,enableentitlement';
