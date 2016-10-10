@@ -70,7 +70,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 	/**
 	 * @return KalturaScheduleEvent
 	 */
-	protected function create($class = 'KalturaLiveStreamScheduleEvent', $additionalAttributes = array())
+	protected function create($class = 'KalturaLiveStreamScheduleEvent', $additionalAttributes = array(), $duration = null)
 	{
 		$scheduleEvent = new $class();
 		/* @var $scheduleEvent KalturaScheduleEvent */
@@ -80,7 +80,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$scheduleEvent->startDate = time() + (60 * 60 * 24);
 		$scheduleEvent->endDate = $scheduleEvent->startDate + 60;
 		$scheduleEvent->referenceId = uniqid();
-		
+
 		foreach($additionalAttributes as $attribute => $value)
 		{
 			$scheduleEvent->$attribute = $value;
@@ -1090,9 +1090,10 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$recurrence->count = $recurrences;
 
 		$endDate = time() + (60 * 60 * 24 * 365 * 2);
+		$duration = 2000;
 		for($i = 0; $i < $recurring; $i++)
 		{
-			$scheduleEvent = $this->create('KalturaRecordScheduleEvent', array('recurrenceType' => KalturaScheduleEventRecurrenceType::RECURRING, 'recurrence' => $recurrence, 'endDate' => $endDate));
+			$scheduleEvent = $this->create('KalturaRecordScheduleEvent', array('recurrenceType' => KalturaScheduleEventRecurrenceType::RECURRING, 'recurrence' => $recurrence, 'endDate' => $endDate, 'duration' => $duration) );
 			$recurringEvents[$scheduleEvent->id] = $scheduleEvent;
 		}
 
@@ -1522,14 +1523,14 @@ class ScheduleEventTest extends KalturaApiTestCase
 		);
 
 
-		$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $lowStartDate - 10000, 'endDate' => $lowStartDate + 600000));
+		$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $lowStartDate - 10000, 'endDate' => $lowStartDate + 6000));
 		$scheduleEventsIds[$scheduleEvent->id] = $scheduleEvent->id;
 		$scheduleEventsTimes[$lowStartDate][$scheduleEvent->id] = $scheduleEvent->id;
 		$scheduleEvents[] = $scheduleEvent;
 
 		for($i = 0; $i < $lows; $i++)
 		{
-			$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $lowStartDate, 'endDate' => $lowStartDate + 600000));
+			$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $lowStartDate, 'endDate' => $lowStartDate + 6000));
 			$scheduleEventsIds[$scheduleEvent->id] = $scheduleEvent->id;
 			$scheduleEventsTimes[$lowStartDate][$scheduleEvent->id] = $scheduleEvent->id;
 			$scheduleEvents[] = $scheduleEvent;
@@ -1537,13 +1538,13 @@ class ScheduleEventTest extends KalturaApiTestCase
 
 		for($i = 0; $i < $highs; $i++)
 		{
-			$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $highStartDate, 'endDate' => $highStartDate + 600000));
+			$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $highStartDate, 'endDate' => $highStartDate + 6000));
 			$scheduleEventsIds[$scheduleEvent->id] = $scheduleEvent->id;
 			$scheduleEventsTimes[$highStartDate][$scheduleEvent->id] = $scheduleEvent->id;
 			$scheduleEvents[] = $scheduleEvent;
 		}
 
-		$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $highStartDate + 10000, 'endDate' => $highStartDate + 600000));
+		$scheduleEvent = $this->create('KalturaLiveStreamScheduleEvent', array('startDate' => $highStartDate + 10000, 'endDate' => $highStartDate + 12000));
 		$scheduleEventsIds[$scheduleEvent->id] = $scheduleEvent->id;
 		$scheduleEventsTimes[$highStartDate][$scheduleEvent->id] = $scheduleEvent->id;
 		$scheduleEvents[] = $scheduleEvent;
@@ -2030,6 +2031,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$content .= "DTSTAMP:" .  kSchedulingICal::formatDate($now). "\r\n";
 		$content .= "DTSTART:" .  kSchedulingICal::formatDate($now + (60 * 60 * 2)). "\r\n";
 		$content .= "DTEND:" .  kSchedulingICal::formatDate($now + (60 * 60 * 3)). "\r\n";
+		$content .= "DURATION:2000" . "\r\n";
 		$content .= "SUMMARY:Test $id\r\n";
 
 		foreach($fields as $field => $value)

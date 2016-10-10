@@ -28,7 +28,16 @@ function Test1_DistributeEntry($client, $profileId)
 		print (".");
 	}
 
-	$entryDistribution = $client->entryDistribution->get($entryDistribution->id);
+	$timeout = 20;
+	do
+	{
+        	$entryDistribution = $client->entryDistribution->get($entryDistribution->id);
+        	sleep(1);
+        	print (".".$timeout);
+        	$timeout--;
+	}
+	while($entryDistribution->status==5 && $timeout>0 );
+
 	if ($entryDistribution->status != 2)
 	{
 		return fail(__FUNCTION__." Distribution Failed");

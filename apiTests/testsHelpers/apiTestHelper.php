@@ -107,7 +107,7 @@ function startWidgetSession($destUrl,$partnerId,$widgetId=0)
 	catch (KalturaException $e)
 	{
 		$msg = $e->getMessage();
-		shout("Problem starting widget sesseion with message: [$msg]\n");
+		fail("Problem starting widget sesseion with message: [$msg]\n");
 		die("ERROR - cannot generate widget session with widgetId [$widgetId]");
 	}
 }
@@ -141,7 +141,7 @@ function addKalturaUser($client,$userId)
   //print ("\nAdd User ID:".$result->id);
   return $result;
 }
-function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag', $referenceId = 'testRefID')
+function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag', $referenceId = 'testRefID', $categories = null)
 {
     $entry                                  = new KalturaMediaEntry();
     $type                                   = KalturaEntryType::MEDIA_CLIP;
@@ -153,6 +153,7 @@ function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId =
     $entry->description                     = $description;
     $entry->tags                            = $tags;
     $entry->referenceId                     = $referenceId;
+    $entry->categories                      = $categories;
     $result                                 = $client->baseEntry->add($entry, $type);
     //print ("\nAdd entry ID:".$result->id);
     return $result;

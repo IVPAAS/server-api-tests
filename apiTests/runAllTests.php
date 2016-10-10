@@ -348,6 +348,84 @@ function runTvinciDistributionTest($dc,$userName,$userPassword)
   printSuccessAndlogOutput("tvinciDistributionTest");
 }
 
+function runPrivacyContextTest($dc,$userName,$userPassword)
+{
+  $testName = 'privacyContextTest';
+  try {
+    print("\n\r $testName init.");
+    $client = login($dc, $userName, $userPassword);
+    $testPartner = createTestPartner($client, "Kaltura.testapp1");
+
+    //setting the default entitlement as true in order to "hide" context from widget
+    $configuration = new KalturaSystemPartnerConfiguration();
+    $configuration->defaultEntitlementEnforcement = true;
+    $systempartnerPlugin = KalturaSystempartnerClientPlugin::get($client);
+    $systempartnerPlugin->systemPartner->updateconfiguration($testPartner->id, $configuration);
+
+    info(" executing $testName ...");
+    $output = array();
+    exec("php advancedTests/privacyContextTests.php $dc $testPartner->id $testPartner->adminSecret $testPartner->secret ", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  }
+  catch (Exception $e) {
+    fail(" $testName failed: $e");
+    $result = 1;
+  }
+  //finally {
+  info(" $testName tear down.");
+  if ($testPartner != null) {
+    $client = login($dc, $userName, $userPassword);
+    removePartner($dc, $client, $testPartner);
+  }
+  //}
+  if ($result) {
+    printFailAndlogOutput($testName);
+    return FAIL;
+  }
+  printSuccessAndlogOutput($testName);
+}
+
+function runLiveToVodTest($dc,$userName,$userPassword)
+{
+  $testName = 'liveToVod';
+  try {
+    print("\n\r $testName init.");
+    $client = login($dc, $userName, $userPassword);
+    $testPartner = createTestPartner($client, "Kaltura.testapp1");
+
+    $conversionProfile = getConversionProfileForSpecficPartner($client, $testPartner->id, 'Passthrough', KalturaConversionProfileType::LIVE_STREAM);
+    setDefaultConversionProfile($dc, $testPartner, $conversionProfile->id);
+
+    $client = login($dc, $userName, $userPassword);
+    $liveStreamPartner = getPartner($client, '-5'); //get the live streaming partner required for the test
+    info(" executing $testName...");
+    $output = array();
+    exec("php advancedTests/liveToVodTests.php $dc $testPartner->id $testPartner->adminSecret $liveStreamPartner->adminSecret", $output, $result);
+
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  }
+  catch (Exception $e) {
+    fail(" $testName failed: $e");
+    $result = 1;
+  }
+  //finally {
+  info(" $testName tear down.");
+  if ($testPartner != null) {
+    $client = login($dc, $userName, $userPassword);
+    removePartner($dc, $client, $testPartner);
+  }
+  //}
+  if ($result) {
+    printFailAndlogOutput($testName);
+    return FAIL;
+  }
+  printSuccessAndlogOutput($testName);
+}
+
 function runFairplayDRMProfileTest($dc,$userName,$userPassword)
 {
   try {
