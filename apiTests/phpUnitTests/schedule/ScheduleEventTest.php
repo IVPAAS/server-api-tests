@@ -38,6 +38,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 	{
 		foreach($this->createdScheduleEvents as $id)
 		{
+			echo "@@NA teardown deleting scheduleEvent with id [".$id."]";
  			$this->delete($id);
 		}
 		
