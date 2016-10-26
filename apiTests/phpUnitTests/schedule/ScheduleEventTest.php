@@ -44,7 +44,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 			}
 			catch(Exception $e)
 			{
-				echo "error occured while deleting [$id]";
+				echo "error occured while deleting [$id]".PHP_EOL;
 			}
 		}
 		
