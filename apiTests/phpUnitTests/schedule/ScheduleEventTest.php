@@ -38,14 +38,13 @@ class ScheduleEventTest extends KalturaApiTestCase
 	{
 		foreach($this->createdScheduleEvents as $id)
 		{
-			echo "@@NA teardown deleting scheduleEvent with id [".$id."]";
 			try
 			{
 				$this->delete($id);
 			}
 			catch(Exception $e)
 			{
-				echo "@@NA error occured while deleting [$id]";
+				echo "error occured while deleting [$id]";
 			}
 		}
 		
@@ -69,21 +68,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 	{
 		$client = $this->getAdminClient();
 		$plugin = KalturaScheduleClientPlugin::get($client);
-		$filter = new KalturaScheduleEventFilter();
-		$filter->parentIdEqual = $id;
-		$pager = new KalturaFilterPager();
-		$pager->pageIndex = 1;
-		$pager->pageSize = 500;
-
-		$scheduleEventsList = $plugin->scheduleEvent->listAction($filter, $pager);
-
 		$plugin->scheduleEvent->delete($id);
-
-		foreach($scheduleEventsList->objects as $recurrence)
-		{
-			if(isset($this->createdScheduleEvents[$recurrence->id]))
-				unset($this->createdScheduleEvents[$recurrence->id]);
-		}
 
 		if(isset($this->createdScheduleEvents[$id]))
 			unset($this->createdScheduleEvents[$id]);
