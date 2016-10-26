@@ -63,17 +63,16 @@ class ScheduleEventTest extends KalturaApiTestCase
 	{
 		$client = $this->getAdminClient();
 		$plugin = KalturaScheduleClientPlugin::get($client);
-		$plugin->scheduleEvent->delete($id);
-
-		$plugin = KalturaScheduleClientPlugin::get($client);
 		$filter = new KalturaScheduleEventFilter();
 		$filter->parentIdEqual = $id;
-
 		$pager = new KalturaFilterPager();
 		$pager->pageIndex = 1;
 		$pager->pageSize = 500;
 
 		$scheduleEventsList = $plugin->scheduleEvent->listAction($filter, $pager);
+
+		$plugin->scheduleEvent->delete($id);
+
 		foreach($scheduleEventsList->objects as $recurrence)
 		{
 			if(isset($this->createdScheduleEvents[$recurrence->id]))
