@@ -43,7 +43,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 			{
 				$this->delete($id);
 			}
-			catch(KalturaException $e)
+			catch(Exception $e)
 			{
 				echo "@@NA error occured while deleting [$id]";
 			}
