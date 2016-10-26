@@ -39,8 +39,14 @@ class ScheduleEventTest extends KalturaApiTestCase
 		foreach($this->createdScheduleEvents as $id)
 		{
 			echo "@@NA teardown deleting scheduleEvent with id [".$id."]";
-			if (isset($this->createdScheduleEvents[$id])) // could not be set because it might be a son of another event.
- 			    $this->delete($id);
+			try
+			{
+				$this->delete($id);
+			}
+			catch(KalturaException $e)
+			{
+				echo "@@NA error occured while deleting [$id]";
+			}
 		}
 		
 		foreach($this->createdScheduleResources as $id)
