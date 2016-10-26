@@ -38,7 +38,14 @@ class ScheduleEventTest extends KalturaApiTestCase
 	{
 		foreach($this->createdScheduleEvents as $id)
 		{
- 			$this->delete($id);
+			try
+			{
+				$this->delete($id);
+			}
+			catch(Exception $e)
+			{
+				echo "error occured while deleting [$id]";
+			}
 		}
 		
 		foreach($this->createdScheduleResources as $id)
@@ -62,7 +69,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$client = $this->getAdminClient();
 		$plugin = KalturaScheduleClientPlugin::get($client);
 		$plugin->scheduleEvent->delete($id);
-		
+
 		if(isset($this->createdScheduleEvents[$id]))
 			unset($this->createdScheduleEvents[$id]);
 	}
