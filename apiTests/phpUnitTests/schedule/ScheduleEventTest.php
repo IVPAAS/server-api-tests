@@ -39,7 +39,8 @@ class ScheduleEventTest extends KalturaApiTestCase
 		foreach($this->createdScheduleEvents as $id)
 		{
 			echo "@@NA teardown deleting scheduleEvent with id [".$id."]";
- 			$this->delete($id);
+			if (isset($this->createdScheduleEvents[$id])) // could not be set because it might be a son of another event.
+ 			    $this->delete($id);
 		}
 		
 		foreach($this->createdScheduleResources as $id)
@@ -63,7 +64,22 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$client = $this->getAdminClient();
 		$plugin = KalturaScheduleClientPlugin::get($client);
 		$plugin->scheduleEvent->delete($id);
-		
+
+		$plugin = KalturaScheduleClientPlugin::get($client);
+		$filter = new KalturaScheduleEventFilter();
+		$filter->parentIdEqual = $id;
+
+		$pager = new KalturaFilterPager();
+		$pager->pageIndex = 1;
+		$pager->pageSize = 500;
+
+		$scheduleEventsList = $plugin->scheduleEvent->listAction($filter, $pager);
+		foreach($scheduleEventsList->objects as $recurrence)
+		{
+			if(isset($this->createdScheduleEvents[$recurrence->id]))
+				unset($this->createdScheduleEvents[$recurrence->id]);
+		}
+
 		if(isset($this->createdScheduleEvents[$id]))
 			unset($this->createdScheduleEvents[$id]);
 	}
