@@ -2127,8 +2127,8 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(4, $rule->byMonth, "byMonth [$rule->byMonth]");
 		$this->assertEquals('-1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertThat($rule->until, $this->logicalOr($this->equalTo($until),$this->equalTol($until-3600)),"until [$rule->until]");
-
+		$testUntilWithDaylightSavings = ($rule->until == $until) || ($rule->until == ($until-3600));
+		$this->assertTrue($testUntilWithDaylightSavings, "until [$rule->until]");
 
 		$until = time() + (60 * 60 * 24 * 365 * 5);
 		$rule = $this->doTestICalWithRules('FREQ=YEARLY;BYMONTH=4;BYDAY=1SU;UNTIL=' . kSchedulingICal::formatDate($until));
