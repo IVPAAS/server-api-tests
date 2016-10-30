@@ -2118,9 +2118,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(4, $rule->byMonth, "byMonth [$rule->byMonth]");
 		$this->assertEquals('-1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertTrue(checkDaylightSavingsGaps($rule->until,$until));
-		
-		//$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$until = time() + (60 * 60 * 24 * 365 * 6);
@@ -2128,7 +2126,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(10, $rule->byMonth, "byMonth [$rule->byMonth]");
 		$this->assertEquals('-1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$until = time() + (60 * 60 * 24 * 365 * 3);
@@ -2136,15 +2134,14 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(4, $rule->byMonth, "byMonth [$rule->byMonth]");
 		$this->assertEquals('-1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$testUntilWithDaylightSavings = ($rule->until == $until) || ($rule->until == ($until-3600));
-		$this->assertTrue($testUntilWithDaylightSavings, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 		$until = time() + (60 * 60 * 24 * 365 * 5);
 		$rule = $this->doTestICalWithRules('FREQ=YEARLY;BYMONTH=4;BYDAY=1SU;UNTIL=' . kSchedulingICal::formatDate($until));
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(4, $rule->byMonth, "byMonth [$rule->byMonth]");
 		$this->assertEquals('1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=YEARLY;BYMONTH=3;BYDAY=2SU;COUNT=1000');
@@ -2182,7 +2179,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(4, $rule->byMonth, "byMonth [$rule->byMonth]");
 		$this->assertEquals('1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;COUNT=1000');
@@ -2196,7 +2193,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(4, $rule->byMonth, "byMonth [$rule->byMonth]");
 		$this->assertEquals('1SU', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=YEARLY;BYDAY=-1SU;BYMONTH=4;COUNT=1000');
@@ -2213,7 +2210,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$until = time() + (60 * 60 * 24 * 365 * 6);
 		$rule = $this->doTestICalWithRules('FREQ=DAILY;UNTIL=' . kSchedulingICal::formatDate($until));
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::DAILY, $rule->frequency, "frequency [$rule->frequency]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=DAILY;INTERVAL=2;COUNT=1000');
@@ -2229,13 +2226,13 @@ class ScheduleEventTest extends KalturaApiTestCase
 
 		$rule = $this->doTestICalWithRules('FREQ=YEARLY;UNTIL=' . kSchedulingICal::formatDate($until) . ';BYMONTH=1;BYDAY=SU,MO,TU,WE,TH,FR,SA');
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=DAILY;UNTIL=' . kSchedulingICal::formatDate($until) . ';BYMONTH=1');
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::DAILY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(1, $rule->byMonth, "byMonth [$rule->byMonth]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=WEEKLY;COUNT=10');
@@ -2246,7 +2243,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$until = time() + (60 * 60 * 24 * 365 * 6);
 		$rule = $this->doTestICalWithRules('FREQ=WEEKLY;UNTIL=' . kSchedulingICal::formatDate($until));
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::WEEKLY, $rule->frequency, "frequency [$rule->frequency]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=WEEKLY;INTERVAL=2;WKST=SU;COUNT=1000');
@@ -2258,7 +2255,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$until = time() + (60 * 60 * 24 * 365 * 6);
 		$rule = $this->doTestICalWithRules('FREQ=WEEKLY;UNTIL=' . kSchedulingICal::formatDate($until) . ';WKST=SU;BYDAY=TU,TH');
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::WEEKLY, $rule->frequency, "frequency [$rule->frequency]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=WEEKLY;COUNT=10;WKST=SU;BYDAY=TU,TH');
@@ -2273,7 +2270,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::WEEKLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(2, $rule->interval, "interval [$rule->interval]");
 		$this->assertEquals('MO,WE,FR', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 		$this->assertEquals('SU', $rule->weekStartDay, "weekStartDay [$rule->weekStartDay]");
 
 
@@ -2295,7 +2292,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$rule = $this->doTestICalWithRules('FREQ=MONTHLY;UNTIL=' . kSchedulingICal::formatDate($until) . ';BYDAY=1FR');
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::MONTHLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals('1FR', $rule->byDay, "byDay [$rule->byDay]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=MONTHLY;INTERVAL=2;COUNT=10;BYDAY=1SU,-1SU');
@@ -2419,7 +2416,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$rule = $this->doTestICalWithRules('FREQ=HOURLY;INTERVAL=3;UNTIL=' . kSchedulingICal::formatDate($until));
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::HOURLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(3, $rule->interval, "interval [$rule->interval]");
-		$this->assertEquals($until, $rule->until, "until [$rule->until]");
+		$this->assertTrue($this->checkDaylightSavingsGaps($rule->until,$until));
 
 
 		$rule = $this->doTestICalWithRules('FREQ=MINUTELY;INTERVAL=15;COUNT=6');
