@@ -326,3 +326,14 @@ function helper_create_widget($client,$role=null)
 	$result = $client->widget->add($widget);
 	return $result->id;
 }
+
+function waitForEntry($client, $entryId)
+{
+	info("Wait for entry to be ready id = $entryId");
+	while(isEntryReady($client,$entryId)!=true)
+	{
+		sleep(1);
+		print (".");
+	}
+	info("Entry ready!");
+}
