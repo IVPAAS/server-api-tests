@@ -2101,6 +2101,9 @@ class ScheduleEventTest extends KalturaApiTestCase
 
 	public function testICalWithRules()
 	{
+		$original = date_default_timezone_get();
+		date_default_timezone_set('UTC');
+		
 		$rule = $this->doTestICalWithRules('FREQ=YEARLY;INTERVAL=2;BYMONTH=1;BYDAY=SU;BYHOUR=8,9;BYMINUTE=30;COUNT=1000');
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::YEARLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(2, $rule->interval, "interval [$rule->interval]");
@@ -2462,5 +2465,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::MONTHLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(5, $rule->count, "count [$rule->count]");
 		$this->assertEquals('15,30', $rule->byMonthDay, "byMonthDay [$rule->byMonthDay]");
+		
+		date_default_timezone_set($original);
 	}
 }
