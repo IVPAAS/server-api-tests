@@ -1786,9 +1786,9 @@ class ScheduleEventTest extends KalturaApiTestCase
 
 			$items[$id] = array(
 				"UID" => "$id",
-				"DTSTAMP" => kSchedulingICal::formatDate($now),
-				"DTSTART" => kSchedulingICal::formatDate($now + (60 * 60 * $i)),
-				"DTEND" => kSchedulingICal::formatDate($now + (60 * 60 * ($i + 1))),
+				"DTSTAMP" => date(kSchedulingICal::TIME_FORMAT, $now),
+				"DTSTART" => date(kSchedulingICal::TIME_FORMAT,($now + (60 * 60 * $i))),
+				"DTEND" => date(kSchedulingICal::TIME_FORMAT,($now + (60 * 60 * ($i + 1)))),
 				"SUMMARY" => "Test $i - $id",
 			);
 
@@ -1809,8 +1809,11 @@ class ScheduleEventTest extends KalturaApiTestCase
 
 			foreach($item as $field => $value)
 			{
-				if($field != 'DTSTAMP')
+				if ($field == 'DTSTART' || $field == 'DTEND')
+					$this->assertEquals($value, date(kSchedulingICal::TIME_FORMAT,strtotime($event->getField($field))));
+				elseif ($field != 'DTSTAMP')
 					$this->assertEquals($value, $event->getField($field));
+
 			}
 		}
 	}
@@ -1992,9 +1995,10 @@ class ScheduleEventTest extends KalturaApiTestCase
 
 		$content .= "BEGIN:VEVENT\r\n";
 		$content .= "UID:$referenceId\r\n";
-		$content .= "DTSTAMP:" . kSchedulingICal::formatDate($now) . "\r\n";
-		$content .= "DTSTART:" . kSchedulingICal::formatDate($startTime) . "\r\n";
-		$content .= "DTEND:" . kSchedulingICal::formatDate($endTime) . "\r\n";
+
+		$content .= "DTSTAMP:" . date(kSchedulingICal::TIME_FORMAT,$now) . "\r\n";
+		$content .= "DTSTART:" . date(kSchedulingICal::TIME_FORMAT,$startTime) . "\r\n";
+		$content .= "DTEND:" . date(kSchedulingICal::TIME_FORMAT,$endTime) . "\r\n";
 		$content .= "SUMMARY:Test\r\n";
 
 		$content .= "X-KALTURA-TAGS:test,{$this->uniqueTag}\r\n";
@@ -2465,7 +2469,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$this->assertEquals(KalturaScheduleEventRecurrenceFrequency::MONTHLY, $rule->frequency, "frequency [$rule->frequency]");
 		$this->assertEquals(5, $rule->count, "count [$rule->count]");
 		$this->assertEquals('15,30', $rule->byMonthDay, "byMonthDay [$rule->byMonthDay]");
-		
+
 		date_default_timezone_set($original);
 	}
 }
