@@ -532,3 +532,26 @@ function runDropFolderTest($dc,$userName,$userPassword)
   }
   printSuccessAndlogOutput("dropFolderTest");
 }
+
+function runEntryPlaybackContextTest($dc,$userName,$userPassword)
+{
+  try {
+
+    $testPartnerId = 7449;
+    $testPartnerAdminSecret = '899b3a00c3c4a340a0215db0450ad8ca';
+    info(" executing EntryPlaybackContextTest...");
+    $output = array();
+    exec("php advancedTests/entryPlaybackContextTest.php $dc $testPartnerId $testPartnerAdminSecret", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  } catch (Exception $e) {
+    fail(" EntryPlaybackContextTest failed: $e");
+    $result = 1;
+  }
+  if ($result) {
+    printFailAndlogOutput("EntryPlaybackContextTest");
+    return FAIL;
+  }
+  printSuccessAndlogOutput("EntryPlaybackContextTest");
+}
