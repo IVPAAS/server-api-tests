@@ -679,35 +679,35 @@ function TestScheduleConflictingEventsByResourceAndDates($client)
 
 	$newScheduleEvent->startDate = 1584914300;
 	$newScheduleEvent->endDate = 1584914700;
-	$result = $schedulePlugin->scheduleEvent->getConflictingEvents($scheduleResource2->id, $newScheduleEvent);
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource2->id, $newScheduleEvent);
 
 	if (!count($result))
 		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914500;
 	$newScheduleEvent->endDate = 1584914600;
-	$result = $schedulePlugin->scheduleEvent->getConflictingEvents($scheduleResource1->id, $newScheduleEvent);
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
 
 	if (!count($result))
 		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914500;
 	$newScheduleEvent->endDate = 1584914900;
-	$result = $schedulePlugin->scheduleEvent->getConflictingEvents("$scheduleResource1->id,$scheduleResource2->id", $newScheduleEvent);
+	$result = $schedulePlugin->scheduleEvent->getConflicts("$scheduleResource1->id,$scheduleResource2->id", $newScheduleEvent);
 
 	if (!count($result))
 		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914300;
 	$newScheduleEvent->endDate = 1584914350;
-	$result = $schedulePlugin->scheduleEvent->getConflictingEvents($scheduleResource1->id, $newScheduleEvent);
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
 
 	if (count($result))
 		$failCount += fail(__FUNCTION__ . " Expecting no conflicts but received conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914900;
 	$newScheduleEvent->endDate = 1584914900;
-	$result = $schedulePlugin->scheduleEvent->getConflictingEvents($scheduleResource1->id, $newScheduleEvent);
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
 
 	if (count($result))
 		$failCount += fail(__FUNCTION__ . " Expecting no conflicts but received conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
