@@ -3,9 +3,6 @@ require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php'
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
 $metadataProfileId = null;
-$entryId = null;
-$metadataId = null;
-$cuePointId = null;
 
 function createCodeCue($client, $entryId, $code="test", $tags=null)
 {
@@ -28,8 +25,6 @@ function createMetadataProfile($client) {
 	$path = dirname ( __FILE__ ).'/../../resources/metadata1.xml';
 	$xsdData = file_get_contents($path);
 	$result = $metadataPlugin->metadataProfile->add($metadataProfile, $xsdData, null);
-	global $metadataProfileId;
-	$metadataProfileId = $result->id;
 	return $result;
 }
 
@@ -38,52 +33,83 @@ function addMetaData($client, $metadataProfileId, $objectId)
 	$xmlData = "<metadata><FirstAttr>adding attr in meta</FirstAttr></metadata>";
 	$metadataPlugin = KalturaMetadataClientPlugin::get($client);
 	$result = $metadataPlugin->metadata->add($metadataProfileId, KalturaMetadataObjectType::CODE_CUE_POINT, $objectId, $xmlData);
-	global $metadataId;
-	$metadataId = $result->id;
 	return $result;
 
 }
-
+function cloneCuepoint($client, $cuepointId, $dstEntryId)
+{
+	$cuepointPlugin = KalturaCuepointClientPlugin::get($client);
+	$result = $cuepointPlugin->cuePoint->cloneAction($cuepointId, $dstEntryId);
+	return $result;
+}
 
 function createCodeCuePointWithMetaData($client, $entryId)
 {
-	//$codeCuePoint = createCodeCue($client, $entryId, 'testCode1');
-	//$meta = createMetadataProfile($client);
-	//info("created metadataProfile with ID $meta->id");
+	$codeCuePoint = createCodeCue($client, $entryId, 'testCode1');
+	$metadataProfile = createMetadataProfile($client);
+	info("created metadataProfile with ID $metadataProfile->id");
+	addMetaData($client, $metadataProfile->id, $codeCuePoint->id);
+	global $metadataProfileId;
+	$metadataProfileId = $metadataProfile->id;
+	return $codeCuePoint;
+}
 
-
+function checkIfCuePointHasMetada($client, $cuepointId)
+{
+	$filter = new KalturaMetadataFilter();
+	$filter->metadataObjectTypeEqual = KalturaMetadataObjectType::CODE_CUE_POINT;
+	$filter->objectIdEqual = $cuepointId;
+	$metadataPlugin = KalturaMetadataClientPlugin::get($client);
+	$result = $metadataPlugin->metadata->listAction($filter, null);
+	
+	if ($result->totalCount > 0)
+		return true;
+	return false;
 }
 
 function cloneCuePointWithMetadata($client)
 {
 	info('start ' .  __FUNCTION__);
-	$res = addMetaData($client, 6, '0_gne54tsy');
-	info("created metadata with ID $res->id");
-	/*
-	$entry  = helper_createEmptyEntry($client,__FILE__);
-	info("created cue point with ID $entry->id");
-	$codeCuePoint = createCodeCue($client, $entry->id, 'testCode1');
-	*/
+	$entrySrc  = helper_createEmptyEntry($client,'test_cloning_cuepoint_with_metadata_src');
+	$entryDst  = helper_createEmptyEntry($client,'test_cloning_cuepoint_with_metadata_dst');
+	info("created entries with ID $entrySrc->id (src) and $entryDst->id (dst)");
+	$codeCuePoint = createCodeCuePointWithMetaData($client, $entrySrc->id);
 
-	//$codeCuePoint = createCodeCue($client, '0_ggiyjwa1', 'testCode1'); //as om prem src
-	//$cuePointid = '0_gne54tsy';
-	//info("created cue point with ID $cuePointid");
-	return (success(__FUNCTION__ ));
+	$cloneCuePoint = cloneCuepoint($client, $codeCuePoint->id, $entryDst->id);
+	info("clone cuepoint with ID $cloneCuePoint->id ");
+
+	$flag = checkIfCuePointHasMetada($client, $cloneCuePoint->id);
+	info("flag is $flag - deleting data");
+
+	deleteEntryAndCuePoint($client, $entrySrc->id, $codeCuePoint->id);
+	deleteEntryAndCuePoint($client, $entryDst->id, $cloneCuePoint->id);
+	deleteGlobal($client);
+
+	if ($flag)
+		return (success(__FUNCTION__ ));
+	return fail(__FUNCTION__." not metadata on cloned cue point");
+
 }
 
-function deleteAll($client)
+function deleteEntryAndCuePoint($client, $entryId, $cuePointId)
+{
+	$cuepointPlugin = KalturaCuepointClientPlugin::get($client);
+	$res = $cuepointPlugin->cuePoint->delete($cuePointId);
+	$client->baseEntry->delete($entryId);
+}
+
+function deleteGlobal($client)
 {
 	global $metadataProfileId;
 	$metadataPlugin = KalturaMetadataClientPlugin::get($client);
-	$metadataPlugin->metadataProfile->delete(9);
+	$metadataPlugin->metadataProfile->delete($metadataProfileId);
 }
 
 
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-
-
+	
 	$ret = cloneCuePointWithMetadata($client);
 	return $ret;
 }
