@@ -3,6 +3,7 @@ require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php'
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
 $metadataProfileId = null;
+CONST XML_METADATA = "<metadata><FirstAttr>adding attr in meta</FirstAttr></metadata>";
 
 function createCodeCue($client, $entryId, $code="test", $tags=null)
 {
@@ -30,9 +31,8 @@ function createMetadataProfile($client) {
 
 function addMetaData($client, $metadataProfileId, $objectId)
 {
-	$xmlData = "<metadata><FirstAttr>adding attr in meta</FirstAttr></metadata>";
 	$metadataPlugin = KalturaMetadataClientPlugin::get($client);
-	$result = $metadataPlugin->metadata->add($metadataProfileId, KalturaMetadataObjectType::CODE_CUE_POINT, $objectId, $xmlData);
+	$result = $metadataPlugin->metadata->add($metadataProfileId, KalturaMetadataObjectType::CODE_CUE_POINT, $objectId, XML_METADATA);
 	return $result;
 
 }
@@ -54,7 +54,7 @@ function createCodeCuePointWithMetaData($client, $entryId)
 	return $codeCuePoint;
 }
 
-function checkIfCuePointHasMetada($client, $cuepointId)
+function checkIfCuePointHasCorrectMetadata($client, $cuepointId)
 {
 	$filter = new KalturaMetadataFilter();
 	$filter->metadataObjectTypeEqual = KalturaMetadataObjectType::CODE_CUE_POINT;
@@ -62,8 +62,13 @@ function checkIfCuePointHasMetada($client, $cuepointId)
 	$metadataPlugin = KalturaMetadataClientPlugin::get($client);
 	$result = $metadataPlugin->metadata->listAction($filter, null);
 	
-	if ($result->totalCount > 0)
+	if ($result->totalCount != 1)
+		return false;
+	$meta = $result->objects[0];
+
+	if ($meta->xml == XML_METADATA)
 		return true;
+
 	return false;
 }
 
@@ -74,21 +79,22 @@ function cloneCuePointWithMetadata($client)
 	$entryDst  = helper_createEmptyEntry($client,'test_cloning_cuepoint_with_metadata_dst');
 	info("created entries with ID $entrySrc->id (src) and $entryDst->id (dst)");
 	$codeCuePoint = createCodeCuePointWithMetaData($client, $entrySrc->id);
-
+	info("created cuepoint: ID $codeCuePoint->id ");
 	$cloneCuePoint = cloneCuepoint($client, $codeCuePoint->id, $entryDst->id);
-	info("clone cuepoint with ID $cloneCuePoint->id ");
-
-	$flag = checkIfCuePointHasMetada($client, $cloneCuePoint->id);
-	info("flag is $flag - deleting data");
+	info("clone cuepoint: ID $cloneCuePoint->id ");
+	
+	if (!checkIfCuePointHasCorrectMetadata($client, $cloneCuePoint->id))
+		return fail(__FUNCTION__." new cue point does not have any/correct metadata");
 
 	deleteEntryAndCuePoint($client, $entrySrc->id, $codeCuePoint->id);
+
+	if (!checkIfCuePointHasCorrectMetadata($client, $cloneCuePoint->id))
+		return fail(__FUNCTION__." new cue point does not have any/correct metadata after delete origin");
+
 	deleteEntryAndCuePoint($client, $entryDst->id, $cloneCuePoint->id);
 	deleteGlobal($client);
 
-	if ($flag)
-		return (success(__FUNCTION__ ));
-	return fail(__FUNCTION__." not metadata on cloned cue point");
-
+	return (success(__FUNCTION__ ));
 }
 
 function deleteEntryAndCuePoint($client, $entryId, $cuePointId)
