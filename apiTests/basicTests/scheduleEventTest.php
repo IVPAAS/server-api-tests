@@ -658,10 +658,10 @@ function TestScheduleConflictingEventsByResourceAndDates($client)
 		print (".");
 	}
 
-	$scheduleResource1 = createScheduleResource($client, "testResource", "testResource");
+	$scheduleResource1 = createScheduleResource($client, "testResource", "testResource".rand(0,1000000));
 	createScheduleEventResource($client, $scheduleEvent->id, $scheduleResource1->id);
 
-	$scheduleResource2 = createScheduleResource($client, "testResource2", "testResource2");
+	$scheduleResource2 = createScheduleResource($client, "testResource2", "testResource2".rand(0,1000000));
 	createScheduleEventResource($client, $scheduleEvent->id, $scheduleResource2->id);
 
 	info("Validating conflicting schedule events for resources ids...");
