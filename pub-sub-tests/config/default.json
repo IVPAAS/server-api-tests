@@ -1,0 +1,15 @@
+{
+  "creationInterval": 1,
+  "clientCount": 1,
+  "entryId": "0_47uvjg49",
+
+  "server": {
+    "serverAddress": "http://allinone-be.dev.kaltura.com/",
+    "secret": "9f942c4485b34f799e8374d18f35bd52",
+    "userId": "pupSub",
+    "ks_type": 0,
+    "partnerId": 8006
+  },
+
+  "connectionTimeout": 10000
+}

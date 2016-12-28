@@ -1,0 +1,13 @@
+{
+  "appenders": [
+    {
+      "type": "file",
+      "filename": "/opt/kaltura/log/pub_sub_test.log",
+      "maxLogSize": 20480,
+      "backups": 3
+    },
+    {
+      "type": "console"
+    }
+  ]
+}
