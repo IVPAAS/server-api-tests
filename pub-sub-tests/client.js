@@ -97,7 +97,7 @@ class Client  {
                 objectType: 'KalturaCodeCuePoint',
                 entryId: "0_47uvjg49",
                 isPublic: true,
-                text: "EREZ",
+                text: "Test-Annotation",
                 startTime: 3000,
                 tags: "WEBCASTSTATETAG",
                 code: "TestCode"

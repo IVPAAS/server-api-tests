@@ -21,6 +21,7 @@ describe('Pub sub annotation Test', function () {
                 annotations.push(annotation);
                 if (annotations.length == annotationsCount)
                 {
+                    sleepFor(5000);
                     if (validateAnnotations(client))
                         done();
                     else
@@ -75,4 +76,9 @@ function validateAnnotations(client)
         else
             return true;
     }
+}
+
+function sleepFor( sleepDuration ){
+    var now = new Date().getTime();
+    while(new Date().getTime() < now + sleepDuration){ /* do nothing */ }
 }
