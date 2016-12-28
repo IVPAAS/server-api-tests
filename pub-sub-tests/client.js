@@ -1,4 +1,5 @@
 let  KalturaAPI = require('./KalturaService.js');
+var ioClient = require('socket.io-client');
 var _ = require('lodash');
 var io = require('socket.io-client');
 var logger=require('./logger.js');
@@ -43,35 +44,6 @@ class Client  {
 
         return this.kalturaAPI.call(request);
     }
-
-     addAnnotation(text, offset, choice, freeText){
-            var addCuePoint = {
-                service: 'cuepoint_cuepoint',
-                action: 'add',
-                cuePoint: {
-                    objectType: 'KalturaCodeCuePoint',
-                    entryId: "0_47uvjg49",
-                    isPublic: true,
-                    text: "Test-annotation",
-                    startTime: 3000,
-                    tags: "WEBCASTSTATETAG",
-                    code: "TestCode"
-                }
-            };
-
-            var multiRequest = {
-                format: 1,
-                0: addCuePoint,
-            };
-
-        this.kalturaAPI.call(addCuePoint).then ((res)=> {
-            return res;
-     }).catch( (err)=> {
-             console.warn(err);
-            return null;
-     });
-    }
-
     connect() {
 
         var events = [
@@ -103,18 +75,46 @@ class Client  {
 
 
             promises.push(this.registerNotification(event.name,event.args).then ((res)=> {
-                return this.registerEvents(event.name,res.url,res.key);
-            }).catch( (err)=> {
+                    return this.registerEvents(event.name,res.url,res.key);
+        }).catch( (err)=> {
                 console.warn(err);
-            }));
+        }));
         }
 
         Promise.all(promises).then( ()=> {
             var t2=new Date();
-            this.totalRegisterTime=t2-t1;
+        this.totalRegisterTime=t2-t1;
 
-        });
+    });
 
+    }
+
+    addAnnotation(callback, text, offset, choice, freeText){
+        var addCuePoint = {
+            service: 'cuepoint_cuepoint',
+            action: 'add',
+            cuePoint: {
+                objectType: 'KalturaCodeCuePoint',
+                entryId: "0_47uvjg49",
+                isPublic: true,
+                text: "EREZ",
+                startTime: 3000,
+                tags: "WEBCASTSTATETAG",
+                code: "TestCode"
+            }
+        };
+
+        var multiRequest = {
+            format: 1,
+            0: addCuePoint,
+        };
+
+        this.kalturaAPI.call(addCuePoint).then((res)=> {
+            callback(res);
+    }).catch( (err)=> {
+            console.log(err);
+        callback(null);
+    });
     }
 
     registerEvents(eventName,url,key) {
@@ -124,13 +124,13 @@ class Client  {
 
 
         return this.connectionPromise.then( () => {
-            var t2=new Date();
-            this.totalConnectionTime=t2-t1;
-            this.logger.info("Connected to server "+url+" for key "+key);
+                var t2=new Date();
+        this.totalConnectionTime=t2-t1;
+        this.logger.info("Connected to server "+url+" for key "+key);
 
-            this.socket.emit('listen', key);
-            return Promise.resolve();
-        });
+        this.socket.emit('listen', key);
+        return Promise.resolve();
+    });
 
     }
 
@@ -144,53 +144,52 @@ class Client  {
         }
         this.connectionPromise=new Promise( (resolve, reject)=> {
 
-            let resolved=null;
-            let This = this;
-            this.logger.debug("Connecting to " +  url);
-            this.socket = io.connect(url, {forceNew: true,'force new connection': true});
+                let resolved=null;
+        this.logger.debug("Connecting to " +  url);
+        this.socket = io.connect(url, {forceNew: true,'force new connection': true});
 
-            this.socket.on('validated', () => {
-                if (resolved===null) {
-                    this.logger.info("Connected to socket for "+url);
-                    resolved = true;
-                    resolve(true);
-                } else {
+        this.socket.on('validated', () => {
+            if (resolved===null) {
+            this.logger.info("Connected to socket for "+url);
+            resolved = true;
+            resolve(true);
+        } else {
 
-                    this.logger.warn("Connected to socket was after timeout "+url);
-                    this.socket.disconnect();
-                }
-            });
-            this.socket.on('disconnect',  (err)=> {
-                this.logger.warn('push server was disconnected err="',err,'"');
-            });
-            this.socket.on('reconnect_error',  (e)=> {
-                this.logger.warn('push server reconnection failed '+e);
-            });
-
-            this.socket.on('connected', (queueKey, key)=> {
-                this.logger.info("listen to queue [" + queueKey + "] for eventName  key "+key);
-                this.lastMsg[queueKey]=key;
-            });
-
-            this.socket.on('message', (queueKey, msg)=> {
-                var message = String.fromCharCode.apply(null, new Uint8Array(msg.data));
-                this.lastMsg[queueKey] = message;
-                var annotation = JSON.parse(message);
-                var d = new Date();
-                var seconds = d.getTime() / 1000;
-                annotation.receivedAt = seconds;
-                this.logger.warn("recieved message: [" + queueKey + "]: " + JSON.stringify(annotation));
-                this.recievedAnnotations.push(annotation);
+            this.logger.warn("Connected to socket was after timeout "+url);
+            this.socket.disconnect();
+        }
+    });
+        this.socket.on('disconnect',  (err)=> {
+            this.logger.warn('push server was disconnected err="',err,'"');
+    });
+        this.socket.on('reconnect_error',  (e)=> {
+            this.logger.warn('push server reconnection failed '+e);
     });
 
-            setTimeout(() =>{
-                if (!resolved) {
-                    this.logger.warn("Timeout connecting to socket for "+url);
-                    resolved=false;
-                    reject("TIMEOUT");
-                }
-            },config.get('connectionTimeout'));
-        });
+        this.socket.on('connected', (queueKey, key)=> {
+            this.logger.info("listen to queue [" + queueKey + "] for eventName  key "+key);
+        this.lastMsg[queueKey]=key;
+    });
+
+        this.socket.on('message', (queueKey, msg)=>{
+            var message=String.fromCharCode.apply(null, new Uint8Array(msg.data));
+        this.lastMsg[queueKey]=message;
+        var annotation = JSON.parse(message);
+        var d = new Date();
+        var seconds = d.getTime() / 1000;
+        annotation.receivedAt = seconds;
+        this.logger.info("recieved message: [" + queueKey + "]: " +  JSON.stringify(annotation));
+        this.recievedAnnotations.push(annotation);
+    });
+
+        setTimeout(() =>{
+            if (!resolved) {
+            this.logger.warn("Timeout connecting to socket for "+url);
+            resolved=false;
+            reject("TIMEOUT");
+        }
+    },config.get('connectionTimeout'));
+    });
 
         return this.connectionPromise;
     }
