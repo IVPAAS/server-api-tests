@@ -646,6 +646,79 @@ function TestScheduleRecurringUntilAndCount($client)
 	return success(__FUNCTION__." Successful schedule event recurring creation with until and count");
 }
 
+function TestScheduleConflictingEventsByResourceAndDates($client)
+{
+	info("Testing " . __FUNCTION__);
+	$failCount = 0;
+
+	$scheduleEvent = createScheduleEvent($client);
+	while (isScheduleEventUploaded($client, $scheduleEvent->id) != true)
+	{
+		sleep(1);
+		print (".");
+	}
+
+	$scheduleResource1 = createScheduleResource($client, "testResource", "testResource".rand(0,1000000));
+	createScheduleEventResource($client, $scheduleEvent->id, $scheduleResource1->id);
+
+	$scheduleResource2 = createScheduleResource($client, "testResource2", "testResource2".rand(0,1000000));
+	createScheduleEventResource($client, $scheduleEvent->id, $scheduleResource2->id);
+
+	info("Validating conflicting schedule events for resources ids...");
+
+	$newScheduleEvent = new KalturaLiveStreamScheduleEvent();
+	$newScheduleEvent->summary = 'testScheduleEvent';
+	$newScheduleEvent->startDate = 1584914400;
+	$newScheduleEvent->endDate = 1584914700;
+	$newScheduleEvent->recurrenceType = KalturaScheduleEventRecurrenceType::NONE;
+	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
+
+	if (!count($result))
+		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
+
+	$newScheduleEvent->startDate = 1584914300;
+	$newScheduleEvent->endDate = 1584914700;
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource2->id, $newScheduleEvent);
+
+	if (!count($result))
+		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
+
+	$newScheduleEvent->startDate = 1584914500;
+	$newScheduleEvent->endDate = 1584914600;
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
+
+	if (!count($result))
+		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
+
+	$newScheduleEvent->startDate = 1584914500;
+	$newScheduleEvent->endDate = 1584914900;
+	$result = $schedulePlugin->scheduleEvent->getConflicts("$scheduleResource1->id,$scheduleResource2->id", $newScheduleEvent);
+
+	if (!count($result))
+		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
+
+	$newScheduleEvent->startDate = 1584914300;
+	$newScheduleEvent->endDate = 1584914350;
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
+
+	if (count($result))
+		$failCount += fail(__FUNCTION__ . " Expecting no conflicts but received conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
+
+	$newScheduleEvent->startDate = 1584914900;
+	$newScheduleEvent->endDate = 1584914900;
+	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
+
+	if (count($result))
+		$failCount += fail(__FUNCTION__ . " Expecting no conflicts but received conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
+
+	if ($failCount)
+		return fail(__FUNCTION__ . " schedule event conflicts testing failed");
+
+	return success(__FUNCTION__." Successful schedule event conflicts testing");
+}
+
+
 function createScheduleEventRecurring($client, $templateEntryId = null, $count = null)
 {
 	info("Creating scheduleEvent");
@@ -839,6 +912,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret += TestScheduleChangeRecurringEventToSingleEvent($client);
 	$ret += TestScheduleChangeSingleEventToRecurringEvent($client);
 	$ret += TestScheduleRecurringUntilAndCount($client);
+	$ret += TestScheduleConflictingEventsByResourceAndDates($client);
 
 	return ($ret);
 }
