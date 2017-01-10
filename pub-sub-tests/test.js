@@ -11,10 +11,12 @@ var annotationsCount = 50;
 
 describe('Pub sub annotation Test', function () {
     it('Annotation Test', function (done) {
-        this.timeout(10000);
+        this.timeout(15000);
         var client = new Client(config.get('server'), config.get('entryId'),"pubSubTesting", id);
         client.connect();
-
+        console.info("sleeping 5 seconds after registering...");
+        sleepFor(5000);
+        
         for ( var i = 0 ; i < annotationsCount ; i++)
         {
             client.addAnnotation(function (annotation) {
