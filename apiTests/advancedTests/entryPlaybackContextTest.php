@@ -122,7 +122,7 @@ function Test1_LIVEentryPlaybackContext($client)
 	if (empty($result))
 		return fail(__FUNCTION__ . "entry getPlaybackContext returned empty result.");
 
-	if (empty($result->sources) || empty($result->flavorAssets) || empty($result->messages) || empty($result->actions) )
+	if (empty($result->sources) || empty($result->messages) || empty($result->actions) )
 	{
 		print(print_r($result, true));
 		return fail(__FUNCTION__ . "entry getPlaybackContext result is not complete. Objects are missing from result.");
@@ -130,8 +130,6 @@ function Test1_LIVEentryPlaybackContext($client)
 
 	if (count($result->sources) != 8)
 		$ret += fail(__FUNCTION__ . " sources count fail. expected 8 - actual " . count($result->sources));
-	if (count($result->flavorAssets) != 2)
-		$ret += fail(__FUNCTION__ . " flavorAssets count fail. expected 2 - actual " . count($result->flavorAssets));
 	if (count($result->messages) != 1)
 		$ret += fail(__FUNCTION__ . " messages count fail. expected 1 - actual " . count($result->messages));
 	if (count($result->actions) != 1)
@@ -151,9 +149,6 @@ function Test1_LIVEentryPlaybackContext($client)
 		if ($currentExpectedSource['protocols'] != $currentActualSource->protocols)
 			$ret += fail(__FUNCTION__ . " Mismatch in source [$i] params:  expected protocols " . $currentExpectedSource['protocols'] . "- actual protocols " .$currentActualSource->protocols);
 
-		if ($currentExpectedSource['flavorIds'] != $currentActualSource->flavorIds)
-			$ret += fail(__FUNCTION__ . " Mismatch in source [$i] params:  expected flavorIds " . $currentExpectedSource['flavorIds'] . "- actual flavorIds " .$currentActualSource->flavorIds);
-
 		$drmSchems = array();
 		foreach ($currentActualSource->drm as $drm)
 		{
@@ -167,13 +162,6 @@ function Test1_LIVEentryPlaybackContext($client)
 
 		if (empty($currentActualSource->url))
 			$ret += fail(__FUNCTION__ . " Mismatch in source [$i] params:  expected source to have a url - actual url is: " . $currentActualSource->url);
-	}
-
-	info("Validating flavors");
-	foreach ($result->flavorAssets as $flavor)
-	{
-		if (!in_array($flavor->id, array('0_ifmnf369', '0_sgd1jyfb')))
-			$ret += fail(__FUNCTION__ . " Retrieved unexpected flavorAssets id $flavor->id)");
 	}
 
 	info("Validating actions");
