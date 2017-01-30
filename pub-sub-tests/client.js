@@ -4,6 +4,7 @@ var _ = require('lodash');
 var io = require('socket.io-client');
 var logger=require('./logger.js');
 var config = require('config');
+var counter = 0;
 
 class Client  {
     constructor(config, entryId,userName, id) {
@@ -172,13 +173,14 @@ class Client  {
     });
 
         this.socket.on('message', (queueKey, msg)=>{
-            var message=String.fromCharCode.apply(null, new Uint8Array(msg.data));
+        counter = counter + 1;
+        var message=String.fromCharCode.apply(null, new Uint8Array(msg.data));
         this.lastMsg[queueKey]=message;
         var annotation = JSON.parse(message);
         var d = new Date();
         var seconds = d.getTime() / 1000;
         annotation.receivedAt = seconds;
-        this.logger.info("recieved message: [" + queueKey + "]: " +  JSON.stringify(annotation));
+        this.logger.info("recieved message number " + counter + ": [" + queueKey + "]: " +  JSON.stringify(annotation));
         this.recievedAnnotations.push(annotation);
     });
 
