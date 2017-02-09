@@ -85,7 +85,7 @@ function createTestPartner($client, $name)
     $partner->adminEmail = "$name@kaltura.com";
     $partner->description = 'myTestUser Description';
     #$partner->type = KalturaPartnerType::ADMIN_CONSOLE;
-    $cmsPassword = '';
+    $cmsPassword = '1';
     $templatePartnerId = 99;
     $silent = null;
     $testPartner = $client->partner->register($partner, $cmsPassword, $templatePartnerId, $silent);
