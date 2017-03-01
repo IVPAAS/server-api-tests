@@ -191,8 +191,8 @@ function runCrossKalturaDistributionTest($dc,$userName,$userPassword)
 
     addPartnerPermissions($client, $sourceTestPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
     addPartnerPermissions($client, $targetTestPartner, "CONTENTDISTRIBUTION_PLUGIN_PERMISSION", KalturaPermissionStatus::ACTIVE);
-
-    $tempPartnerPassword = '!Trz271985';
+    
+    $tempPartnerPassword = '1';
     resetPartnerPassword($client, $targetTestPartner, $tempPartnerPassword);
 
     $sourceConversionProfile = createConversionProfileForSpecficPartner($dc, $sourceTestPartner, 'testConversionProfile1');
@@ -452,7 +452,7 @@ function runFtpApiServerTest($dc,$userName,$userPassword)
     $client = login($dc, $userName, $userPassword);
 
     $sourceTestPartner = createTestPartner($client, "Kaltura.testapp1");
-    $tempPartnerPassword = '!Trz271985';
+    $tempPartnerPassword = '1';
     resetPartnerPassword($client, $sourceTestPartner, $tempPartnerPassword);
 
     sleep(15);
