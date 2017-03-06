@@ -1,7 +1,7 @@
 {
   "creationInterval": 1,
   "clientCount": 1,
-  "entryId": "0_47uvjg49",
+  "entryId": "0_lyrblvsr",
 
   "server": {
     "serverAddress": "http://allinone-be.dev.kaltura.com/",
@@ -11,5 +11,12 @@
     "partnerId": 8006
   },
 
-  "connectionTimeout": 10000
+  "connectionTimeout": 20000000,
+  "test-server":"127.0.0.1",
+  "test-server-port": 8141,
+  "testClientCount" : 1000,
+//3 mins in millis
+  "test-runtime" : 180000
+//  "connectionTimeout": 10000
 }
+
