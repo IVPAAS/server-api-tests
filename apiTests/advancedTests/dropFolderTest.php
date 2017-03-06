@@ -37,10 +37,10 @@ function Test1_UploadToDropFolder($dc,$scp_user_name,$scp_user_pass,$testPartner
 
     $retry = 0;
     $result = false;
-    while($retry  <7)
+    while($retry  <10)
     {
         info("waiting for entry to upload..\n");
-        sleep(30);
+        sleep(60);
         $entriesList = $client->baseEntry->listAction($filter);
         info("count objects [".count($entriesList->objects)."] , count uploaded [".$countUploaded."]" );
         if(count($entriesList->objects) != $countUploaded)
@@ -94,10 +94,10 @@ function Test2_UploadWebVTTCatptionToDropFolder($dc,$scp_user_name,$scp_user_pas
 
     $retry = 0;
     $result = false;
-    while ($retry < 7)
+    while ($retry < 10)
     {
         info("waiting for entry to upload..\n");
-        sleep(30);
+        sleep(60);
         $entriesList = $client->baseEntry->listAction($filter);
         info("count objects [" . count($entriesList->objects) . "] , count uploaded [" . $countUploaded . "]");
         if (count($entriesList->objects) != $countUploaded)
