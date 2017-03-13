@@ -61,36 +61,7 @@ var intervalID = setInterval(function () {
 
 main();
 
-function multiClientTest() {
-for (let  i =0 ; i < clientCount; i++) {
-    let client = new Client(config.get('server'), config.get('entryId'), "pubSubTesting", i, function () {
-
-        receivedMsgs = receivedMsgs + 1;
-        if (receivedMsgs == clientCount) {
-            logger1.info("All Clients Received Msg!");
-            if (validateAnnotations(client)) {
-                logger1.info("TEST IS DONE!");
-                doneMethod();
-            }
-            else {
-                logger1.info("Test FAILED");
-                doneMethod("Test Failed!");
-            }
-
-                   }
-    });
-    client.connect(function () {
-            logger1.info("registered client number: " + count);
-            count = count + 1;
-            if (count == clientCount)
-                client.addAnnotation(function (annotation) {
-                    annotations.push(annotation);
-                });
-        }
-    );
-
-}
-}
+let toggleEntry = false;
 
 function multiMessagesTest(i)
 {
@@ -103,6 +74,11 @@ function multiMessagesTest(i)
             finished = true;
         }
     });
+	if (toggleEntry)
+	{
+		client.entryId = "dummyEntry";
+	}
+	toggleEntry = !toggleEntry;
 
         client.connect(function (errors) {
             if (errors.length > 0 )
@@ -162,75 +138,6 @@ function notifyEndTest(msgCount){
 
 
    req.end();
-}
-
-function sendAnnotationsInvoker(){
-        sleepFor(20000);
-        logger1.info("Start Sending annotations for all clients " + clients.length);
-        for (var i = 0; i < clients.length; i++)
-        {
-        sleepFor(10);
-        sendAnnotations(clients[0], 1 , 0);
-        }
-}
-
-function sendAnnotations(tempClient, annotationNumber, clientNumber ){
-    MsgsSent = MsgsSent+1;
-    if (MsgsSent >= annotationsToSend+1)
-        return;
-    logger1.info("Sending annotation " + annotationNumber + " from client number " + clientNumber);
-    tempClient.addAnnotation(function (annotation) {
-        annotations.push(annotation);
-        if (MsgsSent != (annotationsToSend))
-            sendAnnotations(tempClient, annotationNumber+1, clientNumber);
-
-    });
-}
-
-function validateAnnotations(client)
-{
-    var recievedAnnotations = client.recievedAnnotations;
-    var failedCount = 0;
-    if (recievedAnnotations.length != annotationsToSend)
-    {
-        console.warn("Didn't receive all annotations. Received [" + recievedAnnotations.length +  "] annotations while expecting " + annotationsToSend);
-        return false;
-    }
-    else
-    {
-        for (var key in annotations){
-            var annotation = annotations[key];
-            console.log("validating annotation:" + annotation.id);
-            for (var i = 0; i < recievedAnnotations.length; i++) {
-                var found = false;
-                if (recievedAnnotations[i].id == annotation.id) {
-                    found = true;
-                    break;
-                }
-            }
-            if ( found )
-            {
-                var duration = parseFloat(recievedAnnotations[i].receivedAt) - parseFloat(recievedAnnotations[i].createdAt);
-                console.log("validating annotation duration:" + duration);
-                if (duration > 4)
-                {
-                    console.log("Annotation duration is long! duration is " + duration);
-                    failedCount++;
-                }
-                console.log("Annotation:" + annotation.id + " Validated!");
-            }
-            else
-            {
-                console.log("Annotation:" + annotation.id + " Wasn't received on queue!");
-                failedCount++;
-            }
-
-        }
-        if (failedCount != 0)
-            return false;
-        else
-            return true;
-    }
 }
 
 function sleepFor( sleepDuration ){

@@ -4,12 +4,11 @@ var url= require('url');
 var log4js = require('log4js');
 var njsCrypto = require('crypto');
 var child_process = require('child_process');
-const util = require('util');
 const querystring = require('querystring');
 
 
 function KalturaAPI(config) {
-        this._config=config;
+    this._config=config;
     this._loginPromise = null;
     this._multiRequestPromises=[];
     this._multiRequestParams=null;
@@ -43,8 +42,6 @@ KalturaAPI.prototype.call=function(params) {
 KalturaAPI.prototype.login = function () {
 
     var _this=this;
-
-
     if (this._loginPromise) {
         return this._loginPromise;
     }
@@ -57,12 +54,11 @@ KalturaAPI.prototype.login = function () {
             type: this._config.ks_type,
             userId: this._config.userId,
             secret: this._config.secret,
-            partnerId: this._config.partnerId,
+            partnerId: this._config.partnerId
         },true).then(function (result) {
                 _this._ks = result;
                 var now=new Date();
                 _this._ks_expiry=new Date(now.getTime()+1*60*60*1000);
-                _this._logger.info("loggedin with user '" + _this._config.userId + "' in with ks=" + result);
                 return Promise.resolve(result);
             },
             function (res) {
@@ -81,13 +77,14 @@ KalturaAPI.prototype._kcall=function(params,ingoreMR) {
 
     var _this=this;
     if (this._multiRequestParams && !ingoreMR) {
+
         var  multiRequestCount=this._multiRequestPromises.length+1;
         for(var propertyName in params) {
             Object.defineProperty(this._multiRequestParams, multiRequestCount+":"+propertyName,
                 Object.getOwnPropertyDescriptor(params, propertyName));
         }
         return  new Promise(function (resolve, reject) {
-            _this._multiRequestPromises.push({ success: resolve, failure:reject});
+            _this._multiRequestPromises.push({ success: success, failure:reject});
         });
     }
 
@@ -97,6 +94,8 @@ KalturaAPI.prototype._kcall=function(params,ingoreMR) {
     var startTime=new Date();
 
     params.format = 1;
+    if (this._ks)
+        params.ks = this._ks;
 
     return new Promise( function(resolve,reject) {
 
@@ -106,6 +105,7 @@ KalturaAPI.prototype._kcall=function(params,ingoreMR) {
             body: params,
             timeout: 20*1000,
         }, function (error, response, result) {
+
 
 
             if (error || (result && result.objectType==="KalturaAPIException")) {
@@ -122,8 +122,7 @@ KalturaAPI.prototype._kcall=function(params,ingoreMR) {
 
 KalturaAPI.prototype.startMultirequest=function () {
     this._multiRequestPromises=[];
-    this._multiRequestParams = { service: "multirequest", ignoreNull: true , action: null, clientTag: 'kwidget:12345', format: 1,
-};
+    this._multiRequestParams = { service: "multirequest", action: null };
 }
 
 KalturaAPI.prototype.execMultirequest=function() {
@@ -134,12 +133,13 @@ KalturaAPI.prototype.execMultirequest=function() {
 
 
         return _this._kcall(params).then(function (result) {
+
             for (var i = 0; i < result.length; i++) {
 
                 if (result[i] && result[i].code) {
-
                     return Promise.reject(result);
                 }
+
                 oldMultiRequestPromises[i].success(result[i]);
             }
             return Promise.resolve(result);
@@ -153,14 +153,10 @@ KalturaAPI.prototype.execMultirequest=function() {
     _this._multiRequestPromises=[];
 
     if (_this._ks) {
-               return doCall(params,oldMultiRequestPromises);
+        return doCall(params,oldMultiRequestPromises);
     } else {
-
         return this.login().then(function () {
-                params['1:ks'] = _this._ks;
-                params['2:ks'] = _this._ks;
-                params['3:ks'] = _this._ks;
-                return doCall(params,oldMultiRequestPromises);
+            return doCall(params,oldMultiRequestPromises);
         });
     }
 
@@ -234,3 +230,5 @@ function generateKs(secret, userId, type, partnerId ,expiry,privileges="") {
 }
 
 module.exports=KalturaAPI;
+
+

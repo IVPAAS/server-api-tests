@@ -1,0 +1,12 @@
+{
+"server": {
+   "serverAddress": "http://allinone-be.dev.kaltura.com/",
+   "secret": "9f942c4485b34f799e8374d18f35bd52",
+   "userId": "pupSub",
+   "ks_type": 0,
+   "partnerId": 8006
+   //"entryId": 0_lyrblvsr
+                   },
+   "logFile": "/opt/kaltura/log/pub-sub-tests.log"
+}
+             

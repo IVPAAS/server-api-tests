@@ -4,23 +4,26 @@ var _ = require('lodash');
 var io = require('socket.io-client');
 var logger=require('./logger.js');
 var config = require('config');
-var counter = 0;
-
+const util = require('util');
 class Client  {
-    constructor(config, entryId,userName, id) {
+    constructor(config, entryId,userName, id, callback) {
 
         this.logger=logger.getLogger("Client",userName);
         this.entryId=entryId;
+        let myConf = _.clone(config);
+        myConf.userId = userName;
         if (_.isObject(config)) {
-            this.kalturaAPI = new KalturaAPI(config);
+            this.kalturaAPI = new KalturaAPI(myConf);
         } else {
             this.url = config;
         }
+        this.counter = 0;
         this.id=id;
-        this.userName=userName;
+        this.userName=myConf.userId + "_" +id;
         this.socket=null;
         this.lastMsg={};
         this.recievedAnnotations=[];
+        this.recievedMessageCallback = callback;
     }
     registerNotification(eventName,params) {
 
@@ -31,24 +34,28 @@ class Client  {
             'service': 'eventNotification_eventNotificationTemplate',
             'action': 'register',
             'format': 1,
-            "notificationTemplateSystemName": eventName
+            'notificationTemplateSystemName': eventName,
+            'pushNotificationParams:objectType': "KalturaPushNotificationParams",
+
+
         };
         var index = 0;
         _.each(params, function (value,key) {
-            request["userParamsArray:" + index + ":objectType"] = "KalturaEventNotificationParameter";
-            request["userParamsArray:" + index + ":key"] = key;
-            request["userParamsArray:" + index + ":value:objectType"] = "KalturaStringValue";
-            request["userParamsArray:" + index + ":value:value"] = value;
+            request['pushNotificationParams:userParams:item' + index + ":objectType"] = "KalturaPushEventNotificationParameter";
+            request['pushNotificationParams:userParams:item' + index + ":key"] = key;
+            request['pushNotificationParams:userParams:item' + index + ":value:objectType"] = "KalturaStringValue";
+            request['pushNotificationParams:userParams:item' + index + ":value:value"] = value;
             index++;
         });
         this.logger.info("registering to ", request);
 
         return this.kalturaAPI.call(request);
     }
-    connect() {
+    connect(callback, port) {
+
 
         var events = [
-            {
+           {
                 "name": "USER_QNA_NOTIFICATIONS",
                 args: {
                     "entryId": this.entryId,
@@ -58,7 +65,7 @@ class Client  {
             {
                 "name": "PUBLIC_QNA_NOTIFICATIONS",
                 args: {
-                    "entryId": this.entryId
+                    "entryId": this.entryId,
                 }
             },
             {
@@ -72,23 +79,27 @@ class Client  {
 
         var t1=new Date();
         var promises=[];
-        for (let event of events) {
+        var errors = [];
+        var count = 0;
+        this.kalturaAPI.startMultirequest();
+        for (var i = 0 ; i < 3 ; i++ ){
 
+            var event = events[i];
+            this.registerNotification(event.name,event.args).then ((res)=> {
+                if (this.registerEvents(event.name,res.url,res.queueName, res.queueKey, port)){
+                count ++;
+                if (count == 3)
+                        callback(errors);
 
-            promises.push(this.registerNotification(event.name,event.args).then ((res)=> {
-                    return this.registerEvents(event.name,res.url,res.key);
+}
         }).catch( (err)=> {
-                console.warn(err);
-        }));
+                this.logger.warn("Error registering event " + event.name + ": "  + util.inspect(err));
+                errors.push(err);
+        });
         }
-
-        Promise.all(promises).then( ()=> {
-            var t2=new Date();
-        this.totalRegisterTime=t2-t1;
-
-    });
-
+        this.kalturaAPI.execMultirequest();
     }
+
 
     addAnnotation(callback, text, offset, choice, freeText){
         var addCuePoint = {
@@ -96,7 +107,7 @@ class Client  {
             action: 'add',
             cuePoint: {
                 objectType: 'KalturaCodeCuePoint',
-                entryId: "0_47uvjg49",
+                entryId: "0_9tz98xd9",
                 isPublic: true,
                 text: "Test-Annotation",
                 startTime: 3000,
@@ -118,19 +129,22 @@ class Client  {
     });
     }
 
-    registerEvents(eventName,url,key) {
+    registerEvents(eventName,url,eventKey, key,port) {
 
         var t1=new Date();
+
+
         this.connectToPushServer(url);
 
+        var This = this;
 
         return this.connectionPromise.then( () => {
                 var t2=new Date();
         this.totalConnectionTime=t2-t1;
-        this.logger.info("Connected to server "+url+" for key "+key);
+        this.logger.info("Connected to server "+url+" for key "+key + " and eventName : " + eventKey);
 
-        this.socket.emit('listen', key);
-        return Promise.resolve();
+        this.socket.emit('listen', eventKey, key);
+        return true;
     });
 
     }
@@ -140,14 +154,17 @@ class Client  {
     }
 
     connectToPushServer(url) {
-        if (this.connectionPromise) {
+      var This = this;
+          if (this.connectionPromise) {
             return this.connectionPromise;
         }
-        this.connectionPromise=new Promise( (resolve, reject)=> {
 
+        this.connectionPromise=new Promise( (resolve, reject)=> {
                 let resolved=null;
-        this.logger.debug("Connecting to " +  url);
-        this.socket = io.connect(url, {forceNew: true,'force new connection': true});
+        this.logger.info("Connecting to " +  url);
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+        this.socket = io.connect(url, {forceNew: true,reconnection: true, 'force new connection': true, transports: [ 'websocket' ], secure: true});
+        var options = {'forceNew': true};
 
         this.socket.on('validated', () => {
             if (resolved===null) {
@@ -160,11 +177,23 @@ class Client  {
             this.socket.disconnect();
         }
     });
-        this.socket.on('disconnect',  (err)=> {
+
+        this.socket.on('clientError', (err)=>{
+        this.socket.on('disconnect',  (err)=> {this.logger.warn("Socket disconnect err=" ,err,'"');});
             this.logger.warn('push server was disconnected err="',err,'"');
     });
         this.socket.on('reconnect_error',  (e)=> {
-            this.logger.warn('push server reconnection failed '+e);
+            This.logger.warn('push server reconnection failed '+util.inspect(e));
+    });
+        this.socket.on('error', function (e) {
+            this.logger.warn('socket errorר'+e);
+    });
+        this.socket.on('connect_error', function(error){
+         This.logger.warn("conn error "+ util.inspect(error));
+    });
+         this.socket.on('errorMsg', function (e) {
+
+            This.logger.warn('socket errorרMsg: '+ e);
     });
 
         this.socket.on('connected', (queueKey, key)=> {
@@ -172,23 +201,26 @@ class Client  {
         this.lastMsg[queueKey]=key;
     });
 
-        this.socket.on('message', (queueKey, msg)=>{
-        counter = counter + 1;
-        var message=String.fromCharCode.apply(null, new Uint8Array(msg.data));
-        this.lastMsg[queueKey]=message;
-        var annotation = JSON.parse(message);
+        this.socket.on('message', (queueKey, msgs)=>{
         var d = new Date();
         var seconds = d.getTime() / 1000;
-        annotation.receivedAt = seconds;
-        this.logger.info("recieved message number " + counter + ": [" + queueKey + "]: " +  JSON.stringify(annotation));
-        this.recievedAnnotations.push(annotation);
+        this.counter = this.counter + 1;
+        this.logger.info(JSON.stringify(msgs));
+        for (var i =0 ; i < msgs.length ; i++ ) {
+                var msg = msgs[i];
+                var annotation = msg;
+                annotation.receivedAt = seconds;
+                this.logger.info("Client number " + this.id + " recieved message number " + this.counter + ": [" + queueKey + "]: " +  JSON.stringify(annotation));
+                this.recievedAnnotations.push(annotation);
+                this.recievedMessageCallback();
+        }
     });
 
         setTimeout(() =>{
             if (!resolved) {
             this.logger.warn("Timeout connecting to socket for "+url);
             resolved=false;
-            reject("TIMEOUT");
+            reject("rejeceted - TIMEOUT");
         }
     },config.get('connectionTimeout'));
     });
