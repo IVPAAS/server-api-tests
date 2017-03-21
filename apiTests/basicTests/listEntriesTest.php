@@ -48,7 +48,7 @@ function helper_createEntryAndUploadContent($client, $entryName, $referenceId='t
 {
 
 	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
-	$entry = addEntry($client,$entryName,KalturaMediaType::VIDEO,null,'','test media description','test tag',$referenceId);
+	$entry = addEntry($client,$entryName,KalturaMediaType::VIDEO,null,'dummyId','test media description','test tag',$referenceId);
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
