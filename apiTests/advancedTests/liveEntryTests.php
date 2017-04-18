@@ -19,7 +19,6 @@ function helper_createLiveEntry($client, $recordedEntryId = null)
 	$conversionProfile = $client->conversionProfile->getdefault(KalturaConversionProfileType::LIVE_STREAM);
 	$entry->conversionProfileId	= $conversionProfile->id;
 	$entry->dvrStatus						= 0;
-	$entry->recordStatus					= 1;
 	$result                                 = $client->liveStream->add($entry, KalturaSourceType::FILE);
 	return $result;
 }
