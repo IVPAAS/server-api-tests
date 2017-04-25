@@ -395,6 +395,7 @@ function TestScheduleChangeRecurringEventToSingleEvent($client)
 		$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 		$updatedScheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent->id, $scheduleEvent);
 
+		sleep(5);
 		info("Validating update from recurring type to single event");
 		if ($updatedScheduleEvent->recurrenceType != KalturaScheduleEventRecurrenceType::NONE)
 			$failCount += fail(__FUNCTION__ . " ScheduleEvent update failed expecting recurrence type NONE but got $updatedScheduleEvent->recurrenceType");
@@ -417,12 +418,6 @@ function TestScheduleChangeRecurringEventToSingleEvent($client)
 		info("Total Active recurrences count: $result->totalCount");
 		if ($result->totalCount != 0)
 			$failCount += fail(__FUNCTION__ . " ScheduleEvent should have deleted all recurrences but got <$result->totalCount> active recurrences");
-
-		$filter->statusEqual = KalturaScheduleEventStatus::DELETED;
-		$result = $schedulePlugin->scheduleEvent->listAction($filter, null);
-		info("Total Deleted recurrences count: $result->totalCount");
-		if ($result->totalCount != 0)
-			$failCount += fail(__FUNCTION__ . " ScheduleEvent should have deleted all recurrences but got <$result->totalCount> deleted recurrences");
 
 	}
 
