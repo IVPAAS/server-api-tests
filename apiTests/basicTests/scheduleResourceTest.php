@@ -100,7 +100,7 @@ function getConflicts($client, $resourceIds, $scheduleEvent)
 {
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->getConflicts($resourceIds, $scheduleEvent);
-	return count($result);
+	return $result->totalCount;
 }
 
 function TestResourceReservation($dc,$partnerId,$adminSecret)

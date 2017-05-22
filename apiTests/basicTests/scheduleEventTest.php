@@ -477,6 +477,7 @@ function TestScheduleChangeSingleEventToRecurringEvent($client)
 
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$updatedScheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent1->id, $scheduleEvent1);
+	sleep(5);
 
 	info("Validating update from single type to recurring event");
 	if ($updatedScheduleEvent->recurrenceType != $scheduleEvent->recurrenceType)
@@ -574,6 +575,7 @@ function TestScheduleRecurringUntilAndCount($client)
 
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$scheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent->id, $scheduleEvent);
+	sleep(5);
 
 	$filter = new KalturaEntryScheduleEventFilter();
 	$filter->parentIdEqual = $scheduleEvent->id;
@@ -584,7 +586,7 @@ function TestScheduleRecurringUntilAndCount($client)
 	info("Total list count: $resultAfterUpdate->totalCount");
 	$retries = 5;
 	while ($resultAfterUpdate->totalCount == 0 && $retries > 0){
-		print ("Recurrences are not ready - waiting before retry...\n");
+		info("Recurrences are not ready - waiting before retry...\n");
 		sleep(5);
 		$retries--;
 		$resultAfterUpdate = $schedulePlugin->scheduleEvent->listAction($filter, null);
@@ -608,6 +610,7 @@ function TestScheduleRecurringUntilAndCount($client)
 
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$scheduleEvent = $schedulePlugin->scheduleEvent->update($scheduleEvent->id, $scheduleEvent);
+	sleep(5);
 
 	$filter = new KalturaEntryScheduleEventFilter();
 	$filter->parentIdEqual = $scheduleEvent->id;
@@ -618,7 +621,7 @@ function TestScheduleRecurringUntilAndCount($client)
 	info("Total list count: $resultAfterUpdate2->totalCount");
 	$retries = 5;
 	while ($resultAfterUpdate2->totalCount == 0 && $retries > 0){
-		print ("Recurrences are not ready - waiting before retry...\n");
+		info("Recurrences are not ready - waiting before retry...\n");
 		sleep(5);
 		$retries--;
 		$resultAfterUpdate2 = $schedulePlugin->scheduleEvent->listAction($filter, null);
@@ -669,42 +672,42 @@ function TestScheduleConflictingEventsByResourceAndDates($client)
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
 
-	if (!count($result))
+	if ($result->totalCount == 0)
 		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914300;
 	$newScheduleEvent->endDate = 1584914700;
 	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource2->id, $newScheduleEvent);
 
-	if (!count($result))
+	if ($result->totalCount == 0)
 		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914500;
 	$newScheduleEvent->endDate = 1584914600;
 	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
 
-	if (!count($result))
+	if ($result->totalCount == 0)
 		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914500;
 	$newScheduleEvent->endDate = 1584914900;
 	$result = $schedulePlugin->scheduleEvent->getConflicts("$scheduleResource1->id,$scheduleResource2->id", $newScheduleEvent);
 
-	if (!count($result))
+	if ($result->totalCount == 0)
 		$failCount += fail(__FUNCTION__ . " Expecting conflicts but didn't received any conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914300;
 	$newScheduleEvent->endDate = 1584914350;
 	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
 
-	if (count($result))
+	if ($result->totalCount != 0)
 		$failCount += fail(__FUNCTION__ . " Expecting no conflicts but received conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	$newScheduleEvent->startDate = 1584914900;
 	$newScheduleEvent->endDate = 1584914900;
 	$result = $schedulePlugin->scheduleEvent->getConflicts($scheduleResource1->id, $newScheduleEvent);
 
-	if (count($result))
+	if ($result->totalCount != 0)
 		$failCount += fail(__FUNCTION__ . " Expecting no conflicts but received conflicts on startDate[$newScheduleEvent->startDate] , endDate[$newScheduleEvent->endDate] and resourceId[$scheduleResource1->id]  ");
 
 	if ($failCount)
