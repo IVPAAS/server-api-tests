@@ -116,7 +116,7 @@ function Test6_FullPollTestMultiAnsMultiUserRevote($client)
 	return validatePollResultStructure($votes, 3, $pollId, array(1 => 3, 2=>1, 3=>0, 4=>1), __FUNCTION__);
 }
 
-function Test6_FullPollTestMultiAnsMultiUserRevoteWithZeroes($client)
+function Test7_FullPollTestMultiAnsMultiUserRevoteWithZeroes($client)
 {
 	$pollId = $client->poll->add();
 	$client->poll->vote(strval($pollId), "myUser1", "0,1,2");
@@ -126,6 +126,25 @@ function Test6_FullPollTestMultiAnsMultiUserRevoteWithZeroes($client)
 	$client->poll->vote(strval($pollId), "myUser3", "1,0");
 	$votes = $client->poll->getVotes($pollId, "0,1,2,3,4");
 	return validatePollResultStructure($votes, 3, $pollId, array(0=> 2, 1 => 3, 2=>1, 3=>0, 4=>1), __FUNCTION__);
+}
+
+function Test8_FullPollTestMediumScale($client)
+{
+	$max=5000;
+	$pollId = $client->poll->add();
+	for ($index = 0 ; $index < $max ; $index++)
+	{
+		$client->poll->vote(strval($pollId), "myUser".$index, "0,1,2");
+	}
+
+	$revote=751;
+	for ($index = 0 ; $index < $revote ; $index++)
+	{
+		$client->poll->vote(strval($pollId), "myUser".$index, "1,3");
+	}
+	$votes = $client->poll->getVotes($pollId, "0,1,2,3,4");
+	return validatePollResultStructure($votes, $max, $pollId, array( 0=>$max-$revote, 1=>$max, 2=>$max-$revote, 3=>$revote, 4=>0), __FUNCTION__);
+
 }
 
 
@@ -138,7 +157,8 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret += Test4_FullPollTestSingularAnsMultiUserSeveralVotes($client);
 	$ret += Test5_FullPollTestSingularAnsMultiUserRevote($client);
 	$ret += Test6_FullPollTestMultiAnsMultiUserRevote($client);
-	$ret += Test6_FullPollTestMultiAnsMultiUserRevoteWithZeroes($client);
+	$ret += Test7_FullPollTestMultiAnsMultiUserRevoteWithZeroes($client);
+	$ret += Test8_FullPollTestMediumScale($client);
 
 	return ($ret);
 }
