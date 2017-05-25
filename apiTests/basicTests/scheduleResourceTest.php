@@ -80,8 +80,8 @@ function createScheduleEventResource($client, $eventId , $resourceId)
 	$scheduleEventResource->resourceId = $resourceId;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	try {
-		$schedulePlugin->scheduleEventResource->add($scheduleEventResource);
-		info("Created scheduleEventResource");
+		$res = $schedulePlugin->scheduleEventResource->add($scheduleEventResource);
+		info("Created scheduleEventResource with eventId $eventId and resourceID $resourceId as [" . $res->id . "]");
 		return true;
 	} catch (KalturaException $e){
 		info("got error: " . $e->getMessage());
@@ -115,14 +115,18 @@ function TestResourceReservation($dc,$partnerId,$adminSecret)
 	$scheduleEvent1 = buildScheduleEvent(1584914400,1584914700);
 	$scheduleEvent2 = buildScheduleEvent(1584918400,1584918700);
 
+	// saving the resource for client 1
 	$cnt = getConflicts($client1,$resource1->id,$scheduleEvent1);
 	info("Num of conflicts was $cnt"); // 0 is no conflicts
+
 	$scheduleEventDB = createScheduleEvent($client, $scheduleEvent1);
 	$scheduleEventDB1Id = $scheduleEventDB->id;
+	$scheduleEventDB = createScheduleEvent($client, $scheduleEvent2);
+	$scheduleEventDB2Id = $scheduleEventDB->id;
 
 	$res = createScheduleEventResource($client2, $scheduleEventDB1Id , $resource1->id);
 	if ($res)
-		$failCount += fail(__FUNCTION__. " client 2 steal resource from first create with $resource1->id");
+		$failCount += fail(__FUNCTION__. " client 2 steal resource from client 1 after first create with $resource1->id");
 	$res = createScheduleEventResource($client1, $scheduleEventDB1Id , $resource1->id);
 	if (!$res)
 		$failCount += fail(__FUNCTION__. " client 1 can not use his reserved resource");
@@ -132,38 +136,39 @@ function TestResourceReservation($dc,$partnerId,$adminSecret)
 
 	deleteScheduleEventResource($client, $scheduleEventDB1Id, $resource1->id);
 	deleteScheduleEventResource($client, $scheduleEventDB1Id, $resource2->id);
-	sleep(6);
+	sleep(6); //clean all reserves
 
 	$res = createScheduleEventResource($client2, $scheduleEventDB1Id , $resource1->id);
 	if (!$res)
 		$failCount += fail(__FUNCTION__. " client 2 can not use resource $resource1->id despite of 6 sec passed");
-	deleteScheduleEventResource($client, $scheduleEventDB1Id, $resource1->id);
 
 	//check no reservation if there are conflict
 	$cnt = getConflicts($client1,$resource1->id,$scheduleEvent1);
-	info("Num of conflicts was $cnt"); // 0 is no conflicts
-	$res = createScheduleEventResource($client2, $scheduleEventDB1Id , $resource1->id);
+	info("Num of conflicts was $cnt"); // should be 1 conflict
+	$res = createScheduleEventResource($client2, $scheduleEventDB2Id , $resource1->id);
 	if (!$res)
-		$failCount += fail(__FUNCTION__. "client 2 can not take resource [$resource1->id] despite of conflict");
+		$failCount += fail(__FUNCTION__. " client 2 can not take resource [$resource1->id] despite of conflict for client 1");
+
+	deleteScheduleEventResource($client, $scheduleEventDB1Id, $resource1->id);
+	deleteScheduleEventResource($client, $scheduleEventDB2Id, $resource1->id);
+	sleep(6); //clean all reserves
 
 	//check 2 resources reservation
 	$cnt = getConflicts($client1,"$resource1->id,$resource2->id",$scheduleEvent2);
 	info("Num of conflicts was $cnt"); // 0 is no conflicts
-	$scheduleEventDB = createScheduleEvent($client, $scheduleEvent2);
-	$scheduleEventDB2Id = $scheduleEventDB->id;
 
 	$res = createScheduleEventResource($client2, $scheduleEventDB2Id , $resource1->id);
 	if ($res)
-		$failCount += fail(__FUNCTION__. "client 2 steal first resource [$resource1->id] from first");
+		$failCount += fail(__FUNCTION__. " client 2 steal first resource [$resource1->id] from first");
 	$res = createScheduleEventResource($client2, $scheduleEventDB2Id , $resource2->id);
 	if ($res)
-		$failCount += fail(__FUNCTION__. "client 2 steal second resource [$resource2->id] from first");
+		$failCount += fail(__FUNCTION__. " client 2 steal second resource [$resource2->id] from first");
 	$res = createScheduleEventResource($client1, $scheduleEventDB2Id , $resource1->id);
 	if (!$res)
-		$failCount += fail(__FUNCTION__. "client 1 can use his first reserved resource");
+		$failCount += fail(__FUNCTION__. " client 1 can use his first reserved resource");
 	$res = createScheduleEventResource($client1, $scheduleEventDB2Id , $resource2->id);
 	if (!$res)
-		$failCount += fail(__FUNCTION__. "client 1 can use his second reserved resource");
+		$failCount += fail(__FUNCTION__. " client 1 can use his second reserved resource");
 
 	deleteScheduleEventResource($client, $scheduleEventDB2Id, $resource1->id);
 	deleteScheduleEventResource($client, $scheduleEventDB2Id, $resource2->id);
@@ -171,10 +176,10 @@ function TestResourceReservation($dc,$partnerId,$adminSecret)
 
 	$res = createScheduleEventResource($client2, $scheduleEventDB2Id, $resource1->id);
 	if (!$res)
-		$failCount += fail(__FUNCTION__. "client 2 can not use first resource despite of 6 sec passed");
+		$failCount += fail(__FUNCTION__. " client 2 can not use first resource despite of 6 sec passed");
 	$res = createScheduleEventResource($client2, $scheduleEventDB2Id , $resource2->id);
 	if (!$res)
-		$failCount += fail(__FUNCTION__. "client 2 can not use second resource despite of 6 sec passed");
+		$failCount += fail(__FUNCTION__. " client 2 can not use second resource despite of 6 sec passed");
 
 	if($failCount )
 		return  fail(__FUNCTION__." Schedule resource reservation at $failCount tests");
