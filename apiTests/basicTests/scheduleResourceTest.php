@@ -80,8 +80,8 @@ function createScheduleEventResource($client, $eventId , $resourceId)
 	$scheduleEventResource->resourceId = $resourceId;
 	$schedulePlugin = KalturaScheduleClientPlugin::get($client);
 	try {
-		$res = $schedulePlugin->scheduleEventResource->add($scheduleEventResource);
-		info("Created scheduleEventResource with eventId $eventId and resourceID $resourceId as [" . $res->id . "]");
+		$schedulePlugin->scheduleEventResource->add($scheduleEventResource);
+		info("Created scheduleEventResource with eventId $eventId and resourceID $resourceId");
 		return true;
 	} catch (KalturaException $e){
 		info("got error: " . $e->getMessage());
