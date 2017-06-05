@@ -86,8 +86,8 @@ my_http.createServer(function(request,response){
         if (request.headers.readyformessages == 'true')
         {
                 readyForMessages = readyForMessages + 1;
-                //if (numberOfHosts == readyForMessages)
-                        //addAnnotation();
+                if (numberOfHosts == readyForMessages)
+                        addAnnotation();
         }
         if (request.headers.sendannouncement == 'true')
         {
@@ -104,6 +104,18 @@ my_http.createServer(function(request,response){
                                 if(err) {
                                         }
                               });
+
+        if (request.headers.messagesstatus)
+                        fs.appendFile(logFile, "messagesStatus: " + request.headers.messagesStatus + "\n" , function(err) {
+                                if(err) {
+                                }
+                        });
+
+                if (request.headers.pollvotesstatus)
+                        fs.appendFile(logFile, "pollVotesStatus: " + request.headers.pollVotesStatus + "\n" , function(err) {
+                                if(err) {
+                                }
+                        });
         }
 
 
@@ -112,7 +124,6 @@ my_http.createServer(function(request,response){
         {
                 responseCount = responseCount +1;
                 console.log(" test done for : " +request.headers.sender + "response count is = " +responseCount);
-
         }
 
         if ( numberOfHosts == responseCount)
@@ -122,6 +133,18 @@ my_http.createServer(function(request,response){
                 let date = new Date();
                         fs.appendFile(logFile, "[ " + date + " ] Test Finished: \nNumber of registerd Clients: expected [" + numberOfClients  +  "] actual ["+ totalRegisteredClients
                         + "]. Number of unregistered Clients [" + totalUnRegisteredClients + "] \nNumber of messages - expected ["+ numberOfExpectedMessages +"] actual ["+ messagesRecieved  +"] \nMachines to check: " + errors.toString() + "\n" , function(err) {
+                                if(err) {
+                                }
+                        });
+
+                if (request.headers.messagesstatus)
+                        fs.appendFile(logFile, "messagesStatus: " + request.headers.messagesstatus + "\n" , function(err) {
+                                if(err) {
+                                }
+                        });
+
+                if (request.headers.pollvotesstatus)
+                        fs.appendFile(logFile, "pollVotesStatus: " + request.headers.pollvotesstatus + "\n" , function(err) {
                                 if(err) {
                                 }
                         });
@@ -179,7 +202,7 @@ function addAnnotation(){
                     }).catch( (err)=> {
                     console.log("Announcemnet failed " + util.inspect(err));
             });
-		sleepFor(1000);
+                sleepFor(1000);
         }
         }
         catch(err){
