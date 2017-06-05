@@ -234,7 +234,7 @@ function TestScheduleEventFilterByResourceSystemName($client)
 	info("Total list count: $result->totalCount");
 	if ($result->totalCount != 2)
 	{
-		$failCount += fail(__FUNCTION__ . " ScheduleEvent list result failed. expected <1> but resulted in <$result->totalCount> ");
+		$failCount += fail(__FUNCTION__ . " ScheduleEvent list result failed. expected <2> but resulted in <$result->totalCount> ");
 	} else {
 		success("Successful list count");
 	}
