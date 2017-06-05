@@ -9,13 +9,18 @@ const querystring = require('querystring');
 
 
 function KalturaAPI(config) {
-        this._config=config;
+    this._config=config;
     this._loginPromise = null;
     this._multiRequestPromises=[];
     this._multiRequestParams=null;
     this._ks_expiry=null;
+    this._otherUrl = null;
     this._logger = log4js.getLogger('KalturaAPI');
     if (this._ks) {
+        this._loginPromise = Promise.resolve(this._ks);
+    }
+    if (config.ks) {
+        this._ks = config.ks;
         this._loginPromise = Promise.resolve(this._ks);
     }
 }
@@ -23,7 +28,6 @@ function KalturaAPI(config) {
 
 KalturaAPI.prototype.call=function(params) {
     var _this=this;
-
     var now=new Date();
     if (this._ks_expiry && now>this._ks_expiry) {
         this._loginPromise=null;
@@ -91,23 +95,24 @@ KalturaAPI.prototype._kcall=function(params,ingoreMR) {
         });
     }
 
-
-
-
     var startTime=new Date();
 
     params.format = 1;
-
     return new Promise( function(resolve,reject) {
 
+        let url = _this._config.serverAddress+ '/api_v3/index.php';
+        if (_this._otherUrl)
+            url = _this._otherUrl + '/api_v3/';
+
+        if (params.ks = _this._ks)
+            params.ks = _this._ks;
+
         request.post({
-            url: _this._config.serverAddress+ '/api_v3/index.php',
+            url: url,
             json: true,
             body: params,
-            timeout: 20*1000,
+            timeout: 5*1000,
         }, function (error, response, result) {
-
-
             if (error || (result && result.objectType==="KalturaAPIException")) {
                 return reject( error || result );
             }
@@ -123,7 +128,7 @@ KalturaAPI.prototype._kcall=function(params,ingoreMR) {
 KalturaAPI.prototype.startMultirequest=function () {
     this._multiRequestPromises=[];
     this._multiRequestParams = { service: "multirequest", ignoreNull: true , action: null, clientTag: 'kwidget:12345', format: 1,
-};
+    };
 }
 
 KalturaAPI.prototype.execMultirequest=function() {
@@ -153,14 +158,14 @@ KalturaAPI.prototype.execMultirequest=function() {
     _this._multiRequestPromises=[];
 
     if (_this._ks) {
-               return doCall(params,oldMultiRequestPromises);
+        return doCall(params,oldMultiRequestPromises);
     } else {
 
         return this.login().then(function () {
-                params['1:ks'] = _this._ks;
-                params['2:ks'] = _this._ks;
-                params['3:ks'] = _this._ks;
-                return doCall(params,oldMultiRequestPromises);
+            params['1:ks'] = _this._ks;
+            params['2:ks'] = _this._ks;
+            params['3:ks'] = _this._ks;
+            return doCall(params,oldMultiRequestPromises);
         });
     }
 
