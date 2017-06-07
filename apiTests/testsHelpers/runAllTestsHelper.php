@@ -211,6 +211,12 @@ function createCrossKalturaDistributionProfile($client, $dc, $sourceTestPartner,
     $distributionProfile->mapConversionProfileIds[0] = new KalturaKeyValue();
     $distributionProfile->mapConversionProfileIds[0]->key = $sourceConversionControlProfile->id;
     $distributionProfile->mapConversionProfileIds[0]->value = $targetConversionControlProfile->id;
+    $distributionProfile->distributeCuePoints = true;
+    $distributionProfile->requiredThumbDimensions = array();
+    $distributionProfile->requiredThumbDimensions[0] = new KalturaDistributionThumbDimensions();
+    $distributionProfile->requiredThumbDimensions[0]->width = 300;
+    $distributionProfile->requiredThumbDimensions[0]->width = 150;
+
     $contentdistributionPlugin = KalturaContentdistributionClientPlugin::get($client);
     $result = $contentdistributionPlugin->distributionProfile->add($distributionProfile);
     print("\n\r createDistributionProfile finished successfully");
