@@ -215,7 +215,7 @@ function createCrossKalturaDistributionProfile($client, $dc, $sourceTestPartner,
     $distributionProfile->requiredThumbDimensions = array();
     $distributionProfile->requiredThumbDimensions[0] = new KalturaDistributionThumbDimensions();
     $distributionProfile->requiredThumbDimensions[0]->width = 300;
-    $distributionProfile->requiredThumbDimensions[0]->width = 150;
+    $distributionProfile->requiredThumbDimensions[0]->height = 150;
 
     $contentdistributionPlugin = KalturaContentdistributionClientPlugin::get($client);
     $result = $contentdistributionPlugin->distributionProfile->add($distributionProfile);
