@@ -62,7 +62,7 @@ function Test1_DistributeEntry($client, $targetClient, $profileId)
 	$cuePointFilter = new KalturaCuePointFilter();
 	$cuePointFilter->entryIdEqual = $entryDistribution->remoteId;
 	$targetCuePointPlugin = KalturaCuepointClientPlugin::get($targetClient);
-	$cuePoints = $targetCuePointPlugin->cue_point->listAction($cuePointFilter);
+	$cuePoints = $targetCuePointPlugin->cuePoint->listAction($cuePointFilter);
 	if ($cuePoints->totalCount != 2)
 	{
 		return fail(__FUNCTION__. $cuePoints->totalCount. " Cue points were found on target entry");
