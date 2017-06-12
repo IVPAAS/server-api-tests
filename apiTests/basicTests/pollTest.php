@@ -179,9 +179,11 @@ function Test10_FullPollTestSingularAnsSingleUserOneVote_withKs($client,$userSec
     $pollId = $client->poll->add("SINGLE_RESTRICT");
     //KS Based User
     $wgClient = startWidgetSession($dc,$partnerId,"_".$partnerId);
-    $wgClient->poll->vote(strval($pollId), "myUser1", "1");
-    $votes = $client->poll->getVotes($pollId, "1");
-    return validatePollResultStructure($votes, 3, $pollId, array(1 => 1), __FUNCTION__);
+    $ret = $wgClient->poll->vote(strval($pollId), "myUser1", "1");
+    if (strpos($ret, 'User ID is invalid')!==false) {
+       return success(__FUNCTION__);
+    }
+    return  fail("Allowing vote on restricted session");;
 }
 
 
