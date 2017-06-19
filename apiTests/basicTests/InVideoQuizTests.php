@@ -214,7 +214,7 @@ function Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId)
 	}
 }
 
-function Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc)
+function Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc,$wgClient)
 {
 	info('start ' .  __FUNCTION__);
 	$entry=addEntry($client,__FUNCTION__);
@@ -226,19 +226,20 @@ function Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret
 		$questions[$questionIndex]=$questionCue->id;
 	}		 
 	$userId = "User".rand();
-	//Create user session
+    //Create user session
 	$user = addKalturaUser($client,$userId);
-	$quizUserEntry = addQuizUserEntry($client,$user->id,$entry->id);
-	$answerCue = addAnswer($client,$entry->id,$questions[0],$quizUserEntry->id,"Q");
-	if(is_null($answerCue->isCorrect))
+    $userClient = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER,$userId);
+	$quizUserEntry = addQuizUserEntry($userClient,$user->id,$entry->id);
+	$answerCue = addAnswer($userClient,$entry->id,$questions[0],$quizUserEntry->id,"Q");
+	if(!is_null($answerCue->isCorrect))
 	{
-	return fail(__FUNCTION__." Should get isCorrect value");
+	return fail(__FUNCTION__." Should not get isCorrect value");
 	}
 	$quiz = new KalturaQuiz();
 	$quiz->showCorrectAfterSubmission = KalturaNullableBoolean::FALSE_VALUE;
 	$quizPlugin = KalturaQuizClientPlugin::get($client);
 	$result = $quizPlugin->quiz->update($entry->id, $quiz);
-	$userClient = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER,$userId);
+
 	$answerCue = addAnswer($userClient,$entry->id,$questions[0],$quizUserEntry->id,"Q");
 	if(!is_null($answerCue->isCorrect))
 	{
@@ -247,6 +248,70 @@ function Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret
 	
 	return success(__FUNCTION__);
 }
+
+function Test6_1_ValidateSecurityAfterAnswer($client,$partnerId,$userSecret,$dc,$wgClient)
+{
+    info('start ' .  __FUNCTION__);
+    $entry=addEntry($client,__FUNCTION__);
+    $quiz = createNewQuiz($client,$entry->id,KalturaNullableBoolean::FALSE_VALUE,KalturaNullableBoolean::FALSE_VALUE,null,KalturaNullableBoolean::FALSE_VALUE,null,KalturaNullableBoolean::TRUE_VALUE);
+    $questions = array();
+    for ( $questionIndex=0 ; $questionIndex < 4 ; $questionIndex ++)
+    {
+        $questionCue = addQuestionsOnQuiz($client,$entry->id,"Question".$questionIndex);
+        $questions[$questionIndex]=$questionCue->id;
+    }
+    $userId = "User".rand();
+    //Create user session
+    $user = addKalturaUser($client,$userId);
+    $userClient = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER,$userId);
+    $quizUserEntry = addQuizUserEntry($userClient,$user->id,$entry->id);
+    $answerCue = addAnswer($userClient,$entry->id,$questions[0],$quizUserEntry->id,"Q");
+    if(!is_null($answerCue->isCorrect))
+    {
+        return fail(__FUNCTION__." Should not get isCorrect value");
+    }
+
+    if(!is_null($answerCue->correctAnswerKeys))
+    {
+        return fail(__FUNCTION__." Should not get correctAnswerKeys value");
+    }
+
+    return success(__FUNCTION__);
+}
+
+function Test6_2_ValidateSecurityAfterAnswer($client,$partnerId,$userSecret,$dc,$wgClient)
+{
+    info('start ' .  __FUNCTION__);
+    $entry=addEntry($client,__FUNCTION__);
+    $quiz = createNewQuiz($client,$entry->id,KalturaNullableBoolean::TRUE_VALUE,KalturaNullableBoolean::TRUE_VALUE,null,KalturaNullableBoolean::FALSE_VALUE,null,KalturaNullableBoolean::TRUE_VALUE);
+    $questions = array();
+    for ( $questionIndex=0 ; $questionIndex < 4 ; $questionIndex ++)
+    {
+        $questionCue = addQuestionsOnQuiz($client,$entry->id,"Question".$questionIndex);
+        $questions[$questionIndex]=$questionCue->id;
+    }
+    $userId = "User".rand();
+    //Create user session
+    $user = addKalturaUser($client,$userId);
+    $userClient = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER,$userId);
+    $quizUserEntry = addQuizUserEntry($userClient,$user->id,$entry->id);
+    $answerCue = addAnswer($userClient,$entry->id,$questions[0],$quizUserEntry->id,"Q");
+    if(is_null($answerCue->isCorrect))
+    {
+        return fail(__FUNCTION__." Should get isCorrect value");
+    }
+
+    if(is_null($answerCue->correctAnswerKeys))
+    {
+        return fail(__FUNCTION__." Should  get correctAnswerKeys value");
+    }
+
+
+    return success(__FUNCTION__);
+}
+
+
+
 
 function test7_GetUserPercentageReport($client)
 {
@@ -264,7 +329,7 @@ function test7_GetUserPercentageReport($client)
 	for ( $answerIndex=0 ; $answerIndex < 4 ; $answerIndex ++)
 	{
 		$answerCue = addAnswer($client,$entry->id,$questions[$answerIndex],$quizUserEntry->id,"Question2");
-	}
+    }
 	
 	$reportType = KalturaReportType::QUIZ_USER_PERCENTAGE;
 	$reportInputFilter = new KalturaEndUserReportInputFilter();
@@ -525,6 +590,8 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$widgetId = helper_create_widget($client,"IVQ_WIDGET_SESSION_ROLE" );
+    $widgetId2 = helper_create_widget($client );
+    $wgClient = startWidgetSession($dc,$partnerId,$widgetId2);
 	info("New widget ID {$widgetId}");
 	$ret = Test1_Basicflow($client);
 	$ret += Test2_ValidateNoScoreUponSubmit($client,$partnerId,$userSecret,$dc);
@@ -532,7 +599,9 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret += Test4_ValidateScoreUponSubmit($client,$partnerId,$userSecret,$dc);
 	$ret += Test5_CheckAllowDownload($client);
 	$ret += Test5_1_CheckAllowDownloadWithWidgetKs($client,$dc,$partnerId);
-	$ret += Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc);
+	$ret += Test6_ValidateshowCorrectAfterSubmission($client,$partnerId,$userSecret,$dc,$wgClient);
+    $ret += Test6_1_ValidateSecurityAfterAnswer($client,$partnerId,$userSecret,$dc,$wgClient);
+    $ret += Test6_2_ValidateSecurityAfterAnswer($client,$partnerId,$userSecret,$dc,$wgClient);
 	$ret += test7_GetUserPercentageReport($client);
 	$ret += test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId);
 	$ret += test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId);

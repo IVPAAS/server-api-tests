@@ -195,7 +195,7 @@ function helper_createEntryAndUploaDmp4Content($client, $testName, $userId=null)
     $FILE_NAME_MP4 = ($testName == 'youTubeDistributionTest') ? dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4' : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 	if($testName == 'youTubeDistributionTest')
 	{
-		$description = 'This is a test description with html tags and links .<br><br>Here is a link: <a target="_blank" rel="nofollow noopener noreferrer" href="https://www.youtube.com/watch?v=gLqalzGiqPk">https://www.youtube.com/watch?v=gLqalzGiqPk</a>'; 
+		$description = 'This is a test description with html tags and links .<br><br>Here is a &nbsp link: <a target="_blank" rel="nofollow noopener noreferrer" href="https://www.youtube.com/watch?v=gLqalzGiqPk">https://www.youtube.com/watch?v=gLqalzGiqPk</a>'; 
 		$entry = addEntry($client, $testName, KalturaMediaType::VIDEO, null, $userId, $description);
 	}
 	else

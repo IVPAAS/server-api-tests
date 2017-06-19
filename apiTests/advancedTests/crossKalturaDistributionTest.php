@@ -17,6 +17,8 @@ function Test1_DistributeEntry($client, $targetClient, $profileId)
 		print (".");
 	}
 
+	addCuePointToEntry($client, $MediaEntry);
+
 	//start cross Kaltura distribution
 	$entryDistribution = new KalturaEntryDistribution();
 	$entryDistribution->entryId = $MediaEntry->id;
@@ -57,9 +59,43 @@ function Test1_DistributeEntry($client, $targetClient, $profileId)
 	if ( !$thumbFound )
 		return fail(__FUNCTION__." 300X150 Thumb asset wasn't added");
 
+	$cuePointFilter = new KalturaCuePointFilter();
+	$cuePointFilter->entryIdEqual = $entryDistribution->remoteId;
+	$targetCuePointPlugin = KalturaCuepointClientPlugin::get($targetClient);
+	$cuePoints = $targetCuePointPlugin->cuePoint->listAction($cuePointFilter);
+	if ($cuePoints->totalCount != 2)
+	{
+		return fail(__FUNCTION__. $cuePoints->totalCount. " Cue points were found on target entry");
+	}
+
 	return success(__FUNCTION__);
 }
 
+function addCuePointToEntry($client, $mediaEntry)
+{
+	$cuepointPlugin = KalturaCuepointClientPlugin::get($client);
+	$CcuePoint = new KalturaCodeCuePoint();
+	$CcuePoint->code = "bla_bla";
+	$CcuePoint->entryId = $mediaEntry->id;
+	$cuepointPlugin->cuePoint->add($CcuePoint);
+
+	$TcuePoint = new KalturaThumbCuePoint();
+	$TcuePoint->entryId = $mediaEntry->id;
+	$TcuePoint = $cuepointPlugin->cuePoint->add($TcuePoint);
+
+	$thumbAsset = new KalturaTimedThumbAsset();
+	$thumbAsset->cuePointId = $TcuePoint->id;
+	$thumbAsset = $client->thumbAsset->add($mediaEntry->id, $thumbAsset);
+
+	$THUMB_NAME = dirname ( __FILE__ ).'/../../resources/thumb_300_150.jpg';$uploadTokenObj = new KalturaUploadToken();
+	$uploadTokenObj->fileName = $THUMB_NAME;
+	$uploadToken = $client->uploadToken->add($uploadTokenObj);
+	$fileData = $THUMB_NAME;
+	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+	$resource = new KalturaUploadedFileTokenResource();
+	$resource->token = $uploadToken->id;
+	$client->thumbAsset->setContent($thumbAsset->id, $resource);
+}
 
 function printTestUsage()
 {
