@@ -376,6 +376,7 @@ class AppTokenServiceTest extends KalturaApiTestCase
 		
 		try
 		{
+			sleep(10);
 			$client->baseEntry->get($entryId);
 			$this->fail("KS should be invalid");
 		}
