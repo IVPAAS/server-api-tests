@@ -46,9 +46,15 @@ abstract class RandomElasticDocVerificationBaseTest
 		return startKSSession($partnerId, $apiHost, $ks);
 	}
 
+	public static function splitIntoWords($value)
+	{
+		return preg_split('/\s+/', $value);
+	}
+
+
 	protected function getPartialValueTrim($value)
 	{
-		$words = preg_split('/\s+/', $value);//we split to words
+		$words = self::splitIntoWords($value);
 		$result = array();
 		for ($i = 0; $i < count($words); $i++)
 		{
@@ -108,6 +114,7 @@ abstract class RandomElasticDocVerificationBaseTest
 						catch (Exception $e)
 						{
 							$this->myReport->increaseFailedElasticDocCounter();
+							fail("Failed on ".ElasticTestUtils::getSearchTypeText($searchTerm)." field [$elasticField] and pId: [$partnerId] , searched for: [$elasticValu]e ,due to ".$e->getMessage());
 							continue;
 						}
 
@@ -115,6 +122,7 @@ abstract class RandomElasticDocVerificationBaseTest
 						{
 							// these are the tests that failed to get even one result from tha API server
 							$this->myReport->increaseFailedElasticDocCounter();
+							fail("Failed on ".ElasticTestUtils::getSearchTypeText($searchTerm)." field [$elasticField] and pId: [$partnerId] , searched for: [$elasticValue] ,due to count 0 from server");
 							continue;
 						}
 						$isFirstComparison = true;
@@ -186,8 +194,7 @@ abstract class RandomElasticDocVerificationBaseTest
 
 	protected function isValidElasticAndApiResultsMatch($apiObject, $elasticObject, $elasticObjectId, $fieldPath, $searchText, $searchType)
 	{
-		$apiMapping = ElasticToApiMapping::getMappingFor($this->getIndexType(), $fieldPath);
-		$apiFieldName = $apiMapping->apiName;
+		$apiFieldName = ElasticToApiMapping::getMappingFor($this->getIndexType(), $fieldPath);
 		if (!property_exists($apiObject, $apiFieldName))
 		{
 			fail("API object did not have field $apiFieldName yet was on elastic as ".$elasticObject[$fieldPath]." ".print_r($apiObject, true));
@@ -202,13 +209,12 @@ abstract class RandomElasticDocVerificationBaseTest
 				$result = (strcmp($apiFieldLowerCase, $elasticFieldLowerCase) === 0);
 				break;
 			case ElasticConstants::SEARCH_TYPE_PARTIAL:
-				$wordsToLookFor = explode(' ', $searchText);
+				$wordsToLookFor = self::splitIntoWords($searchText);
 				$result = true;
 				foreach ($wordsToLookFor as $word)
 				{
-					if (strpos($apiFieldLowerCase, strtolower($word)) === false)
+					if (strpos($apiFieldLowerCase, $word) === false)
 					{
-						info("Could not find the position of ".strtolower($word)." in $apiFieldLowerCase");
 						$result = false;
 						break;
 					}
@@ -216,17 +222,21 @@ abstract class RandomElasticDocVerificationBaseTest
 				break;
 			case ElasticConstants::SEARCH_TYPE_STARTS_WITH:
 				$result = (strpos($apiFieldLowerCase, $searchText) === 0) && (strpos($elasticFieldLowerCase, $searchText) === 0);
-				if (!$result)
-					info("strpos [$searchText] in api [$apiFieldLowerCase] gave ".strpos($apiFieldLowerCase, $searchText)." and strpos [$searchText] in elastic [$elasticFieldLowerCase] gave ".strpos($elasticFieldLowerCase, $searchText));
 				break;
 			case ElasticConstants::SEARCH_TYPE_DOESNT_CONTAIN:
-				$result = (!strpos($apiFieldLowerCase, $searchText)) && (!strpos($elasticFieldLowerCase, $searchText));
+				$wordsToLookFor = self::splitIntoWords($searchText);
+				$wordsThatExist = self::splitIntoWords($apiFieldLowerCase);
+				$result = true;
+				foreach ($wordsToLookFor as $word)
+					$result &= in_array($word, $wordsThatExist);
+				$result = !$result;
 				break;
 			default:
 				throw new Exception("Cannot search for invalid search type ($searchType)");
 		}
 		if (!$result)
-			fail("Found a mismatch: ".ElasticTestUtils::getSearchTypeText($searchType)." search on [$apiFieldName] gave API: ".$apiObject->$apiFieldName." and ELASTIC: ".$elasticObject[$fieldPath]." , id: $elasticObjectId, partnerId is ".$elasticObject['partner_id']);
+			fail("Found a mismatch: Search type: ".ElasticTestUtils::getSearchTypeText($searchType).",id: $elasticObjectId, partnerId is :".$elasticObject['partner_id'].
+				" searched on field [$apiFieldName] with text [$searchText], API result : [".$apiObject->$apiFieldName."]");
 		return $result;
 	}
 

@@ -65,10 +65,7 @@ function getValidRandomPartnerId($maxPartnerId, $conf, $retries = 0)
 		return getValidRandomPartnerId($maxPartnerId, $conf, $retries + 1);
 	$genPartnerId = shell_exec("php $genksPath $randPartnerId | php $kalCliPath partner getInfo | grep -A1 KalturaPartner | grep id | awk '{print \$2}'");
 	if (strcmp( strval($genPartnerId), strval($randPartnerId) === 0 ))
-	{
-		info("Managed to draw a valid partner id on the $retries try");
 		return $randPartnerId;
-	}
 	else
 	{
 		if ($retries > 100)

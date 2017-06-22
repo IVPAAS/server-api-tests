@@ -22,70 +22,57 @@ class ElasticToApiMapping
 		switch ($elasticName)
 		{
 			case 'name':
-				return new ElasticToApiMatchData('name', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'name';
 			case 'description':
-				return new ElasticToApiMatchData('description', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'description';
 			case 'tags':
-				return new ElasticToApiMatchData('tags', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'tags';
 			case 'admin_tags':
-				return new ElasticToApiMatchData('adminTags', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'adminTags';
 			case 'category_ids':
-				return new ElasticToApiMatchData('adminTags', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'adminTags';
 			case 'puser_id':
-				return new ElasticToApiMatchData('userId', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'userId';
 			case 'start_time':
-				// TODO return new ElasticToApiMatchData('startDate', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('startDate', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'startDate';
 			case 'end_time':
-				// TODO return new ElasticToApiMatchData('endDate', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('endDate', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'endDate';
 			case 'category_ids':
-				return new ElasticToApiMatchData('categories', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'categories';
 			case 'status':
-				// TODO return new ElasticToApiMatch('status', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('status', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'status';
 			case 'moderation_status':
-				// TODO return new ElasticToApiMatch('moderationStatus', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('moderationStatus', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'moderationStatus';
 			case 'moderation_count':
-				// TODO return new ElasticToApiMatch('moderationCount', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('moderationCount', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'moderationCount';
 			case 'created_at':
-				// TODO return new ElasticToApiMatch('createdAt', ElasticConstants::TYPE_DATE, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('createdAt', ElasticConstants::TYPE_DATE, ElasticToApiMatchData::EXACT_ONLY);
+				return 'createdAt';
 			case 'updated_at':
-				// TODO return new ElasticToApiMatch('updatedAt', ElasticConstants::TYPE_DATE, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('updatedAt', ElasticConstants::TYPE_DATE, ElasticToApiMatchData::EXACT_ONLY);
+				return 'updatedAt';
 			case 'conversion_profile_id':
-				// TODO return new ElasticToApiMatch('conversionProfileId', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('conversionProfileId', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'conversionProfileId';
 			case 'reference_id':
-				return new ElasticToApiMatchData('referenceId', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'referenceId';
 			case 'display_in_search':
-				// TODO return new ElasticToApiMatch('displayInSearch', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('displayInSearch', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'displayInSearch';
 			case 'source_type':
-				// TODO return new ElasticToApiMatch('sourceType', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('sourceType', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'sourceType';
 			case 'duration':
-				// TODO return new ElasticToApiMatch('duration', ElasticConstants::TYPE_NUMBER, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('duration', ElasticConstants::TYPE_NUMBER, ElasticToApiMatchData::EXACT_ONLY);
+				return 'duration';
 			case 'recorded_entry_id':
-				// TODO return new ElasticToApiMatch('recordedEntryId', ElasticConstants::TYPE_STRING, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('recordedEntryId', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::EXACT_ONLY);
+				return 'recordedEntryId';
 			case 'template_entry_id':
-				return new ElasticToApiMatchData('templateEntryId', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::EXACT_ONLY);
+				return 'templateEntryId';
 			case 'redirect_entry_id':
-				return new ElasticToApiMatchData('redirect_entry_id', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::EXACT_ONLY);
+				return 'redirect_entry_id';
 			case 'parent_id':
-				// TODO return new ElasticToApiMatch('parentId', ElasticConstants::TYPE_STRING, ElasticToApiMatch::EXACT_AND_RANGE);
-				return new ElasticToApiMatchData('parentEntryId', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::EXACT_ONLY);
+				return 'parentEntryId';
 			case 'push_publish':
-				return new ElasticToApiMatchData('pushPublish', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::EXACT_ONLY);
+				return 'pushPublish';
 			case 'entitled_kusers_edit':
-				return new ElasticToApiMatchData('entitledUsersEdit', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'entitledUsersEdit';
 			case 'entitled_kusers_publish':
-				return new ElasticToApiMatchData('entitledUsersPublish', ElasticConstants::TYPE_STRING, ElasticToApiMatchData::STRING_TEXT);
+				return 'entitledUsersPublish';
 			default:
 				throw new Exception("Have you forgotten about some ENTRY field: $elasticName");
 		}
