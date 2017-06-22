@@ -243,21 +243,34 @@ function helper_getVideoLength($sourceFileName)
     return $duration;
 }
 
+function helper_uploadThumbAssetByName($client, $entryId,$fileName)
+{
+    $thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
+    $THUMB_NAME = $fileName;
+    $uploadTokenObj = new KalturaUploadToken();
+    $uploadTokenObj->fileName = $THUMB_NAME;
+    $uploadToken = $client->uploadToken->add($uploadTokenObj);
+    $fileData = $THUMB_NAME;
+    $result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+    $resource = new KalturaUploadedFileTokenResource();
+    $resource->token = $uploadToken->id;
+
+    $client->thumbAsset->setContent($thumbAsset->id, $resource);
+}
+
+
 function helper_uploadThumbAsset($client, $entryId)
 {
-	$thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
-
-	$THUMB_NAME = dirname ( __FILE__ ).'/../../resources/thumb_300_150.jpg';
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $THUMB_NAME;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $THUMB_NAME;
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-
-	$client->thumbAsset->setContent($thumbAsset->id, $resource);
+    $THUMB_NAME = dirname ( __FILE__ ).'/../../resources/thumb_300_150.jpg';
+    helper_uploadThumbAssetByName($client, $entryId,$THUMB_NAME);
 }
+
+function helper_uploadThumbAsset2($client, $entryId)
+{
+    $THUMB_NAME = dirname ( __FILE__ ).'/../../resources/kalturaIcon.jpg';
+    helper_uploadThumbAssetByName($client, $entryId,$THUMB_NAME);
+}
+
 
 function isEntryReady($client,$id)
 {
@@ -277,12 +290,25 @@ function isEntryReady($client,$id)
 }
 
 
-function isSubmitting($client, $id)
+function entryDistributionIsSubmitting($client, $id)
 {
-	$result = $client->entryDistribution->get($id);
-	if ($result->status == 4) // status submitting
-		return true;
-	return false;
+    return checkDistributionStatus($client, $id,4);
+}
+
+function entryDistributionIsUpdating($client, $id)
+{
+    return checkDistributionStatus($client, $id,5);
+}
+
+function checkDistributionStatus($client, $id,$status)
+{
+    $result = $client->entryDistribution->get($id);
+    $result = $client->entryDistribution->get($id);
+    info("entryDistribution status : ".$result->status);
+    if ($result->status == $status) // status submitting
+        return true;
+    return false;
+
 }
 
 function isRemoving($client, $id)

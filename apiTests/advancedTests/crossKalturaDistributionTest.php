@@ -14,10 +14,13 @@ function Test1_DistributeEntry($client, $targetClient, $profileId)
 	while(isEntryReady($client,$MediaEntry->id)!=true)
 	{
 		sleep(1);
-		print (".");
+        info (".");
 	}
 
-	addCuePointToEntry($client, $MediaEntry);
+    $thumbBundleArray = addCuePointToEntry($client, $MediaEntry);
+
+	$ThumbCuePointID =$thumbBundleArray[0];
+    $TimeThumbAssetID=$thumbBundleArray[1];
 
 	//start cross Kaltura distribution
 	$entryDistribution = new KalturaEntryDistribution();
@@ -27,10 +30,10 @@ function Test1_DistributeEntry($client, $targetClient, $profileId)
 	$entryDistribution = $client->entryDistribution->submitAdd($entryDistribution->id);
 
 	info("Distributing ".$MediaEntry->id);
-	while(isSubmitting($client,$entryDistribution->id))
+	while(entryDistributionIsSubmitting($client,$entryDistribution->id))
 	{
 		sleep(1);
-		print (".");
+        info (".");
 	}
 
 	$entryDistribution = $client->entryDistribution->get($entryDistribution->id);
@@ -68,6 +71,30 @@ function Test1_DistributeEntry($client, $targetClient, $profileId)
 		return fail(__FUNCTION__. $cuePoints->totalCount. " Cue points were found on target entry");
 	}
 
+    info("Testing distribution update.");
+    //upload new thump asset on the same cue point and update
+
+    $res = updateThumbCuePoint($client,$ThumbCuePointID,$MediaEntry->id,$TimeThumbAssetID);
+    info (print_r($res,true));
+
+    $entryDistribution = $client->entryDistribution->submitUpdate($entryDistribution->id);
+
+    info("Distributing update on entry ".$MediaEntry->id);
+	while(entryDistributionIsUpdating($client,$entryDistribution->id))
+    {
+        sleep(1);
+        info (".");
+    }
+
+    $entryDistribution = $client->entryDistribution->get($entryDistribution->id);
+    if ($entryDistribution->status != 2)
+    {
+        info("Distribution update fail".print_r($entryDistribution,true));
+        return fail(__FUNCTION__." Distribution update Failed");
+    }
+
+    info($MediaEntry->id . " Distribution update Succeeded" );
+
 	return success(__FUNCTION__);
 }
 
@@ -77,6 +104,7 @@ function addCuePointToEntry($client, $mediaEntry)
 	$CcuePoint = new KalturaCodeCuePoint();
 	$CcuePoint->code = "bla_bla";
 	$CcuePoint->entryId = $mediaEntry->id;
+    $CcuePoint->endTime = null;
 	$cuepointPlugin->cuePoint->add($CcuePoint);
 
 	$TcuePoint = new KalturaThumbCuePoint();
@@ -95,7 +123,28 @@ function addCuePointToEntry($client, $mediaEntry)
 	$resource = new KalturaUploadedFileTokenResource();
 	$resource->token = $uploadToken->id;
 	$client->thumbAsset->setContent($thumbAsset->id, $resource);
+    return array($TcuePoint->id,$thumbAsset->id);
 }
+
+
+function updateThumbCuePoint($client, $cuePointId,$entryId,$TimeThumbAssetID)
+{
+    $client->thumbAsset->delete($TimeThumbAssetID);
+
+    $thumbAsset = new KalturaTimedThumbAsset();
+    $thumbAsset->cuePointId = $cuePointId;
+    $thumbAsset = $client->thumbAsset->add($entryId, $thumbAsset);
+    $THUMB_NAME = dirname ( __FILE__ ).'/../../resources/thumb_300_150.jpg';$uploadTokenObj = new KalturaUploadToken();
+    $uploadTokenObj->fileName = $THUMB_NAME;
+    $uploadToken = $client->uploadToken->add($uploadTokenObj);
+    $fileData = $THUMB_NAME;
+    $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
+    $resource = new KalturaUploadedFileTokenResource();
+    $resource->token = $uploadToken->id;
+    $res = $client->thumbAsset->setContent($thumbAsset->id, $resource);
+    return $res;
+}
+
 
 function printTestUsage()
 {
