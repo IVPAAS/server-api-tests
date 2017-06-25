@@ -114,7 +114,7 @@ abstract class RandomElasticDocVerificationBaseTest
 						catch (Exception $e)
 						{
 							$this->myReport->increaseFailedElasticDocCounter();
-							fail("Failed on ".ElasticTestUtils::getSearchTypeText($searchTerm)." field [$elasticField] and pId: [$partnerId] , searched for: [$elasticValu]e ,due to ".$e->getMessage());
+							fail("Failed on ".ElasticTestUtils::getSearchTypeText($searchTerm)." field [$elasticField] and pId: [$partnerId] , searched for: [$elasticValue] ,due to ".$e->getMessage());
 							continue;
 						}
 
