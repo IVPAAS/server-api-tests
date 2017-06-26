@@ -185,7 +185,23 @@ function Test10_FullPollTestSingularAnsSingleUserOneVote_withKs($client,$userSec
     }
     return  fail("Allowing vote on restricted session");;
 }
+function Test11_resetVotes($client,$userSecret,$dc,$partnerId)
+{
+    info('start ' . __FUNCTION__);
+    $max = 51;
+    $pollId = $client->poll->add("MULTI_ANONYMOUS");
+    for ($index = 0; $index < $max; $index++) {
+        $client->poll->vote(strval($pollId), "myUser" . $index, "0,1,2");
+    }
+    $revote = 27;
+    for ($index = 0; $index < $revote; $index++) {
+        $client->poll->vote(strval($pollId), "myUser" . $index, "1,3");
+    }
 
+    $client->poll->resetVotes($pollId,"0,1,2,3,4");
+    $votes = $client->poll->getVotes($pollId, "0,1,2,3,4");
+    return validatePollResultStructure($votes, 0, $pollId, array(0 => 0, 1 => 0, 2 => 0, 3 => 0, 4 => 0), __FUNCTION__);
+}
 
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
@@ -200,7 +216,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
     $ret += Test8_FullPollTestMediumScale($client);
     $ret += Test9_FullPollTestSingularAnsSingleUserOneVote_withKs($client,$userSecret,$dc,$partnerId);
     $ret += Test10_FullPollTestSingularAnsSingleUserOneVote_withKs($client,$userSecret,$dc,$partnerId);
-
+    $ret += Test11_resetVotes($client,$userSecret,$dc,$partnerId);
     return ($ret);
 }
 
