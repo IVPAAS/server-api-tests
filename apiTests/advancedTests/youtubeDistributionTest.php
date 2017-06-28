@@ -25,7 +25,7 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
     $entryDistribution = $client->entryDistribution->submitAdd($entryDistribution->id);
 
     info("Distributing To Youtube ".$MediaEntry->id);
-    while(isSubmitting($client,$entryDistribution->id))
+    while(entryDistributionIsSubmitting($client,$entryDistribution->id))
     {
         sleep(1);
         print (".");
