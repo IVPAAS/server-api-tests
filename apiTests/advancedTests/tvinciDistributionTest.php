@@ -22,7 +22,7 @@ function Test1_DistributeEntry($client, $profileId)
 	$entryDistribution = $client->entryDistribution->submitAdd($entryDistribution->id);
 
 	info("Distributing ".$MediaEntry->id);
-	while(isSubmitting($client,$entryDistribution->id))
+	while(entryDistributionIsSubmitting($client,$entryDistribution->id))
 	{
 		sleep(1);
 		print (".");
