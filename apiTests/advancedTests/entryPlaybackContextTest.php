@@ -9,10 +9,10 @@ function Test1_VODentryPlaybackContext($client)
 	(
 		array("deliveryProfileId" => 1356, "format" => "url", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array("widevine.WIDEVINE")),
 		array("deliveryProfileId" => 2, "format" => "url", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array("widevine.WIDEVINE")),
-		array("deliveryProfileId" => 1, "format" => "applehttp", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array("fairplay.FAIRPLAY")),
-		array("deliveryProfileId" => 1001, "format" => "applehttp", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array("fairplay.FAIRPLAY")),
+		array("deliveryProfileId" => 1, "format" => "applehttp", "protocols" => "http,https", "flavorIds" => "0_6re07y3x", "drm" => array("fairplay.FAIRPLAY")),
+		array("deliveryProfileId" => 1001, "format" => "applehttp", "protocols" => "http,https", "flavorIds" => "0_6re07y3x", "drm" => array("fairplay.FAIRPLAY")),
 		array("deliveryProfileId" => 1002, "format" => "hdnetworkmanifest", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array()),
-		array("deliveryProfileId" => 1003, "format" => "mpegdash", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array("drm.WIDEVINE_CENC", "drm.PLAYREADY_CENC")),
+		array("deliveryProfileId" => 1003, "format" => "mpegdash", "protocols" => "http,https", "flavorIds" => "0_w9a5yj86", "drm" => array("drm.WIDEVINE_CENC", "drm.PLAYREADY_CENC")),
 		array("deliveryProfileId" => 1356, "format" => "url", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array("widevine.WIDEVINE")),
 		array("deliveryProfileId" => 2, "format" => "url", "protocols" => "http,https", "flavorIds" => "0_6re07y3x,0_w9a5yj86", "drm" => array("widevine.WIDEVINE")),
 	);
