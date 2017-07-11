@@ -215,7 +215,7 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWithPagination
 
 	if (count($result->totalCount) != 2 )
 	{
-		return (fail(__FUNCTION__ . " Retrieved [" . $result->totalCount) ."] Annotation cuePoint when 2 was expected."));
+		return (fail(__FUNCTION__ . " Retrieved [" . $result->totalCount ."] Annotation cuePoint when 2 was expected."));
 	}
 
 	return (success(__FUNCTION__ ));
