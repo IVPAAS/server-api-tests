@@ -164,7 +164,7 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWhenHaveEntryP
 	$cuepointPlugin = KalturaCuepointClientPlugin::get($weakClient2);
 	$result = $cuepointPlugin->cuePoint->listAction($filter, null);
 
-	if ($result->objects != 2 )
+	if (count($result->objects) != 2 )
         {
                 return (fail(__FUNCTION__ . " Retrieved  [" .count($result->objects) ."] Annotation cuePoint when 2 were expected."));
 
@@ -213,7 +213,7 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWithPagination
 	$cuepointPlugin = KalturaCuepointClientPlugin::get($weakClient2);
 	$result = $cuepointPlugin->cuePoint->listAction($filter, $pager);
 
-	if (count($result->totalCount) != 2 )
+	if ($result->totalCount != 2 )
 	{
 		return (fail(__FUNCTION__ . " Retrieved [" . $result->totalCount ."] Annotation cuePoint when 2 was expected."));
 	}
