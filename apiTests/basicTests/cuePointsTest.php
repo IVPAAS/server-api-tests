@@ -164,13 +164,16 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWhenHaveEntryP
 	$cuepointPlugin = KalturaCuepointClientPlugin::get($weakClient2);
 	$result = $cuepointPlugin->cuePoint->listAction($filter, null);
 
-	if (count($result->objects) == 1 )
-	{
-		if ($result->objects[0]->id != $annotationCuePoint1->id)
-			return (fail(__FUNCTION__ . " Retrieved Annotation cuePoint [" . $result->objects[0]->id . "] when expected annotation was [" . $annotationCuePoint1->id . "]"));
-	}
-	else
-		return (fail(__FUNCTION__ . " Retrieved [" .count($result->objects) ."] Annotation cuePoint when 1 was expected."));
+	if (count($result->objects) != 2 )
+        {
+                return (fail(__FUNCTION__ . " Retrieved  [" .count($result->objects) ."] Annotation cuePoint when 2 were expected."));
+
+        }
+        else
+        {
+                if (($result->objects[0]->id != $annotationCuePoint1->id) && ($result->objects[1]->id != $annotationCuePoint1->id))
+                        return (fail(__FUNCTION__ . " Retrieved Annotation cuePoint [" . $result->objects[0]->id . "] and [" . $result->objects[1]->id . "] when expected at least one annotation to be equal to [" . $annotationCuePoint1->id . "]"));
+        }
 
 	return (success(__FUNCTION__ ));
 }
@@ -210,13 +213,10 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWithPagination
 	$cuepointPlugin = KalturaCuepointClientPlugin::get($weakClient2);
 	$result = $cuepointPlugin->cuePoint->listAction($filter, $pager);
 
-	if (count($result->objects) == 1 )
+	if ($result->totalCount != 2 )
 	{
-		if ($result->objects[0]->id != $annotationCuePoint1->id)
-			return (fail(__FUNCTION__ . " Retrieved Annotation cuePoint [" . $result->objects[0]->id . "] when expected annotation was [" . $annotationCuePoint1->id . "]"));
+		return (fail(__FUNCTION__ . " Retrieved [" . $result->totalCount ."] Annotation cuePoint when 2 was expected."));
 	}
-	else
-		return (fail(__FUNCTION__ . " Retrieved [" .count($result->objects) ."] Annotation cuePoint when 1 was expected."));
 
 	return (success(__FUNCTION__ ));
 }

@@ -57,7 +57,7 @@ function printUsage()
 }
 function goMain()
 {
-    if ($GLOBALS['argc']!=5 )
+    if ($GLOBALS['argc'] < 5 )
     {
         printUsage();
         exit (1);
@@ -89,6 +89,16 @@ function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionTyp
 		die("ERROR - cannot generate session with partner id [$partnerId] and secret [$secret]");
 	}
 }	
+
+function startKSSession($partnerId, $url, $ks)
+{
+    $config = new KalturaConfiguration($partnerId);
+    $config->serviceUrl = $url;
+    $client = new KalturaClient($config);
+    $client->setKs($ks);
+    return $client;
+}
+
 
 function startWidgetSession($destUrl,$partnerId,$widgetId=0)
 {
