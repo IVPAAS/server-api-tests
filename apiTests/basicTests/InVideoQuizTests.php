@@ -365,7 +365,7 @@ function test7_GetUserPercentageReport($client)
 	return success(__FUNCTION__);
 }
 
-function test12_filterQuizUserEntry($client)
+function test12_filterQuizUserEntry($client, $wgClient)
 {
 	$entry=addEntry($client,__FUNCTION__);
         $quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,null);
@@ -615,7 +615,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$ret += test9_addAnonimousUserQuiz($client,$dc,$partnerId,$widgetId);
 	$ret += test10_anonmymousUserMultyRequest($client,$dc,$partnerId,$widgetId);
 	$ret += test11_anonmymousUsersMultyQuiz($client,$dc,$partnerId,$widgetId);
-	$ret += test12_filterQuizUserEntry($client);
+	$ret += test12_filterQuizUserEntry($client, $wgClient);
 	$ret += test13_createTwoUserEntriesWithForSameUser($client, $dc, $partnerId);
 	return ($ret);
 }
