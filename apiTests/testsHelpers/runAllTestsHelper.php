@@ -236,7 +236,7 @@ function createTvinciDistributionProfile($client, $testPartner)
     $distributionProfile->updateEnabled = KalturaDistributionProfileActionStatus::MANUAL;
     $distributionProfile->deleteEnabled = KalturaDistributionProfileActionStatus::MANUAL;
     $distributionProfile->reportEnabled = KalturaDistributionProfileActionStatus::MANUAL;
-    $distributionProfile->ingestUrl = '52.30.29.170:8030/catalog_v3_8/service.svc';
+    $distributionProfile->ingestUrl = '34.249.122.223:8030/catalog_v3_8/service.svc';
     $distributionProfile->username = 'Kaltura Sus Regular-main';
     $distributionProfile->password = 'Kaltura Mus-main';
     $distributionProfile->ismFileName = 'Web HD';
