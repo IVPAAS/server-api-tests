@@ -367,28 +367,37 @@ function test7_GetUserPercentageReport($client)
 
 function test12_filterQuizUserEntry($client)
 {
-	info('start ' .  __FUNCTION__);
-	//Get list of all quiz user entry
-	$filter = new KalturaQuizUserEntryFilter();
-	$pager = null;
+	$entry=addEntry($client,__FUNCTION__);
+        $quiz = createNewQuiz($client,$entry->id,null,null,null,null,null,null);
+        info('start ' .  __FUNCTION__);
+        //Get list of all quiz user entry
+        $filter = new KalturaQuizUserEntryFilter();
+        $pager = null;
+        $user = "UU".rand(1,1000);
+        $user = addKalturaUser($client,"UU".rand(1,1000));
 
-	//Get list of all quiz user entry without anonymous user
-	$filter = new KalturaQuizUserEntryFilter();
-	$filter->isAnonymous = KalturaNullableBoolean::FALSE_VALUE;
-	$result = $client->userEntry->listAction($filter, $pager);
-	$items = $result->objects;
-	foreach($items as $item)
-	{
-		if($item->userId=='0') {
-			return fail(__FUNCTION__.__LINE__." found anonymous user while should not" . print_r($item,true));
-		}
-	}
+        addQuizUserEntry($client,$user->id,$entry->id);
+        addQuizUserEntry($wgClient,0,$entry->id);
+        //Get list of all quiz user entry without anonymous user
+        $filter = new KalturaQuizUserEntryFilter();
+        $filter->isAnonymous = KalturaNullableBoolean::FALSE_VALUE;
+        $filter->entryIdIn = $entry->id;
+        $result = $client->userEntry->listAction($filter, $pager);
+        $items = $result->objects;
+        foreach($items as $item)
+        {
+                if($item->userId=='0') {
+                        return fail(__FUNCTION__.__LINE__." found anonymous user while should not" . print_r($item,true));
+                }
+        }
 
-	//Get list of all quiz user entry with anonymous user
-	$filter = new KalturaQuizUserEntryFilter();
-	$filter->isAnonymous = KalturaNullableBoolean::TRUE_VALUE;
-	$result = $client->userEntry->listAction($filter, $pager);
-	$items = $result->objects;
+        //Get list of all quiz user entry with anonymous user
+        $filter = new KalturaQuizUserEntryFilter();
+        $filter->isAnonymous = KalturaNullableBoolean::TRUE_VALUE;
+        $filter->entryIdIn = $entry->id;
+        $result = $client->userEntry->listAction($filter, $pager);
+        $items = $result->objects;
+
 	$foundAnonymousUsres=0;
 	foreach($items as $item)
 	{
