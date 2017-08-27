@@ -196,6 +196,25 @@ function helper_createEmptyEntry($client, $testName)
 	return $entry;
 }
 
+function helper_UploapContent($client, $testName, $entry, $filePath = null)
+{
+    if (is_null($entry))
+        $entry = addEntry($client, $testName, KalturaMediaType::VIDEO);
+    if (is_null($filePath))
+        $filePath =  dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
+    
+    $uploadTokenObj = new KalturaUploadToken();
+    $uploadTokenObj->fileName = $filePath;
+    $uploadToken = $client->uploadToken->add($uploadTokenObj);
+    $result = $client->uploadToken->upload($uploadToken->id,$filePath ,null,null,null);
+    $resource = new KalturaUploadedFileTokenResource();
+    $resource->token = $uploadToken->id;
+    $result = $client->baseEntry->addcontent($entry->id, $resource);
+    waitForEntry($client, $entry->id);
+    return $result;
+}
+
+
 
 function helper_createEntryAndUploaDmp4Content($client, $testName, $userId=null)
 {
@@ -378,4 +397,23 @@ function waitForEntry($client, $entryId)
 		print (".");
 	}
 	info("Entry ready!");
+}
+
+function getResourceForClipAndTrim($entryId, $startTime, $clipDuration)
+{
+    $operation1						= new KalturaClipAttributes();
+    $operation1->offset				= $startTime;
+    $operation1->duration			= $clipDuration;
+
+    $resource						= new KalturaOperationResource();
+    $resource->resource				= new KalturaEntryResource();
+    $resource->resource->entryId	= $entryId;
+    $resource->operationAttributes	= array($operation1);
+    return $resource;
+}
+
+function helper_trimEntry($client, $entryId, $startTime, $clipDuration, $conversionProfile = null)
+{
+    $resource = getResourceForClipAndTrim($entryId, $startTime, $clipDuration);
+    return $client->media->updateContent($entryId, $resource, $conversionProfile);
 }

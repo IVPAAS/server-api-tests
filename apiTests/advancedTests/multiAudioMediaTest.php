@@ -2,6 +2,7 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
+$multiAudioConvertionProfile = 47896;
 $entryIdToDelete;
 /**
  * 1. upload entry via xml bulk upload with 3 streams - russian , french, english
@@ -11,7 +12,7 @@ $entryIdToDelete;
  */
 function multiAudioTest1($client)
 {
-	global $entryIdToDelete;
+	global $entryIdToDelete,$multiAudioConvertionProfile;
 
 	$ret = 0;
 	$mediaUrl = 'http://allinone-be.dev.kaltura.com/content/tests/multiAudioTest.mp4';
@@ -31,7 +32,7 @@ function multiAudioTest1($client)
 		                                <category>examples>example1</category>
 		                                <category>examples>example2</category>
 		                        </categories>
-		                        <conversionProfileId>47896</conversionProfileId>
+		                        <conversionProfileId>$multiAudioConvertionProfile</conversionProfileId>
 		                        <media>
 		                                <mediaType>1</mediaType>
 		                        </media>
@@ -248,6 +249,96 @@ function addXmlBulkUpload($client, $input)
 	return $output;
 }
 
+function getAudioStream($client, $entryId)
+{
+	$contextDataParams = new KalturaPlaybackContextOptions();
+	$contextDataParams->mediaProtocol = 'http';
+	$result = $client->baseEntry->getPlaybackContext($entryId, $contextDataParams);
+
+	if (!$result)
+		return fail(__FUNCTION__." Command: getPlaybackContext for entry $entryId failed.");
+
+	$url = null;
+	foreach ($result->sources as $item)
+	{
+		if ($item->format == 'applehttp')
+		{
+			$url = $item->url;
+			break;
+		}
+	}
+
+	$command = 'curl -i "'.$url.'"';
+	info("\n\r getting playmanifest info. executing the following request: $command");
+	exec($command, $output1, $result1);
+	if ($result1 != 0){
+		return fail(__FUNCTION__." Command: $command failed.");
+	}
+	//info(print_r($output1,true));
+
+	$audioStreams = array();
+	foreach ($output1 as $row)
+	{
+		if (0 === strpos($row, '#EXT-X-MEDIA:TYPE=AUDIO')){
+			info("Found stream $row");
+			$audioStreams[]= $row;
+		}
+	}
+	return $audioStreams;
+}
+
+function createBasicEntryForMultiAudio($client,$parentEntryId=null)
+{
+	global $multiAudioConvertionProfile;
+	$entry                                  = new KalturaMediaEntry();
+	$type                                   = KalturaEntryType::MEDIA_CLIP;
+	$entry->name                            = "Dummy";
+	$entry->mediaType                       = KalturaMediaType::VIDEO;
+	$entry->conversionProfileId		= $multiAudioConvertionProfile; //multi Audio conversion profile
+	if($parentEntryId)
+		$entry->parentEntryId = $parentEntryId;
+	$result                                 = $client->baseEntry->add($entry, $type);
+	return $result;
+}
+
+function trimEntry($client, $entryId, $start, $duration)
+{
+	global $multiAudioConvertionProfile;
+	$res = helper_trimEntry($client, $entryId, 0, 5000, $multiAudioConvertionProfile);
+	sleep(5);
+	info("Wating untill $entryId is done replacing");
+	do 
+	{
+		$res = $client->baseEntry->get($entryId, null);
+		sleep(1);
+		print(".");
+	}
+	while ($res->replacementStatus != 0);
+	return $res;
+}
+
+
+function clipMultiAudioWithParentTest($client)
+{
+	//$res = helper_trimEntry($client, '0_zy7w8duu', 0, 5000, 47896);
+	//$audioStreams = getAudioStream($client, '0_zy7w8duu');
+	//info(print_r($audioStreams, true));
+	//return success(__FUNCTION__ . ". \n\r finished successfully");
+
+	$multiAudioFile = dirname( __FILE__ ).'/../../resources/multiAudioTest.mp4';
+	$entry = createBasicEntryForMultiAudio($client);
+	helper_UploapContent($client, 'MultiAudioParentCliping', $entry, $multiAudioFile);
+	$childEntry = createBasicEntryForMultiAudio($client, $entry->id);
+	helper_UploapContent($client, 'MultiAudioParentCliping', $childEntry, $multiAudioFile);
+	$childEntry2 = createBasicEntryForMultiAudio($client, $entry->id);
+        helper_UploapContent($client, 'MultiAudioParentCliping', $childEntry2, $multiAudioFile);
+
+	$res = trimEntry($client, $entry->id, 0, 5000);	
+	$client->baseEntry->delete($entry->id);
+
+	return success(__FUNCTION__ . ". \n\r finished successfully");
+}
+
 function tearDown($client, $entryId)
 {
 	info("Deleting Entry $entryId");
@@ -259,7 +350,8 @@ function main($dc,$partnerId,$adminSecret)
 	global $entryIdToDelete;
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
 	$ret  = multiAudioTest1($client);
-    tearDown($client, $entryIdToDelete);
+	$ret += clipMultiAudioWithParentTest($client);
+    	tearDown($client, $entryIdToDelete);
 	return ($ret);
 }
 
