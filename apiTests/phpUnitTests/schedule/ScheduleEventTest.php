@@ -435,7 +435,6 @@ class ScheduleEventTest extends KalturaApiTestCase
 			$this->assertEquals('KalturaLiveStreamScheduleEvent', get_class($scheduleEventRecurrence));
 			$this->assertEquals(KalturaScheduleEventRecurrenceType::RECURRENCE, $scheduleEventRecurrence->recurrenceType);
 			$this->assertGreaterThanOrEqual($scheduleEvent->startDate, $scheduleEventRecurrence->startDate);
-			$this->assertLessThanOrEqual($scheduleEvent->endDate, $scheduleEventRecurrence->startDate);
 		}
 
 		return array($createdScheduleEvent, $scheduleEventsList->objects);
