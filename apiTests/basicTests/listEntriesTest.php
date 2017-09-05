@@ -1,67 +1,11 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
-function helper_createEntryWithTranscript( $client, $transcriptPath)
-{
-	$entryId = helper_createEntryAndUploadContent($client,__FUNCTION__);
+$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 
-	//add transcript
-	$transcript = $client->attachmentAsset->add($entryId, new KalturaTranscriptAsset());
-	$NAME = dirname ( __FILE__ ). $transcriptPath;
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $NAME;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $NAME;
-	$client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-	$client->attachmentAsset->setContent($transcript->id, $resource);
-
-	info ("transcript asset: ". $transcript->id);
-
-	return $entryId;
-}
-
-function helper_createEntryWithCaptions( $client, $captionsPath)
-{
-	$entryId = helper_createEntryAndUploadContent($client,__FUNCTION__);
-
-	//add transcript
-	$caption = $client->captionAsset->add($entryId, new KalturaCaptionAsset());
-	$NAME = dirname ( __FILE__ ). $captionsPath;
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $NAME;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $NAME;
-	$client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-	$client->captionAsset->setContent($caption->id, $resource);
-
-	info ("caption asset: ". $caption->id);
-
-	return $entryId;
-}
-
-function helper_createEntryAndUploadContent($client, $entryName, $referenceId='testRefID')
-{
-
-	$FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
-	$entry = addEntry($client,$entryName,KalturaMediaType::VIDEO,null,'','test media description','test tag',$referenceId);
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $FILE_NAME_MP4;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $FILE_NAME_MP4;
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-	$result = $client->baseEntry->addcontent($entry->id, $resource);
-	info ("entry ". $entry->id . " was created");
-	return $result->id;
-}
-
-function helper_validateEntryList( $client, $filter, $goodEntries, $badEntries )
+function helper_validateEntryList( $client, $filter, $goodEntries, $badEntries)
 {
 	$totalCreated = array_merge($goodEntries, $badEntries);
 	info("wait for entries to be ready");
@@ -110,8 +54,8 @@ function Test1_BaseEntryList( $client, $keyWord )
 	$badEntries = array();
 
 	//add entries
-	$goodEntries[] = helper_createEntryAndUploadContent($client,"test " . $keyWord);
-	$badEntries[] = helper_createEntryAndUploadContent($client,"test no keyword");
+	$goodEntries[] = createEntryAndUploadContent($client,"test " . $keyWord, $GLOBALS['FILE_NAME_MP4']);
+	$badEntries[] = createEntryAndUploadContent($client,"test no keyword", $GLOBALS['FILE_NAME_MP4']);
 
 	$filter = new KalturaBaseEntryFilter();
 	//entry metadata
@@ -129,8 +73,8 @@ function Test2_EntryTranscriptSearchFilter( $client, $keyWord )
 	$badEntries = array();
 
 	//entries with transcript
-	$goodEntries[] = helper_createEntryWithTranscript( $client, '/../../resources/transcriptWithKeyword.txt');
-	$badEntries[] = helper_createEntryWithTranscript( $client, '/../../resources/transcriptWithoutKeyword.txt');
+	$goodEntries[] = createEntryWithTranscript( $client, '/../../resources/transcriptWithKeyword.txt', $GLOBALS['FILE_NAME_MP4']);
+	$badEntries[] = createEntryWithTranscript( $client, '/../../resources/transcriptWithoutKeyword.txt', $GLOBALS['FILE_NAME_MP4']);
 
 	$filter = new KalturaBaseEntryFilter();
 	$transcriptSearchItem = new KalturaEntryTranscriptAssetSearchItem();
@@ -150,8 +94,8 @@ function Test3_EntryCaptionSearchFilter( $client, $keyWord )
 	$badEntries = array();
 
 	//entries with captions
-	$goodEntries[] = helper_createEntryWithCaptions( $client, '/../../resources/KalturaTestCaptionWithKeyword.srt');
-	$badEntries[] = helper_createEntryWithCaptions( $client, '/../../resources/KalturaTestCaption.srt');
+	$goodEntries[] = createEntryWithCaptions( $client, '/../../resources/KalturaTestCaptionWithKeyword.srt', $GLOBALS['FILE_NAME_MP4']);
+	$badEntries[] = createEntryWithCaptions( $client, '/../../resources/KalturaTestCaption.srt', $GLOBALS['FILE_NAME_MP4']);
 
 	$filter = new KalturaBaseEntryFilter();
 	$captionsSearchItem = new KalturaEntryCaptionAssetSearchItem();
@@ -172,8 +116,8 @@ function Test4_referenceIdFilter( $client )
 	$badEntries = array();
 
 	foreach ( $referenceIds as $refId ) {
-		$goodEntries[] = helper_createEntryAndUploadContent( $client, "correctReferenceId", $refId );
-		$badEntries[] = helper_createEntryAndUploadContent( $client, "wrongReferenceId", $refId . 'aa' );
+		$goodEntries[] = createEntryAndUploadContent( $client, "correctReferenceId", $GLOBALS['FILE_NAME_MP4'], $refId);
+		$badEntries[] = createEntryAndUploadContent( $client, "wrongReferenceId", $GLOBALS['FILE_NAME_MP4'], $refId . 'aa' );
 	}
 
 	$filter = new KalturaBaseEntryFilter();

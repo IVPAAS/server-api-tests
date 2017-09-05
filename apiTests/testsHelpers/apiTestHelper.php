@@ -190,11 +190,7 @@ function addCategoryEntry($client, $categoryId, $entryId)
     return $result;
 }
 
-function helper_createEmptyEntry($client, $testName)
-{
-	$entry = addEntry($client, $testName);
-	return $entry;
-}
+
 
 
 function helper_createEntryAndUploaDmp4Content($client, $testName, $userId=null)
