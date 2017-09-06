@@ -31,21 +31,21 @@ function runAllTests($dc,$userName,$userPassword)
     // Run all basic tests that require only partner creation
     $di = new RecursiveDirectoryIterator('basicTests');
 //    foreach (new RecursiveIteratorIterator($di) as $filename => $file)
-//    {
-//      $testName = basename($filename, ".php");
-//      if (is_file($filename))
-//      {
-//        if (shouldRun($ini, $testName))
-//        {
-//          $TotalCount++;
-//          $failedCount = $failedCount + runBasicTest($dc, $userName, $userPassword, $testName, $filename);
-//        } else
-//        {
-//          print ("$testName is disabled in configuration file. Skipping test \n");
-//          $skipCount++;
-//        }
-//      }
-//    }
+    {
+      $testName = basename($filename, ".php");
+      if (is_file($filename))
+      {
+        if (shouldRun($ini, $testName))
+        {
+          $TotalCount++;
+          $failedCount = $failedCount + runBasicTest($dc, $userName, $userPassword, $testName, $filename);
+        } else
+        {
+          print ("$testName is disabled in configuration file. Skipping test \n");
+          $skipCount++;
+        }
+      }
+    }
   
 
     // Run Advanced Tests
