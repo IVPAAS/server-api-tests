@@ -30,7 +30,7 @@ function runAllTests($dc,$userName,$userPassword)
 
     // Run all basic tests that require only partner creation
     $di = new RecursiveDirectoryIterator('basicTests');
-//    foreach (new RecursiveIteratorIterator($di) as $filename => $file)
+    foreach (new RecursiveIteratorIterator($di) as $filename => $file)
     {
       $testName = basename($filename, ".php");
       if (is_file($filename))
