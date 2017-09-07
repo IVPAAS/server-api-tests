@@ -157,7 +157,7 @@ function multiAudioTest1($client)
 		print (".");
 	}
 	info("Entry $replacementEntry is ready");
-	sleep(5);
+	sleep(60);
 
 	$contextDataParams = new KalturaPlaybackContextOptions();
 	$contextDataParams->mediaProtocol = 'http';
