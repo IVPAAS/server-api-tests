@@ -1,12 +1,12 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
-
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function Test1_CloneAReadyEntry($client)
 {
     info("Create entry and upload content");
-    $MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
+    $MediaEntry = createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
     info("Wait for entry to be ready id =".$MediaEntry->id);
     while(isEntryReady($client,$MediaEntry->id)!=true)
     {
@@ -27,7 +27,7 @@ function Test1_CloneAReadyEntry($client)
 function Test2_CloneAPendingEntry($client)
 {
     info("Create entry and upload content");
-    $MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
+    $MediaEntry = createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
     info("Make sure entry is not ready id =".$MediaEntry->id);
     if (isEntryReady($client,$MediaEntry->id)!=true)
     {
@@ -63,7 +63,7 @@ function Test2_CloneAPendingEntry($client)
 function Test3_ClonePlaylistEntry($client)
 {
     info("Create entry and upload content");
-    $playList  = helper_createPlaylist($client);
+    $playList  = createPlaylist($client);
     $newEntry = $client->baseEntry->cloneAction($playList->id);
     if( $playList -> status != $newEntry-> status)
     {
@@ -76,7 +76,7 @@ function Test3_ClonePlaylistEntry($client)
 function Test4_CloneImageEntry($client)
 {
     info("Create entry and upload content");
-    $imageEntry  = helper_createEntryAndUploadJpgContent($client);
+    $imageEntry  = createEntryAndUploadJpgContent($client);
     
     info("Wait for entry to be ready id =".$imageEntry->id);
     while(isEntryReady($client,$imageEntry->id)!=true)

@@ -1,11 +1,12 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function Test1_SimpleUploadEntry(KalturaClient $client)
 {
 	info("Simple upload to verify that file extensions are good");
-	$mediaEntry = helper_createEntryAndUploaDmp4Content($client, 'simpleUploadTest');
+	$mediaEntry = createEntryAndUploaDmp4Content($client, 'simpleUploadTest');
 	info("Wait for entry to be ready id =".$mediaEntry->id);
 	while(isEntryReady($client,$mediaEntry->id)!=true)
 	{

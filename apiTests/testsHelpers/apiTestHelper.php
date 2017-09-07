@@ -2,6 +2,7 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 
 const LOG_FILE="./executionLog.txt";
+const ENTRY_READY_TIMEOUT = 180;
 //start session and setting KS function
 class bcolors
 {
@@ -14,6 +15,7 @@ class bcolors
     const BOLD = "\033[1m";
     const UNDERLINE = "\033[4m";
 }
+
 function success($msg)
 {
     $out = "\n".bcolors::OKGREEN.$msg." OK!".bcolors::ENDC;
@@ -21,6 +23,7 @@ function success($msg)
     logOutput($out);
     return 0;
 }
+
 function fail($msg)
 {
     $out = "\n".bcolors::FAIL.$msg." FAIL!".bcolors::ENDC;
@@ -28,6 +31,7 @@ function fail($msg)
     logOutput($out);
     return -1;
 }
+
 function info($msg)
 {
     $out = "\n".bcolors::INFO.$msg.bcolors::ENDC;
@@ -35,6 +39,7 @@ function info($msg)
     logOutput($out);
     return 0;
 }
+
 function warning($msg)
 {
     $out = "\n".bcolors::WARNING.$msg.bcolors::ENDC;
@@ -43,18 +48,17 @@ function warning($msg)
     return 0;
 }
 
-
 function logOutput($msg)
 {
     file_put_contents ( LOG_FILE , $msg,$flags =FILE_APPEND );
 }
-
 
 function printUsage()
 {
     print ("\n\rUsage: " .$GLOBALS['argv'][0] . " <DC URL> 	<parnter id> <admin secret> <user secret>");
     print ("\n\r for adding quiz.\r\n");
 }
+
 function goMain()
 {
     if ($GLOBALS['argc'] < 5 )
@@ -70,6 +74,7 @@ function goMain()
     $res =  main($dcUrl,$partnerId,$adminSecret,$userSecret);
     exit($res);
 }
+
 function startKalturaSession($partnerId,$secret,$destUrl,$type=KalturaSessionType::ADMIN,$userId=null, $privileges=null)
 {
 	try
@@ -99,7 +104,6 @@ function startKSSession($partnerId, $url, $ks)
     return $client;
 }
 
-
 function startWidgetSession($destUrl,$partnerId,$widgetId=0)
 {
     try
@@ -121,9 +125,6 @@ function startWidgetSession($destUrl,$partnerId,$widgetId=0)
 		die("ERROR - cannot generate widget session with widgetId [$widgetId]");
 	}
 }
-
-
-
 
 function addKalturaUser($client,$userId)
 {
@@ -151,6 +152,7 @@ function addKalturaUser($client,$userId)
   //print ("\nAdd User ID:".$result->id);
   return $result;
 }
+
 function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId = null, $userId='', $description = 'test media description', $tags = 'test tag', $referenceId = 'testRefID', $categories = null)
 {
     $entry                                  = new KalturaMediaEntry();
@@ -190,13 +192,10 @@ function addCategoryEntry($client, $categoryId, $entryId)
     return $result;
 }
 
-
-
-
-function helper_createEntryAndUploaDmp4Content($client, $testName, $userId=null)
+function createEntryAndUploaDmp4Content($client, $testName, $userId=null)
 {
     if($testName == 'youTubeDistributionTest')
-        helper_cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
+        cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
 
     $FILE_NAME_MP4 = ($testName == 'youTubeDistributionTest') ? dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4' : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 	if($testName == 'youTubeDistributionTest')
@@ -217,10 +216,10 @@ function helper_createEntryAndUploaDmp4Content($client, $testName, $userId=null)
 	return $result;
 }
 
-function helper_createEntryWithReferenceIdAndUploaDmp4Content($client, $testName, $refId=null, $userId=null)
+function createEntryWithReferenceIdAndUploaDmp4Content($client, $testName, $refId=null, $userId=null)
 {
 	if($testName == 'youTubeDistributionTest')
-		helper_cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
+		cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
 
 	$FILE_NAME_MP4 = ($testName == 'youTubeDistributionTest') ? dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4' : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 	$entry = addEntry($client, $testName, KalturaMediaType::VIDEO, null, $userId, 'test media description', 'test tag', $refId);
@@ -235,21 +234,20 @@ function helper_createEntryWithReferenceIdAndUploaDmp4Content($client, $testName
 	return $result;
 }
 
-
-function helper_cutRandomPartFromVideo($sourceFile,$outputFile,$duration)
+function cutRandomPartFromVideo($sourceFile, $outputFile, $duration)
 {
-    $sourceVideoLength = helper_getVideoLength($sourceFile);
+    $sourceVideoLength = getVideoLength($sourceFile);
     $startSec = rand(0,$sourceVideoLength-$duration);
     shell_exec("ffmpeg -ss ".$startSec." -i ".$sourceFile." -c copy -f mp4 -t ".$duration." -y ".$outputFile);
 }
 
-function helper_getVideoLength($sourceFileName)
+function getVideoLength($sourceFileName)
 {
     $duration = shell_exec("ffprobe -i ".$sourceFileName." -show_entries format=Duration -v quiet -of csv=\"p=0\"");
     return $duration;
 }
 
-function helper_uploadThumbAssetByName($client, $entryId,$fileName)
+function uploadThumbAssetByName($client, $entryId, $fileName)
 {
     $thumbAsset = $client->thumbAsset->add($entryId, new KalturaThumbAsset());
     $THUMB_NAME = $fileName;
@@ -264,19 +262,17 @@ function helper_uploadThumbAssetByName($client, $entryId,$fileName)
     $client->thumbAsset->setContent($thumbAsset->id, $resource);
 }
 
-
-function helper_uploadThumbAsset($client, $entryId)
+function uploadThumbAsset($client, $entryId)
 {
     $THUMB_NAME = dirname ( __FILE__ ).'/../../resources/thumb_300_150.jpg';
-    helper_uploadThumbAssetByName($client, $entryId,$THUMB_NAME);
+    uploadThumbAssetByName($client, $entryId,$THUMB_NAME);
 }
 
-function helper_uploadThumbAsset2($client, $entryId)
+function uploadThumbAsset2($client, $entryId)
 {
     $THUMB_NAME = dirname ( __FILE__ ).'/../../resources/kalturaIcon.jpg';
-    helper_uploadThumbAssetByName($client, $entryId,$THUMB_NAME);
+    uploadThumbAssetByName($client, $entryId,$THUMB_NAME);
 }
-
 
 function isEntryReady($client,$id)
 {
@@ -294,7 +290,6 @@ function isEntryReady($client,$id)
         }
         return false;
 }
-
 
 function entryDistributionIsSubmitting($client, $id)
 {
@@ -325,23 +320,7 @@ function isRemoving($client, $id)
     return false;
 }
 
-function helper_createEntryAndUploadJpgContent($client)
-{
-	$FILE_NAME_JPG = dirname ( __FILE__ ).'/../../resources/kalturaIcon.jpg';
-	$entry = addEntry($client,__FUNCTION__,KalturaMediaType::IMAGE);
-	$uploadTokenObj = new KalturaUploadToken();
-	$uploadTokenObj->fileName = $FILE_NAME_JPG;
-	$uploadToken = $client->uploadToken->add($uploadTokenObj);
-	$fileData = $FILE_NAME_JPG;
-	$result = $client->uploadToken->upload($uploadToken->id,$fileData ,null,null,null);
-	$resource = new KalturaUploadedFileTokenResource();
-	$resource->token = $uploadToken->id;
-	$result = $client->baseEntry->addcontent($entry->id, $resource);
-	return $result;
-}
-
-
-function helper_createPlaylist($client)
+function createPlaylist($client)
 {
 	$entry = new KalturaPlaylist();
 	$entry->type = KalturaEntryType::PLAYLIST;
@@ -353,7 +332,7 @@ function helper_createPlaylist($client)
 	return $result;
 }
 
-function helper_create_widget($client,$role=null)
+function create_widget($client, $role=null)
 {
 	$filter = new KalturaUiConfFilter();
 	$result = $client->uiConf->listAction($filter, null);
@@ -363,15 +342,4 @@ function helper_create_widget($client,$role=null)
 	$widget->roles = $role;
 	$result = $client->widget->add($widget);
 	return $result->id;
-}
-
-function waitForEntry($client, $entryId)
-{
-	info("Wait for entry to be ready id = $entryId");
-	while(isEntryReady($client,$entryId)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-	info("Entry ready!");
 }

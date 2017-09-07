@@ -1,12 +1,12 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
-
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $storageHost, $storageUserName,$storageUserPassword, $storageUrl ,$storageBaseDir)
 {
 	info("Create entry and upload content");
-	$MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP' );
+	$MediaEntry = createEntryAndUploaDmp4Content($client, 'Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP' );
 	info("Wait for entry to be ready id =".$MediaEntry->id);
 	while(isEntryReady($client,$MediaEntry->id)!=true)
 	{

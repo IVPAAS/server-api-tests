@@ -1,14 +1,15 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function Test1_DistributeEntry($client, $targetClient, $profileId)
 {
 	info("Create entry and upload content");
-	$MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'crossKalturaDistributionTest');
+	$MediaEntry = createEntryAndUploaDmp4Content($client, 'crossKalturaDistributionTest');
 
 	info("Upload 300X150 thumb asset");
-	helper_uploadThumbAsset($client, $MediaEntry->id);
+	uploadThumbAsset($client, $MediaEntry->id);
 
 	info("Wait for entry to be ready id =".$MediaEntry->id);
 	while(isEntryReady($client,$MediaEntry->id)!=true)

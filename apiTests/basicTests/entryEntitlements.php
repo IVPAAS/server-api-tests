@@ -1,14 +1,15 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function createEntry($client, $refEntry = null)
 {
 	info("Create entry and upload content");
 	if ($refEntry)
-		$MediaEntry = helper_createEntryWithReferenceIdAndUploaDmp4Content($client, 'cloneEntryTest',$refEntry->id, 'test');
+		$MediaEntry = createEntryWithReferenceIdAndUploaDmp4Content($client, 'cloneEntryTest',$refEntry->id, 'test');
 	else
-		$MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'cloneEntryTest', 'test');
+		$MediaEntry = createEntryAndUploaDmp4Content($client, 'cloneEntryTest', 'test');
 
 	info("Wait for entry to be ready id =".$MediaEntry->id);
 	while(isEntryReady($client,$MediaEntry->id)!=true)

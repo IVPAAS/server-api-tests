@@ -1,6 +1,8 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
+
 /**
  * Created by IntelliJ IDEA.
  * User: David.Winder
@@ -34,7 +36,7 @@ function createCuePoints($client, $EntryId = null)
 function createEntry($client, $entryName = 'privacyContextTest')
 {
     info("Create entry and upload content");
-    $MediaEntry = helper_createEntryAndUploaDmp4Content($client, $entryName);
+    $MediaEntry = createEntryAndUploaDmp4Content($client, $entryName);
     info("Wait for entry to be ready id = ".$MediaEntry->id);
     while(isEntryReady($client,$MediaEntry->id) != true) {
         sleep(1);

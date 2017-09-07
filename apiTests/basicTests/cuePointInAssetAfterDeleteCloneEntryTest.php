@@ -4,7 +4,7 @@ require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 
 function helper_createEntryWithCuePoint($client)
 {
-	$entry = helper_createEntryAndUploaDmp4Content($client,__FUNCTION__);
+	$entry = createEntryAndUploaDmp4Content($client,__FUNCTION__);
 	info ("entry ". $entry->id . " was created");
 	waitForEntry($client, $entry->id);
 
