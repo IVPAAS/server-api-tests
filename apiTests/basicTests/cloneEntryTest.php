@@ -7,12 +7,7 @@ function Test1_CloneAReadyEntry($client)
 {
     info("Create entry and upload content");
     $MediaEntry = createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
-    info("Wait for entry to be ready id =".$MediaEntry->id);
-    while(isEntryReady($client,$MediaEntry->id)!=true)
-    {
-        sleep(1);
-        print (".");
-    }
+	waitForEntry($client,$MediaEntry->id );
     info("Cloning entry entry");
     $newEntry = $client->baseEntry->cloneAction($MediaEntry->id);
     if (!isEntryReady($client,$newEntry->id))

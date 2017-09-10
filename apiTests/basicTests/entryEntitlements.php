@@ -3,24 +3,6 @@ require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php'
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
-function createEntry($client, $refEntry = null)
-{
-	info("Create entry and upload content");
-	if ($refEntry)
-		$MediaEntry = createEntryWithReferenceIdAndUploaDmp4Content($client, 'cloneEntryTest',$refEntry->id, 'test');
-	else
-		$MediaEntry = createEntryAndUploaDmp4Content($client, 'cloneEntryTest', 'test');
-
-	info("Wait for entry to be ready id =".$MediaEntry->id);
-	while(isEntryReady($client,$MediaEntry->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
-	return $MediaEntry;
-}
-
 function testGetRestrictedEntry($client, $restrictedEntry)
 {
 	info('start ' .  __FUNCTION__);
@@ -83,8 +65,8 @@ function testLetRestrictedEntryByRefernceId($client, $restrictedRefEntry)
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry1 = createEntry($client);
-	$entry2 = createEntry($client, $entry1);
+	$entry1 = createMediaEntry($client);
+	$entry2 = createMediaEntry($client, $entry1);
 
 	$weakClient = startKalturaSession($partnerId,$adminSecret,$dc,KalturaSessionType::USER, null, 'privacycontext:MediaSpace,enableentitlement');
 	$ret = testGetRestrictedEntry($weakClient, $entry2);

@@ -33,18 +33,6 @@ function createCuePoints($client, $EntryId = null)
     return $result;
 }
 
-function createEntry($client, $entryName = 'privacyContextTest')
-{
-    info("Create entry and upload content");
-    $MediaEntry = createEntryAndUploaDmp4Content($client, $entryName);
-    info("Wait for entry to be ready id = ".$MediaEntry->id);
-    while(isEntryReady($client,$MediaEntry->id) != true) {
-        sleep(1);
-        print (".");
-    }
-    return $MediaEntry;
-}
-
 function checkEntryExist($client, $entryId = null)
 {
     $filter = new KalturaBaseEntryFilter();
@@ -118,7 +106,7 @@ function runAllTestWithClient($client, $ksType, $description = null)
         if ($runCategory && !runAllCategoryTests($client))
             throw new Exception('fail on category tests');
 
-        $entry = createEntry($client);
+        $entry = createMediaEntry($client, null, 'privacyContextTest');
         // check list on Entry
         if (!checkEntryExist($client, $entry->id))
             throw new Exception('entry not existed');
@@ -160,7 +148,7 @@ $categoryId;
 $entryId;
 function createCategoryAndEntry($client, $privacyType) {
     $category = createCategory($client, 'privacyContextTest_MediaSpace', $privacyType, true);
-    $entry = createEntry($client, 'current');
+    $entry = createMediaEntry($client, null,'current');
     addCategoryEntry($client, $category->id, $entry->id);
     info("created category with id $category->id and entry with id $entry->id");
     global $categoryId, $entryId;
