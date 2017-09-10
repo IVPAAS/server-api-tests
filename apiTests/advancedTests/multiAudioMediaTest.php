@@ -103,7 +103,7 @@ function multiAudioTest1($client)
 	}
 	info("Found ". count($streams) . " as expected");
 
-	if ( !strpos($streams[0], "LANGUAGE=\"fre\"") || !strpos($streams[1], "LANGUAGE=\"rus\"") || !strpos($streams[2], "LANGUAGE=\"eng\""))
+	if ( !strpos($streams[0], "LANGUAGE=\"eng\"") || !strpos($streams[1], "LANGUAGE=\"fre\"") || !strpos($streams[2], "LANGUAGE=\"rus\""))
 	{
 		return fail(__FUNCTION__." Original audio streams are not in the right order.");
 	}
@@ -200,7 +200,7 @@ function multiAudioTest1($client)
 	}
 
 	info("Found ". count($streamsAfterReplacement) . " as expected");
-	if ( !strpos($streamsAfterReplacement[1], "LANGUAGE=\"fre\"") || !strpos($streamsAfterReplacement[0], "LANGUAGE=\"rus\"") || !strpos($streamsAfterReplacement[2], "LANGUAGE=\"eng\""))
+	if ( !strpos($streamsAfterReplacement[0], "LANGUAGE=\"eng\"") || !strpos($streamsAfterReplacement[1], "LANGUAGE=\"rus\"") || !strpos($streamsAfterReplacement[2], "LANGUAGE=\"fre\""))
 	{
 		return fail(__FUNCTION__." Original audio streams are not in the right order.");
 	}
