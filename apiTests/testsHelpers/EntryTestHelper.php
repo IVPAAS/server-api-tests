@@ -2,6 +2,8 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
+const ENTRY_READY_TIMEOUT = 240;
+
 function createEntryAndUploadContent($client, $entryName, $fileName, $referenceId='testRefID')
 {
 	$entry = addEntry($client, $entryName, KalturaMediaType::VIDEO, null, '', 'test media description', 'test tag', $referenceId);
@@ -82,15 +84,16 @@ function waitForEntry($client, $entryId)
 {
 	info("Wait for entry to be ready id = $entryId");
 	$counter = 0;
-	while(isEntryReady($client,$entryId)!=true && $counter < ENTRY_READY_TIMEOUT)
+	while(isEntryReady($client,$entryId)!=true && $counter <= ENTRY_READY_TIMEOUT)
 	{
 		sleep(1);
 		print (".");
 	}
 
-	if($counter < ENTRY_READY_TIMEOUT)
+	if($counter > ENTRY_READY_TIMEOUT)
 	{
 		fail("Entry is not ready after more then ".ENTRY_READY_TIMEOUT." seconds");
+		throw new KalturaClientException("Test failed");
 	}
 
 	info("Entry ready!");

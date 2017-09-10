@@ -2,7 +2,6 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 
 const LOG_FILE="./executionLog.txt";
-const ENTRY_READY_TIMEOUT = 180;
 //start session and setting KS function
 class bcolors
 {
