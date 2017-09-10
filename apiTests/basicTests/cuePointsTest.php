@@ -30,7 +30,7 @@ function testRetrievePrivateAnnotationCueForDifferentUserWhenHaveEntryPrivilage(
 {
 	info('start ' .  __FUNCTION__);
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	$weakClient1 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "a@gmail.com");
 	$weakClient2 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "b@gmail.com");
