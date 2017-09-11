@@ -435,12 +435,7 @@ function createCategoryTreeWithEntry($client, &$rootCat, &$CategoryLeaf, &$Categ
 	$CategoryChildLevel1 = createCategory($client, "childOf $rootCat->name", $rootCat->id, KalturaInheritanceType::MANUAL);
 	$CategoryChild = $CategoryChildLevel1;
 	$MediaEntry = createEntryAndUploaDmp4Content($client, 'categoryEntryTest');
-	info("Wait for entry to be ready id =" . $MediaEntry->id);
-	while (isEntryReady($client, $MediaEntry->id) != true) {
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client, $MediaEntry->id);
 	$CategoryChildLeaf = null;
 	info("Creating category tree with entries");
 	for ($i = 0; $i < 3; $i++) {

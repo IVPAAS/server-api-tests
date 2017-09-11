@@ -91,13 +91,11 @@ function helper_ValidateAppend($clientServer, $liveEntry)
 			print (".");
 		}
 		while(!$recordedEntry->replacingEntryId);
-	info("Found replacing entry Id [$recordedEntry->replacedEntryId] waiting for it to be ready");
-		while($recordedEntry->replacingEntryId && isEntryReady($clientServer,$recordedEntry->replacingEntryId)!=true)
-		{
-			sleep(1);
-			print (".");
-		}
+
+		info("Found replacing entry Id [$recordedEntry->replacedEntryId] waiting for it to be ready");
+		waitForEntry($clientServer, $recordedEntry->replacingEntryId)
 	}
+
 	return $liveEntry;
 }
 

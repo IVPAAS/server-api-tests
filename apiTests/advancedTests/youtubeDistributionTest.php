@@ -10,14 +10,7 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
 
     info("Upload 300X150 thumb asset");
     uploadThumbAsset($client, $MediaEntry->id);
-
-    info("Wait for entry to be ready id =".$MediaEntry->id);
-    while(isEntryReady($client,$MediaEntry->id)!=true)
-    {
-        sleep(1);
-        print (".");
-    }
-
+	waitForEntry($client,$MediaEntry->id);
     //start youtube distribution
 	$entryDistribution = new KalturaEntryDistribution();
 	$entryDistribution->entryId = $MediaEntry->id;

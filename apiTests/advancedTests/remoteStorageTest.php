@@ -7,13 +7,7 @@ function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $
 {
 	info("Create entry and upload content");
 	$MediaEntry = createEntryAndUploaDmp4Content($client, 'Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP' );
-	info("Wait for entry to be ready id =".$MediaEntry->id);
-	while(isEntryReady($client,$MediaEntry->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client, $MediaEntry->id);
 	info("Check That entry exists in remote storage");
 
 	info("Rqunning command to locate entry on remote storage: sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find .* -name '$MediaEntry->id*'");

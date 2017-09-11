@@ -133,19 +133,10 @@ function addCuePointToLiveAndCheckVOD($clientMS, $clientServer)
 		// in i == 0 can add times: 1468768250, 1468768270
 		// in i == 2 can add times: 1468768320, 1468768340
 	}
+
 	$recordEntryID = $liveEntry->recordedEntryId;
-	info("waiting for recorded id: " .$recordEntryID ." to be ready");
-
-	do {
-		sleep(5);
-		print (".");
-	}
-	while (!isEntryReady($clientServer,$recordEntryID));
-	info("recordedEntry ready!");
-
+	waitForEntry($clientServer,$recordEntryID);
 	sleep(20);
-
-
 	if (hasCuePoint($clientServer,$recordEntryID))
 		return success(__FUNCTION__);
 	else return fail(__FUNCTION__ . "     -  No cuePoint on entry id: " .$recordEntryID);

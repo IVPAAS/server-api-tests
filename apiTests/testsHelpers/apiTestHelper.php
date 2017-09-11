@@ -203,23 +203,6 @@ function uploadThumbAsset2($client, $entryId)
     uploadThumbAssetByName($client, $entryId,$THUMB_NAME);
 }
 
-function isEntryReady($client,$id)
-{
-        if($id!=null)
-        {
-                try{
-                        $result = $client->baseEntry->get($id, null);
-                        if ($result->status == 2)
-                        return true;
-                }
-                catch(Exception $e)
-                {
-                        return true;
-                }
-        }
-        return false;
-}
-
 function entryDistributionIsSubmitting($client, $id)
 {
     return checkDistributionStatus($client, $id,4);

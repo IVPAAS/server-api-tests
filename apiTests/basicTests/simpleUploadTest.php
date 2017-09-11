@@ -7,13 +7,7 @@ function Test1_SimpleUploadEntry(KalturaClient $client)
 {
 	info("Simple upload to verify that file extensions are good");
 	$mediaEntry = createEntryAndUploaDmp4Content($client, 'simpleUploadTest');
-	info("Wait for entry to be ready id =".$mediaEntry->id);
-	while(isEntryReady($client,$mediaEntry->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client, $mediaEntry->id);
 	$sourceFilter = new KalturaFlavorAssetFilter();
 	$sourceFilter->entryIdEqual = $mediaEntry->id;
 	$sourceFilter->tagsLike = "Source";

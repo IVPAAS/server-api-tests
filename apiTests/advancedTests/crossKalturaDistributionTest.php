@@ -10,14 +10,7 @@ function Test1_DistributeEntry($client, $targetClient, $profileId)
 
 	info("Upload 300X150 thumb asset");
 	uploadThumbAsset($client, $MediaEntry->id);
-
-	info("Wait for entry to be ready id =".$MediaEntry->id);
-	while(isEntryReady($client,$MediaEntry->id)!=true)
-	{
-		sleep(1);
-        info (".");
-	}
-
+	waitForEntry($client,$MediaEntry->id);
     $thumbBundleArray = addCuePointToEntry($client, $MediaEntry);
 
 	$ThumbCuePointID =$thumbBundleArray[0];

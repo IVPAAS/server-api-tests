@@ -8,13 +8,7 @@ function Test1_DistributeEntry($client, $profileId)
 	info("Create entry and upload content");
 	$MediaEntry = createEntryAndUploaDmp4Content($client, 'tvinciDistributionTest');
 
-	info("Wait for entry to be ready id =".$MediaEntry->id);
-	while(isEntryReady($client,$MediaEntry->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client, $MediaEntry->id);
 	//start tvinci distribution
 	$entryDistribution = new KalturaEntryDistribution();
 	$entryDistribution->entryId = $MediaEntry->id;

@@ -33,20 +33,15 @@ function Test2_CloneAPendingEntry($client)
     {
         return fail(__FUNCTION__."entry is ready too fast, cant test it!");
     }
-    info("Wait for entry to be ready id =".$MediaEntry->id);
-    while(isEntryReady($client,$MediaEntry->id)!=true)
-    {
-        sleep(1);
-        print (".");
-    }
 
+	waitForEntry($client,$MediaEntry->id);
     $maxWait=100;
     info("Wait for cloned entry to be ready id =".$newEntry->id);
     while(isEntryReady($client,$newEntry->id)!=true)
     {
         if($maxWait-- <0)
         {
-            return fail(__FUNCTION__."Cloned entry is not ready, while source entry beacme ready");
+            return fail(__FUNCTION__."Cloned entry is not ready, while source entry became ready");
         }
         sleep(1);
         print (".");
@@ -72,13 +67,7 @@ function Test4_CloneImageEntry($client)
 {
     info("Create entry and upload content");
     $imageEntry  = createEntryAndUploadJpgContent($client);
-    
-    info("Wait for entry to be ready id =".$imageEntry->id);
-    while(isEntryReady($client,$imageEntry->id)!=true)
-    {
-        sleep(1);
-        print (".");
-    }
+    waitForEntry($client,$imageEntry->id);
     $newEntry = $client->baseEntry->cloneAction($imageEntry->id);
     if( $imageEntry -> status != $newEntry-> status)
     {
@@ -239,7 +228,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
   $ret += Test4_CloneImageEntry($client);
   $ret += Test5_CloneEntryWithUsersAndCategories($client);
   $ret += Test6_CloneEntryNoUsersAndNoCategories($client);
-    $ret += Test7_CloneEntryWithNullCloneOptions($client);
+  $ret += Test7_CloneEntryWithNullCloneOptions($client);
 
   return ($ret);
 }

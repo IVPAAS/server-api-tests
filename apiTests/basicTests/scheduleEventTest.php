@@ -37,22 +37,10 @@ function TestScheduleEventFilterByTemplateEntryCategoriesId($client)
 
 	//create template entry1
 	$MediaEntry1 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =".$MediaEntry1->id);
-	while(isEntryReady($client,$MediaEntry1->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client,$MediaEntry1->id);
 	//create template entry2
 	$MediaEntry2 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =".$MediaEntry2->id);
-	while(isEntryReady($client,$MediaEntry2->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client,$MediaEntry2->id);
 	addCategoryEntry($client, $category1->id, $MediaEntry1->id);
 	addCategoryEntry($client, $category2->id, $MediaEntry1->id);
 	addCategoryEntry($client, $category2->id, $MediaEntry2->id);
@@ -800,22 +788,10 @@ function TestScheduleEventFilterByTemplateEntryId($client)
 {
 	//create template entry1
 	$MediaEntry1 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =" . $MediaEntry1->id);
-	while (isEntryReady($client, $MediaEntry1->id) != true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client, $MediaEntry1->id);
 	//create template entry2
 	$MediaEntry2 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =" . $MediaEntry2->id);
-	while (isEntryReady($client, $MediaEntry2->id) != true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	waitForEntry($client, $MediaEntry2->id);
 	$scheduleEvent1 = createScheduleEvent($client, $MediaEntry1->id);
 	while (isScheduleEventUploaded($client, $scheduleEvent1->id) != true)
 	{

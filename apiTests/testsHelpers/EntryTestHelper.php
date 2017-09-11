@@ -22,6 +22,16 @@ function addEntry($client,$name,$mediaType=KalturaMediaType::VIDEO, $profileId =
 	return $result;
 }
 
+function addCategoryEntry($client, $categoryId, $entryId)
+{
+	//create a category entry
+	$categoryEntry = new KalturaCategoryEntry();
+	$categoryEntry->categoryId = $categoryId;
+	$categoryEntry->entryId = $entryId;
+	$result = $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
+	return $result;
+}
+
 function createMediaEntry($client, $refEntry = null, $entryName = null)
 {
 	info("Create entry and upload content");
@@ -162,14 +172,21 @@ function createEntryAndUploadJpgContent($client)
 	return $result;
 }
 
-function addCategoryEntry($client, $categoryId, $entryId)
+function isEntryReady($client,$id)
 {
-	//create a category entry
-	$categoryEntry = new KalturaCategoryEntry();
-	$categoryEntry->categoryId = $categoryId;
-	$categoryEntry->entryId = $entryId;
-	$result = $newCategoryEntry = $client->categoryEntry->add($categoryEntry);
-	return $result;
+	if($id!=null)
+	{
+		try{
+			$result = $client->baseEntry->get($id, null);
+			if ($result->status == 2)
+				return true;
+		}
+		catch(Exception $e)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 function waitForEntry($client, $entryId)
@@ -188,5 +205,5 @@ function waitForEntry($client, $entryId)
 		throw new KalturaClientException("Test failed");
 	}
 
-	info("Entry ready!");
+	info("Entry $entryId ready!");
 }
