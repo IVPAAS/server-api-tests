@@ -410,7 +410,7 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$scheduleEvent->recurrenceType = KalturaScheduleEventRecurrenceType::RECURRING;
 		$scheduleEvent->summary = uniqid('Test: ');
 		$scheduleEvent->startDate = time() + (60 * 60 * 24);
-		$scheduleEvent->endDate = $scheduleEvent->startDate + (60 * 60 * 24 * 365 * 2);
+		$scheduleEvent->endDate = time() + (60 * 60 * 24) + 60;
 		$scheduleEvent->duration = 60;
 		$scheduleEvent->recurrence = $recurrence;
 
@@ -435,7 +435,6 @@ class ScheduleEventTest extends KalturaApiTestCase
 			$this->assertEquals('KalturaLiveStreamScheduleEvent', get_class($scheduleEventRecurrence));
 			$this->assertEquals(KalturaScheduleEventRecurrenceType::RECURRENCE, $scheduleEventRecurrence->recurrenceType);
 			$this->assertGreaterThanOrEqual($scheduleEvent->startDate, $scheduleEventRecurrence->startDate);
-			$this->assertLessThanOrEqual($scheduleEvent->endDate, $scheduleEventRecurrence->startDate);
 		}
 
 		return array($createdScheduleEvent, $scheduleEventsList->objects);
@@ -1098,11 +1097,10 @@ class ScheduleEventTest extends KalturaApiTestCase
 		$recurrence->bySecond = 0;
 		$recurrence->count = $recurrences;
 
-		$endDate = time() + (60 * 60 * 24 * 365 * 2);
 		$duration = 2000;
 		for($i = 0; $i < $recurring; $i++)
 		{
-			$scheduleEvent = $this->create('KalturaRecordScheduleEvent', array('recurrenceType' => KalturaScheduleEventRecurrenceType::RECURRING, 'recurrence' => $recurrence, 'endDate' => $endDate, 'duration' => $duration) );
+			$scheduleEvent = $this->create('KalturaRecordScheduleEvent', array('recurrenceType' => KalturaScheduleEventRecurrenceType::RECURRING, 'recurrence' => $recurrence, 'duration' => $duration) );
 			$recurringEvents[$scheduleEvent->id] = $scheduleEvent;
 		}
 

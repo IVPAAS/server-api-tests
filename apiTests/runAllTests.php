@@ -555,3 +555,26 @@ function runEntryPlaybackContextTest($dc,$userName,$userPassword)
   }
   printSuccessAndlogOutput("EntryPlaybackContextTest");
 }
+
+function runMultiAudioMediaTest($dc,$userName,$userPassword)
+{
+  try {
+
+    $testPartnerId = 15158;
+    $testPartnerAdminSecret = 'e64c4dc52a5ee2d7900a61bee25e4104';
+    info(" executing MultiAudioMediaTest...");
+    $output = array();
+    exec("php advancedTests/multiAudioMediaTest.php $dc $testPartnerId $testPartnerAdminSecret", $output, $result);
+    foreach ($output as $item) {
+      print("\n\r $item");
+    }
+  } catch (Exception $e) {
+    fail(" MultiAudioMediaTest failed: $e");
+    $result = 1;
+  }
+  if ($result) {
+    printFailAndlogOutput("MultiAudioMediaTest");
+    return FAIL;
+  }
+  printSuccessAndlogOutput("MultiAudioMediaTest");
+}
