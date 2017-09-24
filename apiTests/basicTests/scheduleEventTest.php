@@ -1,7 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
-
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function createCategory($client,$categoryName, $parentId = null, $inheritanceType = KalturaInheritanceType::INHERIT)
 {
@@ -36,23 +36,11 @@ function TestScheduleEventFilterByTemplateEntryCategoriesId($client)
 	$category2 = createCategory($client, $categoryName2);
 
 	//create template entry1
-	$MediaEntry1 = helper_createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =".$MediaEntry1->id);
-	while(isEntryReady($client,$MediaEntry1->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	$MediaEntry1 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
+	waitForEntry($client,$MediaEntry1->id);
 	//create template entry2
-	$MediaEntry2 = helper_createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =".$MediaEntry2->id);
-	while(isEntryReady($client,$MediaEntry2->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	$MediaEntry2 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
+	waitForEntry($client,$MediaEntry2->id);
 	addCategoryEntry($client, $category1->id, $MediaEntry1->id);
 	addCategoryEntry($client, $category2->id, $MediaEntry1->id);
 	addCategoryEntry($client, $category2->id, $MediaEntry2->id);
@@ -799,23 +787,11 @@ function createScheduleEventResource($client, $eventId , $resourceId )
 function TestScheduleEventFilterByTemplateEntryId($client)
 {
 	//create template entry1
-	$MediaEntry1 = helper_createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =" . $MediaEntry1->id);
-	while (isEntryReady($client, $MediaEntry1->id) != true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	$MediaEntry1 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
+	waitForEntry($client, $MediaEntry1->id);
 	//create template entry2
-	$MediaEntry2 = helper_createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
-	info("Wait for entry to be ready id =" . $MediaEntry2->id);
-	while (isEntryReady($client, $MediaEntry2->id) != true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	$MediaEntry2 = createEntryAndUploaDmp4Content($client, 'scheduleEventTest');
+	waitForEntry($client, $MediaEntry2->id);
 	$scheduleEvent1 = createScheduleEvent($client, $MediaEntry1->id);
 	while (isScheduleEventUploaded($client, $scheduleEvent1->id) != true)
 	{

@@ -2,6 +2,7 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/InVideoQuizHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function CreateNewQuizAnonimousUser($wgClient,$entryId)
 
@@ -16,17 +17,17 @@ function CreateNewQuizAnonimousUser($wgClient,$entryId)
 function testAnonymousCache($dc,$partnerId,$client,$entryId)
 {
 	info(__FUNCTION__."$dc $partnerId $entryId");
-	$widgetId = helper_create_widget($client,"IVQ_WIDGET_SESSION_ROLE");
+	$widgetId = create_widget($client,"IVQ_WIDGET_SESSION_ROLE");
 	$wgClient = startWidgetSession($dc, $partnerId, $widgetId);
 	info("New widget ID with non API cache role {$widgetId}");
 	if(CreateNewQuizAnonimousUser($wgClient,$entryId)==false)
 		return fail(__FUNCTION__." Should get new value, but got value from cache! ");
-	$widgetId = helper_create_widget($client,"PLAYBACK_BASE_ROLE");
+	$widgetId = create_widget($client,"PLAYBACK_BASE_ROLE");
 	$wgClient = startWidgetSession($dc, $partnerId, $widgetId);
 	info("New widget ID with API cache role {$widgetId}");
 	if(CreateNewQuizAnonimousUser($wgClient,$entryId)==true)
 		return fail(__FUNCTION__." Should get value from cache, but got new value!");
-	$widgetId = helper_create_widget($client);
+	$widgetId = create_widget($client);
 	$wgClient = startWidgetSession($dc, $partnerId, $widgetId);
 	info("New widget ID with no role {$widgetId}");
 	if(CreateNewQuizAnonimousUser($wgClient,$entryId)==true)

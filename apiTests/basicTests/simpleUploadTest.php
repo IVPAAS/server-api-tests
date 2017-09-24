@@ -1,18 +1,13 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function Test1_SimpleUploadEntry(KalturaClient $client)
 {
 	info("Simple upload to verify that file extensions are good");
-	$mediaEntry = helper_createEntryAndUploaDmp4Content($client, 'simpleUploadTest');
-	info("Wait for entry to be ready id =".$mediaEntry->id);
-	while(isEntryReady($client,$mediaEntry->id)!=true)
-	{
-		sleep(1);
-		print (".");
-	}
-
+	$mediaEntry = createEntryAndUploaDmp4Content($client, 'simpleUploadTest');
+	waitForEntry($client, $mediaEntry->id);
 	$sourceFilter = new KalturaFlavorAssetFilter();
 	$sourceFilter->entryIdEqual = $mediaEntry->id;
 	$sourceFilter->tagsLike = "Source";

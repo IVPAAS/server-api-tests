@@ -1,6 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/InVideoQuizHelper.php');
 
 function updateCuePoints($client)
@@ -100,7 +101,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
 	$annotaionArray=array();
 
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	//create annotation + tags = chaptering - ispublic = true
 	//create annotation + tags = chaptering - ispublic = false

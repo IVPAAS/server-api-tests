@@ -1,18 +1,13 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
-
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function Test1_CloneAReadyEntry($client)
 {
     info("Create entry and upload content");
-    $MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
-    info("Wait for entry to be ready id =".$MediaEntry->id);
-    while(isEntryReady($client,$MediaEntry->id)!=true)
-    {
-        sleep(1);
-        print (".");
-    }
+    $MediaEntry = createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
+	waitForEntry($client,$MediaEntry->id );
     info("Cloning entry entry");
     $newEntry = $client->baseEntry->cloneAction($MediaEntry->id);
     if (!isEntryReady($client,$newEntry->id))
@@ -27,7 +22,7 @@ function Test1_CloneAReadyEntry($client)
 function Test2_CloneAPendingEntry($client)
 {
     info("Create entry and upload content");
-    $MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
+    $MediaEntry = createEntryAndUploaDmp4Content($client, 'cloneEntryTest');
     info("Make sure entry is not ready id =".$MediaEntry->id);
     if (isEntryReady($client,$MediaEntry->id)!=true)
     {
@@ -38,20 +33,15 @@ function Test2_CloneAPendingEntry($client)
     {
         return fail(__FUNCTION__."entry is ready too fast, cant test it!");
     }
-    info("Wait for entry to be ready id =".$MediaEntry->id);
-    while(isEntryReady($client,$MediaEntry->id)!=true)
-    {
-        sleep(1);
-        print (".");
-    }
 
+	waitForEntry($client,$MediaEntry->id);
     $maxWait=100;
     info("Wait for cloned entry to be ready id =".$newEntry->id);
     while(isEntryReady($client,$newEntry->id)!=true)
     {
         if($maxWait-- <0)
         {
-            return fail(__FUNCTION__."Cloned entry is not ready, while source entry beacme ready");
+            return fail(__FUNCTION__."Cloned entry is not ready, while source entry became ready");
         }
         sleep(1);
         print (".");
@@ -63,7 +53,7 @@ function Test2_CloneAPendingEntry($client)
 function Test3_ClonePlaylistEntry($client)
 {
     info("Create entry and upload content");
-    $playList  = helper_createPlaylist($client);
+    $playList  = createPlaylist($client);
     $newEntry = $client->baseEntry->cloneAction($playList->id);
     if( $playList -> status != $newEntry-> status)
     {
@@ -76,14 +66,8 @@ function Test3_ClonePlaylistEntry($client)
 function Test4_CloneImageEntry($client)
 {
     info("Create entry and upload content");
-    $imageEntry  = helper_createEntryAndUploadJpgContent($client);
-    
-    info("Wait for entry to be ready id =".$imageEntry->id);
-    while(isEntryReady($client,$imageEntry->id)!=true)
-    {
-        sleep(1);
-        print (".");
-    }
+    $imageEntry  = createEntryAndUploadJpgContent($client);
+    waitForEntry($client,$imageEntry->id);
     $newEntry = $client->baseEntry->cloneAction($imageEntry->id);
     if( $imageEntry -> status != $newEntry-> status)
     {
@@ -244,7 +228,7 @@ function main($dc,$partnerId,$adminSecret,$userSecret)
   $ret += Test4_CloneImageEntry($client);
   $ret += Test5_CloneEntryWithUsersAndCategories($client);
   $ret += Test6_CloneEntryNoUsersAndNoCategories($client);
-    $ret += Test7_CloneEntryWithNullCloneOptions($client);
+  $ret += Test7_CloneEntryWithNullCloneOptions($client);
 
   return ($ret);
 }

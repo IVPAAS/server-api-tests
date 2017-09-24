@@ -1,6 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function createTranscodingProfileWithTempalte($client, $name, $templateEntryId)
 {

@@ -1,10 +1,11 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function helper_createEntryWithCuePoint($client)
 {
-	$entry = helper_createEntryAndUploaDmp4Content($client,__FUNCTION__);
+	$entry = createEntryAndUploaDmp4Content($client,__FUNCTION__);
 	info ("entry ". $entry->id . " was created");
 	waitForEntry($client, $entry->id);
 

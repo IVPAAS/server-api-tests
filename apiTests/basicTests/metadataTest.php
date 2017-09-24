@@ -1,6 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 $metadataProfileId = null;
 CONST XML_METADATA = "<metadata><FirstAttr>adding attr in meta</FirstAttr></metadata>";
@@ -75,8 +76,8 @@ function checkIfCuePointHasCorrectMetadata($client, $cuepointId)
 function cloneCuePointWithMetadata($client)
 {
 	info('start ' .  __FUNCTION__);
-	$entrySrc  = helper_createEmptyEntry($client,'test_cloning_cuepoint_with_metadata_src');
-	$entryDst  = helper_createEmptyEntry($client,'test_cloning_cuepoint_with_metadata_dst');
+	$entrySrc  = createEmptyEntry($client,'test_cloning_cuepoint_with_metadata_src');
+	$entryDst  = createEmptyEntry($client,'test_cloning_cuepoint_with_metadata_dst');
 	info("created entries with ID $entrySrc->id (src) and $entryDst->id (dst)");
 	$codeCuePoint = createCodeCuePointWithMetaData($client, $entrySrc->id);
 	info("created cuepoint: ID $codeCuePoint->id ");
