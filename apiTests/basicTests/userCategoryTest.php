@@ -1,6 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function createCategory($client,$categoryName, $parentId = null, $inheritanceType = KalturaInheritanceType::INHERIT)
 {
@@ -433,13 +434,8 @@ function createCategoryTreeWithEntry($client, &$rootCat, &$CategoryLeaf, &$Categ
 	$rootCat = createCategory($client, 'rootCat' . rand(0, 1000000), null, KalturaInheritanceType::MANUAL);
 	$CategoryChildLevel1 = createCategory($client, "childOf $rootCat->name", $rootCat->id, KalturaInheritanceType::MANUAL);
 	$CategoryChild = $CategoryChildLevel1;
-	$MediaEntry = helper_createEntryAndUploaDmp4Content($client, 'categoryEntryTest');
-	info("Wait for entry to be ready id =" . $MediaEntry->id);
-	while (isEntryReady($client, $MediaEntry->id) != true) {
-		sleep(1);
-		print (".");
-	}
-
+	$MediaEntry = createEntryAndUploaDmp4Content($client, 'categoryEntryTest');
+	waitForEntry($client, $MediaEntry->id);
 	$CategoryChildLeaf = null;
 	info("Creating category tree with entries");
 	for ($i = 0; $i < 3; $i++) {

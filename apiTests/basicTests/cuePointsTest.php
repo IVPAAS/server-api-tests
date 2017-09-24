@@ -2,6 +2,7 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/InVideoQuizHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function createAnnontation($client,$entryId,$tags=null,$isPublic=null)
 {
@@ -29,7 +30,7 @@ function testRetrievePrivateAnnotationCueForDifferentUserWhenHaveEntryPrivilage(
 {
 	info('start ' .  __FUNCTION__);
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	$weakClient1 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "a@gmail.com");
 	$weakClient2 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "b@gmail.com");
@@ -63,7 +64,7 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWhenHaveEntryP
 {
 	info('start ' .  __FUNCTION__);
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	$weakClient1 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "a@gmail.com");
 	$weakClient2 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "b@gmail.com");
@@ -96,7 +97,7 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWhenHaveInvali
 {
 	info('start ' .  __FUNCTION__);
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	$weakClient1 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "a@gmail.com");
 	$weakClient2 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "b@gmail.com");
@@ -138,7 +139,7 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWhenHaveEntryP
 {
 	info('start ' .  __FUNCTION__);
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	$weakClient1 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "a@gmail.com");
 	$weakClient2 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "b@gmail.com");
@@ -183,7 +184,7 @@ function testRetrievePrivateAndPublicAnnotationCueForDifferentUserWithPagination
 {
 	info('start ' .  __FUNCTION__);
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	$weakClient1 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "a@gmail.com");
 	$weakClient2 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "b@gmail.com");
@@ -226,7 +227,7 @@ function testRetrievePrivateAndPublicCodeCueForDifferentUserWithPrivilages($dc,$
 {
 	info('start ' .  __FUNCTION__);
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$entry  = helper_createEmptyEntry($client,__FILE__);
+	$entry  = createEmptyEntry($client,__FILE__);
 
 	$weakClient1 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "a@gmail.com");
 	$weakClient2 = startKalturaSession($partnerId,$userSecret,$dc,KalturaSessionType::USER, "b@gmail.com");

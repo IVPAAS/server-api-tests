@@ -115,7 +115,9 @@ function runTest($testName, $testParams)
 
 function runBasicTest($dc,$userName,$userPassword, $testName, $testPath)
 {
-  try {
+  $testPartner = null;
+  try
+  {
     info("\n********** Running  $testName **************");
     print("\n\r $testName init.");
     $client = login($dc, $userName, $userPassword);
@@ -125,8 +127,8 @@ function runBasicTest($dc,$userName,$userPassword, $testName, $testPath)
     $output = array();
     exec("php $testPath $dc $testPartner->id $testPartner->adminSecret  $testPartner->secret", $output, $result);
     foreach ($output as $item) {
-      print("\n\r $item");
-    }
+		print("\n\r $item");
+	}
   } catch (Exception $e) {
     fail(" $testName failed: $e");
     $result = 1;
