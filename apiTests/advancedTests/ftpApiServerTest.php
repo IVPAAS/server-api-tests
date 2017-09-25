@@ -1,6 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function connectAndLoginToFtpServer($dc, $partnerId, $userName, $password, $ftp_port)
 {
@@ -27,7 +28,7 @@ function testValidFtpRequests($client, $dc,$partnerId, $userName, $password, $ft
 {
 	info("\nStarting testInValidFtpRequests \n");
 
-	$entry = helper_createEntryAndUploadJpgContent($client);
+	$entry = createEntryAndUploadJpgContent($client);
 	$scheduleEvent = createEmptyScheduleEvent($client);
 
 	while (isEmptyEntryUploaded($client, $entry->id) != true)

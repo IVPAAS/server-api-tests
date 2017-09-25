@@ -1,6 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 $entryIdToDelete;
 /**
@@ -51,15 +52,7 @@ function multiAudioTest1($client)
 
 	$createdEntry = addXmlBulkUpload($client, $input);
 	$entryIdToDelete = $createdEntry;
-
-	info("Waiting for entry $createdEntry to be ready");
-	while(isEntryReady($client,$createdEntry)!=true)
-	{
-		sleep(2);
-		print (".");
-	}
-	info("Entry $createdEntry is ready");
-
+	waitForEntry($client, $createdEntry);
 	$contextDataParams = new KalturaPlaybackContextOptions();
 	$contextDataParams->mediaProtocol = 'http';
 	$result = $client->baseEntry->getPlaybackContext($createdEntry, $contextDataParams);
@@ -149,13 +142,7 @@ function multiAudioTest1($client)
 	sleep(10);
 	$originalEntry = $client->baseEntry->get($createdEntry, $baseEntry);
 	$replacementEntry = $originalEntry->replacingEntryId;
-	info("Waiting for replacement entry $replacementEntry to be ready");
-	while(isEntryReady($client,$replacementEntry)!=true)
-	{
-		sleep(2);
-		print (".");
-	}
-	info("Entry $replacementEntry is ready");
+	waitForEntry($client, $replacementEntry);
 	sleep(60);
 
 	$contextDataParams = new KalturaPlaybackContextOptions();

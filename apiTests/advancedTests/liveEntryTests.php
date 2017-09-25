@@ -1,7 +1,7 @@
 <?php
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
-
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 /**
  * @KalturaClient $client (admin KS)
@@ -91,13 +91,11 @@ function helper_ValidateAppend($clientServer, $liveEntry)
 			print (".");
 		}
 		while(!$recordedEntry->replacingEntryId);
-	info("Found replacing entry Id [$recordedEntry->replacedEntryId] waiting for it to be ready");
-		while($recordedEntry->replacingEntryId && isEntryReady($clientServer,$recordedEntry->replacingEntryId)!=true)
-		{
-			sleep(1);
-			print (".");
-		}
+
+		info("Found replacing entry Id [$recordedEntry->replacedEntryId] waiting for it to be ready");
+		waitForEntry($clientServer, $recordedEntry->replacingEntryId);
 	}
+
 	return $liveEntry;
 }
 

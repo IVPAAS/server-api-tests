@@ -1,3 +1,5 @@
 SeleniumBasedTests/.idea
 SeleniumBasedTests/target
 .idea/
+*.iml
+/.gitignore

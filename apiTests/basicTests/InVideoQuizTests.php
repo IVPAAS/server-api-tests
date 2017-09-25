@@ -2,6 +2,7 @@
 require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/apiTestHelper.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/InVideoQuizHelper.php');
+require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
 function report1($client,$userEntryId)
 {
@@ -598,8 +599,8 @@ function test13_createTwoUserEntriesWithForSameUser($client,$dc,$partnerId)
 function main($dc,$partnerId,$adminSecret,$userSecret)
 {
 	$client = startKalturaSession($partnerId,$adminSecret,$dc);
-	$widgetId = helper_create_widget($client,"IVQ_WIDGET_SESSION_ROLE" );
-    $widgetId2 = helper_create_widget($client );
+	$widgetId = create_widget($client,"IVQ_WIDGET_SESSION_ROLE" );
+    $widgetId2 = create_widget($client );
     $wgClient = startWidgetSession($dc,$partnerId,$widgetId2);
 	info("New widget ID {$widgetId}");
 	$ret = Test1_Basicflow($client);
