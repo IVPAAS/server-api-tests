@@ -8,22 +8,13 @@ $FILE_NAME_MP4 = dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
 function helper_validateEntryList( $client, $filter, $goodEntries, $badEntries)
 {
 	$totalCreated = array_merge($goodEntries, $badEntries);
-	info("wait for entries to be ready");
-	while(true)
+	info("waiting for entries to be ready");
+	foreach ( $totalCreated as $entryId)
 	{
-		$readyCount = 0;
-		foreach ( $totalCreated as $entryId)
-		{
-			if ( isEntryReady($client, $entryId) )
-				$readyCount++;
-		}
-		if ( $readyCount == count($totalCreated) )
-			break;
-
-		sleep(1);
-		print (".");
+		waitForEntry($client, $entryId);
 	}
 
+	info("All entries are ready");
 	$entriesList = $client->baseEntry->listAction($filter);
 	$fail = false;
 	$matchCount = 0;
