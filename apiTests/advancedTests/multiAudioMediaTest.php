@@ -90,7 +90,7 @@ function multiAudioTest1($client)
 		}
 	}
 	sleep(60);
-	if ( count($streams) !=2)
+	if ( count($streams) !=1)
 	{
 		return fail(__FUNCTION__." Didnt match audio streams. expected [3] actual [ ".count($streams) ."]");
 	}
