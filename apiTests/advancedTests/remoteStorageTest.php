@@ -10,33 +10,45 @@ function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $
 	waitForEntry($client, $MediaEntry->id);
 	info("Check That entry exists in remote storage");
 
-	info("Rqunning command to locate entry on remote storage: sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find .* -name '$MediaEntry->id*'");
+	info("Running command to locate entry on remote storage: sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find $storageBaseDir -name '$MediaEntry->id*'");
 	$output = array();
-	exec("sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find .* -name '$MediaEntry->id*'", $output, $result);
+	sleep(20); // waiting for the SFTP to end as well
+	exec("sshpass -p '$storageUserPassword' ssh $storageUserName@$storageHost find $storageBaseDir -name '$MediaEntry->id*'", $output, $result);
 	$res = count($output);
 
-	if ( $res<1 )
+	if ( $res<2 ) // for checking SCP and SFTP
 	{
-		return fail(__FUNCTION__."Entry $MediaEntry->id was not copied to remote Storage.");
+		
+		return fail(__FUNCTION__." Entry $MediaEntry->id was not copied to remote Storage. Output is ". print_r($output, true));
 	}
-	success("Entry  $MediaEntry->id exists in remote storage");
+	success("Entry $MediaEntry->id exists in 2 remote storage ");
 
-		print("\n\r found entry location in remote storage: $output[0]");
-		list($var, $value) = explode($storageBaseDir, $output[0]);
-		$important = $value;
+	$result = true;
+	foreach($output as $path)
+	{
+		print("\n\r found entry location in remote storage: $path");		
+		list($var, $value) = explode($storageBaseDir, $path);
+		$result &= checkRemoteStorageFile($storageUrl. $value);
+	}
 
-	$httpRequest = $storageUrl.$important ;
-	$command = "curl --head $httpRequest | grep \"200 OK\"";
-	print("\n\r Validate http request for uploaded media in remote server: \n executing the following request: $command");
-
-	exec($command, $output1, $result);
-
-	if ($result != 0){
-		return fail(__FUNCTION__." Command: $command failed.");
+	if (!$result){
+		return fail(__FUNCTION__." Didnt found 2 file in the remote storage.");
 	}
 	return success(__FUNCTION__ .". \n\r Remote storage export and import for Entry $MediaEntry->id finished successfully");
 }
 
+function checkRemoteStorageFile($httpRequest)
+{
+	$command = "curl --head $httpRequest | grep \"200 OK\"";
+	print("\n\r Validate http request for uploaded media in remote server: \n executing the following request: $command");
+	exec($command, $output1, $result);	
+	return !$result;
+
+	if ($result != 0){
+                return fail(__FUNCTION__." Command: $command failed.");
+        }
+        return success(__FUNCTION__ .". \n\r Remote storage export and import for Entry $MediaEntry->id finished successfully");
+}
 
 function main($dc,$partnerId,$adminSecret, $storageHost, $storageUserName,$storageUserPassword, $storageUrl, $storageBaseDir)
 {
