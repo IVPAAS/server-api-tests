@@ -29,7 +29,7 @@ function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $
 	}
 
 	if (!$result){
-		return fail(__FUNCTION__." Didnt found 2 file in the remote storage.");
+		return fail(__FUNCTION__." Did not find 2 file in the remote storage.");
 	}
 	return success(__FUNCTION__ .". \n\r Remote storage export and import for Entry $MediaEntry->id finished successfully");
 }
