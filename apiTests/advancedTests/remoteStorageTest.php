@@ -17,10 +17,7 @@ function Test1_UploadEntryAndTransferToRemoteStorageAndRetriveViaHTTP($client, $
 	$res = count($output);
 
 	if ( $res<2 ) // for checking SCP and SFTP
-	{
-		
 		return fail(__FUNCTION__." Entry $MediaEntry->id was not copied to remote Storage. Output is ". print_r($output, true));
-	}
 	success("Entry $MediaEntry->id exists in 2 remote storage ");
 
 	$result = true;
@@ -43,11 +40,6 @@ function checkRemoteStorageFile($httpRequest)
 	print("\n\r Validate http request for uploaded media in remote server: \n executing the following request: $command");
 	exec($command, $output1, $result);	
 	return !$result;
-
-	if ($result != 0){
-                return fail(__FUNCTION__." Command: $command failed.");
-        }
-        return success(__FUNCTION__ .". \n\r Remote storage export and import for Entry $MediaEntry->id finished successfully");
 }
 
 function main($dc,$partnerId,$adminSecret, $storageHost, $storageUserName,$storageUserPassword, $storageUrl, $storageBaseDir)
