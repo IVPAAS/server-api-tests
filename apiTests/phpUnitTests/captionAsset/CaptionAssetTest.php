@@ -16,13 +16,13 @@ class CaptionAssetTest extends KalturaApiTestCase
 	public function testWebVttTimeParser()
 	{
 		$webVttManager = new webVttCaptionsContentManager();
-		$shortTime = $webVttManager->parseStrTTTime('00:00.123');
+		$shortTime = $webVttManager->parseCaptionTime('00:00.123');
 		$this->assertNotNull($shortTime);
-		$longTime = $webVttManager->parseStrTTTime('00:00:00.123');
+		$longTime = $webVttManager->parseCaptionTime('00:00:00.123');
 		$this->assertNotNull($longTime);
-		$InvalidTime = $webVttManager->parseStrTTTime('00:00:00:00.123');
+		$InvalidTime = $webVttManager->parseCaptionTime('00:00:00:00.123');
 		$this->assertNull($InvalidTime);
-		$InvalidTime2 = $webVttManager->parseStrTTTime('00');
+		$InvalidTime2 = $webVttManager->parseCaptionTime('00');
 		$this->assertNull($InvalidTime2);
 
 	}
