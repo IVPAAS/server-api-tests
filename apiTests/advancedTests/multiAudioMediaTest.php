@@ -113,7 +113,7 @@ function multiAudioTest1($client)
                         <type>1</type>
             <referenceId>$refId</referenceId>
                         <userId>example</userId>
-                        <conversionProfileId>47896</conversionProfileId>
+                        <conversionProfileId>50934</conversionProfileId>
                         <media>
                                 <mediaType>1</mediaType>
                         </media>
