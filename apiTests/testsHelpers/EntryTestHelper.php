@@ -111,9 +111,8 @@ function createEntryAndUploadContent($client, $entryName, $fileName, $referenceI
 	return $result->id;
 }
 
-function createEntryWithCaptions($client, $captionsPath, $clipFullPath, $language = KalturaLanguage::EN)
+function addCaptionToEntry($client, $entryId, $captionsPath, $language = KalturaLanguage::EN)
 {
-	$entryId = createEntryAndUploadContent($client, __FUNCTION__, $clipFullPath);
 	$captionAsset =  new KalturaCaptionAsset();
 	$captionAsset->language = $language;
 	$caption = $client->captionAsset->add($entryId,$captionAsset);
@@ -128,6 +127,12 @@ function createEntryWithCaptions($client, $captionsPath, $clipFullPath, $languag
 	$client->captionAsset->setContent($caption->id, $resource);
 	info("caption asset: " . $caption->id);
 	return $entryId;
+}
+
+function createEntryWithCaptions($client, $captionsPath, $clipFullPath, $language = KalturaLanguage::EN)
+{
+	$entryId = createEntryAndUploadContent($client, __FUNCTION__, $clipFullPath);
+	return addCaptionToEntry($client, $entryId, $captionsPath, $language);
 }
 
 function createEntryWithTranscript($client, $transcriptPath, $fileName)
