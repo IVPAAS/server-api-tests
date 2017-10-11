@@ -66,6 +66,7 @@ function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
 {
     info("Create entry and upload content");
     $MediaEntry = createEntryAndUploaDmp4Content($client, 'youTubeDistributionTest');
+    waitForEntry($client,$MediaEntry->id);
     return checkDistributionForEntry($client, $MediaEntry->id, $DistributionProfileId);
 }
 
