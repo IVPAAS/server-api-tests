@@ -42,32 +42,41 @@ function checkDistributionForEntry($client, $entryId, $DistributionProfileId)
     return success(__FUNCTION__);
 }
 
-function Test2_YoutubeEntryDistributeWithCaption($client, $DistributionProfileId)
+function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
 {
-    info("Create entry and upload content caption");
-    $MediaEntry = createEntryAndUploaDmp4Content($client, 'youTubeDistributionTest');
-    addCaptionToEntry($client, $MediaEntry->id, '/../../resources/KalturaTestCaption.srt');
+    info("Create entry and upload content");
+    $MediaEntry = createEntry($client, 'youTubeDistributionTestRegular');
     waitForEntry($client,$MediaEntry->id);
-
     return checkDistributionForEntry($client, $MediaEntry->id, $DistributionProfileId);
 }
 
-function Test3_YoutubeEntryDistributeWithThumbAsset($client, $DistributionProfileId)
+function Test2_YoutubeEntryDistributeWithThumbAsset($client, $DistributionProfileId)
 {
     info("Create entry and upload content with 300X150 thumb asset");
-    $MediaEntry = createEntryAndUploaDmp4Content($client, 'youTubeDistributionTest');
+    $MediaEntry = createEntry($client, 'youTubeDistributionTestWithThumbAsset');
     uploadThumbAsset($client, $MediaEntry->id);
     waitForEntry($client,$MediaEntry->id);
 
     return checkDistributionForEntry($client, $MediaEntry->id, $DistributionProfileId);
 }
 
-function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
+function Test3_YoutubeEntryDistributeWithCaption($client, $DistributionProfileId)
 {
-    info("Create entry and upload content");
-    $MediaEntry = createEntryAndUploaDmp4Content($client, 'youTubeDistributionTest');
+    info("Create entry and upload content caption");
+    $MediaEntry = createEntry($client, 'youTubeDistributionTestWithCaption');
+    addCaptionToEntry($client, $MediaEntry->id, '/../../resources/KalturaTestCaption.srt');
     waitForEntry($client,$MediaEntry->id);
+
     return checkDistributionForEntry($client, $MediaEntry->id, $DistributionProfileId);
+}
+
+
+
+function createEntry($client, $name)
+{
+    $description = 'This is a test description with html tags and links .<br><br>Here is a &nbsp link: <a target="_blank" rel="nofollow noopener noreferrer" href="https://www.youtube.com/watch?v=gLqalzGiqPk">https://www.youtube.com/watch?v=gLqalzGiqPk</a>';
+    cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
+    return createEntryAndUploaDmp4Content($client, $name, null, dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4', $description);
 }
 
 function printTestUsage()
@@ -85,8 +94,8 @@ function main( $dc, $partnerId, $adminSecret, $distributionProfileId )
 {
     $client = startKalturaSession($partnerId,$adminSecret,$dc);
     $ret  = Test1_YoutubeEntryDistribute($client, $distributionProfileId);
-    $ret += Test2_YoutubeEntryDistributeWithCaption($client, $distributionProfileId);
-    $ret += Test3_YoutubeEntryDistributeWithThumbAsset($client, $distributionProfileId);
+    $ret += Test2_YoutubeEntryDistributeWithThumbAsset($client, $distributionProfileId);
+    $ret += Test3_YoutubeEntryDistributeWithCaption($client, $distributionProfileId);
     return ($ret);
 }
 
