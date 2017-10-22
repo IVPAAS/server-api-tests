@@ -54,19 +54,11 @@ function createMediaEntry($client, $refEntry = null, $entryName = null)
 	return $MediaEntry;
 }
 
-function createEntryAndUploaDmp4Content($client, $testName, $userId=null)
+function createEntryAndUploaDmp4Content($client, $testName, $userId=null, $fileName = null, $description = null)
 {
-	if($testName == 'youTubeDistributionTest')
-		cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
-
-	$FILE_NAME_MP4 = ($testName == 'youTubeDistributionTest') ? dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4' : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
-	if($testName == 'youTubeDistributionTest')
-	{
-		$description = 'This is a test description with html tags and links .<br><br>Here is a &nbsp link: <a target="_blank" rel="nofollow noopener noreferrer" href="https://www.youtube.com/watch?v=gLqalzGiqPk">https://www.youtube.com/watch?v=gLqalzGiqPk</a>';
-		$entry = addEntry($client, $testName, KalturaMediaType::VIDEO, null, $userId, $description);
-	}
-	else
-		$entry = addEntry($client, $testName, KalturaMediaType::VIDEO, null, $userId);
+	$FILE_NAME_MP4 = ($fileName) ? $fileName : dirname ( __FILE__ ).'/../../resources/KalturaTestUpload.mp4';
+	$entry = addEntry($client, $testName, KalturaMediaType::VIDEO, null, $userId, $description);
+	
 	$uploadTokenObj = new KalturaUploadToken();
 	$uploadTokenObj->fileName = $FILE_NAME_MP4;
 	$uploadToken = $client->uploadToken->add($uploadTokenObj);
@@ -111,9 +103,8 @@ function createEntryAndUploadContent($client, $entryName, $fileName, $referenceI
 	return $result->id;
 }
 
-function createEntryWithCaptions($client, $captionsPath, $clipFullPath, $language = KalturaLanguage::EN)
+function addCaptionToEntry($client, $entryId, $captionsPath, $language = KalturaLanguage::EN)
 {
-	$entryId = createEntryAndUploadContent($client, __FUNCTION__, $clipFullPath);
 	$captionAsset =  new KalturaCaptionAsset();
 	$captionAsset->language = $language;
 	$caption = $client->captionAsset->add($entryId,$captionAsset);
@@ -128,6 +119,12 @@ function createEntryWithCaptions($client, $captionsPath, $clipFullPath, $languag
 	$client->captionAsset->setContent($caption->id, $resource);
 	info("caption asset: " . $caption->id);
 	return $entryId;
+}
+
+function createEntryWithCaptions($client, $captionsPath, $clipFullPath, $language = KalturaLanguage::EN)
+{
+	$entryId = createEntryAndUploadContent($client, __FUNCTION__, $clipFullPath);
+	return addCaptionToEntry($client, $entryId, $captionsPath, $language);
 }
 
 function createEntryWithTranscript($client, $transcriptPath, $fileName)

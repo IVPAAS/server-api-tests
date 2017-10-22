@@ -3,40 +3,80 @@ require_once('/opt/kaltura/web/content/clientlibs/testsClient/KalturaClient.php'
 require_once(dirname(__FILE__).'/../testsHelpers/apiTestHelper.php');
 require_once(dirname(__FILE__) . '/../testsHelpers/EntryTestHelper.php');
 
-function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
+function addDistribution($client, $mediaId, $DistributionProfileId)
 {
-    info("Create entry and upload content");
-    $MediaEntry = createEntryAndUploaDmp4Content($client, 'youTubeDistributionTest');
+    $entryDistribution = new KalturaEntryDistribution();
+    $entryDistribution->entryId = $mediaId;
+    $entryDistribution->distributionProfileId = $DistributionProfileId;
+    $entryDistribution = $client->entryDistribution->add($entryDistribution);
+    return $client->entryDistribution->submitAdd($entryDistribution->id);
+}
 
-    info("Upload 300X150 thumb asset");
-    uploadThumbAsset($client, $MediaEntry->id);
-	waitForEntry($client,$MediaEntry->id);
-    //start youtube distribution
-	$entryDistribution = new KalturaEntryDistribution();
-	$entryDistribution->entryId = $MediaEntry->id;
-	$entryDistribution->distributionProfileId = $DistributionProfileId;
-	$entryDistribution = $client->entryDistribution->add($entryDistribution);
-    $entryDistribution = $client->entryDistribution->submitAdd($entryDistribution->id);
-
-    info("Distributing To Youtube ".$MediaEntry->id);
-    while(entryDistributionIsSubmitting($client,$entryDistribution->id))
+function waitWhileSubmitting($client,$entryDistributionId)
+{
+    for ($i=0; $i< 120; $i++)
     {
+        if (!entryDistributionIsSubmitting($client,$entryDistributionId))
+            break;
         sleep(1);
         print (".");
     }
-    $maxCount=30;
+}
 
-    $entryDistribution = $client->entryDistribution->get($entryDistribution->id);
+function checkDistributionForEntry($client, $entryId, $DistributionProfileId)
+{
+    //start youtube distribution
+    $entryDistribution = addDistribution($client, $entryId, $DistributionProfileId);
+    $entryDistributionId = $entryDistribution->id;
+    info("Distributing To Youtube ". $entryId . " with entryDistributionId [$entryDistributionId]");
+    waitWhileSubmitting($client, $entryDistributionId);
+
+    $entryDistribution = $client->entryDistribution->get($entryDistributionId);
     if ($entryDistribution->status != 2)
-    {
         return fail(__FUNCTION__." Distribution Failed");
-    }
 
     info("Deleting youtube entry distribution");
-    $client->entryDistribution->submitDelete($entryDistribution->id);
-    
-    info($MediaEntry->id . " Youtube Distribution Succeeded" );
+    $client->entryDistribution->submitDelete($entryDistributionId);
+
+    info($entryId . " Youtube Distribution Succeeded" );
     return success(__FUNCTION__);
+}
+
+function Test1_YoutubeEntryDistribute($client, $DistributionProfileId)
+{
+    info("Create entry and upload content");
+    $MediaEntry = createEntry($client, 'youTubeDistributionTestRegular');
+    waitForEntry($client,$MediaEntry->id);
+    return checkDistributionForEntry($client, $MediaEntry->id, $DistributionProfileId);
+}
+
+function Test2_YoutubeEntryDistributeWithThumbAsset($client, $DistributionProfileId)
+{
+    info("Create entry and upload content with 300X150 thumb asset");
+    $MediaEntry = createEntry($client, 'youTubeDistributionTestWithThumbAsset');
+    uploadThumbAsset($client, $MediaEntry->id);
+    waitForEntry($client,$MediaEntry->id);
+
+    return checkDistributionForEntry($client, $MediaEntry->id, $DistributionProfileId);
+}
+
+function Test3_YoutubeEntryDistributeWithCaption($client, $DistributionProfileId)
+{
+    info("Create entry and upload content caption");
+    $MediaEntry = createEntry($client, 'youTubeDistributionTestWithCaption');
+    addCaptionToEntry($client, $MediaEntry->id, '/../../resources/KalturaTestCaption.srt');
+    waitForEntry($client,$MediaEntry->id);
+
+    return checkDistributionForEntry($client, $MediaEntry->id, $DistributionProfileId);
+}
+
+
+
+function createEntry($client, $name)
+{
+    $description = 'This is a test description with html tags and links .<br><br>Here is a &nbsp link: <a target="_blank" rel="nofollow noopener noreferrer" href="https://www.youtube.com/watch?v=gLqalzGiqPk">https://www.youtube.com/watch?v=gLqalzGiqPk</a>';
+    cutRandomPartFromVideo(dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRaw.mp4',dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4',3);
+    return createEntryAndUploaDmp4Content($client, $name, null, dirname ( __FILE__ ).'/../../resources/youtubeDistribTestRand.mp4', $description);
 }
 
 function printTestUsage()
@@ -54,6 +94,8 @@ function main( $dc, $partnerId, $adminSecret, $distributionProfileId )
 {
     $client = startKalturaSession($partnerId,$adminSecret,$dc);
     $ret  = Test1_YoutubeEntryDistribute($client, $distributionProfileId);
+    $ret += Test2_YoutubeEntryDistributeWithThumbAsset($client, $distributionProfileId);
+    $ret += Test3_YoutubeEntryDistributeWithCaption($client, $distributionProfileId);
     return ($ret);
 }
 
